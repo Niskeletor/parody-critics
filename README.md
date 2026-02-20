@@ -123,6 +123,117 @@ Each critic is designed with a unique personality and reviewing style:
 - **Style:** Social justice focused, sees oppression everywhere
 - **Language:** Progressive terminology, hashtags, triggers
 
+## 🚀 Deployment
+
+### Quick Deploy to Jellyfin Server
+
+If your Jellyfin runs on a remote server (like `stilgar@192.168.45.181`), use the automated deployment script:
+
+```bash
+# Make sure SSH key authentication is set up first
+./deploy-to-stilgar.sh
+```
+
+This script will:
+- ✅ Copy all project files to the remote server
+- ✅ Set up Python virtual environment
+- ✅ Install dependencies and initialize database
+- ✅ Create systemd service for the API
+- ✅ Install JavaScript client in Jellyfin web directory
+- ✅ Start the API service automatically
+
+After deployment:
+```bash
+# SSH to your Jellyfin server
+ssh stilgar@192.168.45.181
+
+# Navigate to project directory
+cd parody-critics
+
+# Activate environment and sync your Jellyfin library
+source venv/bin/activate
+python scripts/jellyfin_sync.py --jellyfin-url http://localhost:8096 --api-key YOUR_API_KEY
+
+# Restart Jellyfin to load the new JavaScript client
+sudo systemctl restart jellyfin
+```
+
+### Manual Deployment
+
+1. **Copy project to your Jellyfin server:**
+   ```bash
+   rsync -avz ./ user@your-server:/path/to/parody-critics/
+   ```
+
+2. **Set up environment:**
+   ```bash
+   # On the server
+   cd /path/to/parody-critics
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   python run_setup.py
+   ```
+
+3. **Configure for your environment:**
+   ```bash
+   # Copy and edit environment file
+   cp .env.stilgar .env
+   nano .env  # Update JELLYFIN_API_KEY and other settings
+   ```
+
+4. **Start the API:**
+   ```bash
+   # Development
+   source venv/bin/activate
+   python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+
+   # Production (with systemd)
+   sudo cp parody-critics-api.service /etc/systemd/system/
+   sudo systemctl enable parody-critics-api.service
+   sudo systemctl start parody-critics-api.service
+   ```
+
+5. **Install JavaScript client:**
+   ```bash
+   # Copy to your Jellyfin web directory
+   sudo cp frontend/parody-critics-api-client.js /opt/jellyfin/jellyfin-web/
+   ```
+
+### Environment Variables
+
+The API supports environment-based configuration:
+
+```bash
+# Environment
+PARODY_CRITICS_ENV=stilgar          # development, stilgar, production
+
+# API Configuration
+PARODY_CRITICS_HOST=0.0.0.0         # Bind address
+PARODY_CRITICS_PORT=8000            # Port number
+
+# Database
+PARODY_CRITICS_DB_PATH=/path/to/critics.db
+
+# Jellyfin
+JELLYFIN_URL=http://localhost:8096
+JELLYFIN_API_KEY=your-api-key
+
+# CORS (comma-separated URLs)
+PARODY_CRITICS_CORS_ORIGINS=http://localhost:8096,http://server:8096
+```
+
+### Network Configuration
+
+The JavaScript client automatically detects the API URL:
+- **Local development**: Uses `http://localhost:8000/api`
+- **Remote deployment**: Uses `http://YOUR_SERVER_IP:8000/api`
+
+Make sure:
+- ✅ Port 8000 is open on your server firewall
+- ✅ Jellyfin can access the API (same network/CORS configured)
+- ✅ API service starts automatically on boot
+
 ## 🔧 Development
 
 ### Project Structure

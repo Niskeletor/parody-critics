@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 Parody Critics - Test Page</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffd700, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p {
+            color: #aaa;
+            font-size: 1.1em;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .test-section h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #4CAF50;
+            color: white;
+        }
+        .status.error {
+            background: #f44336;
+            color: white;
+        }
+        .status.loading {
+            background: #ff9800;
+            color: white;
+        }
+        .api-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ffd700;
+        }
+        .api-info pre {
+            margin: 0;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+        .simulate-jellyfin {
+            background: rgba(30, 30, 50, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        .simulate-jellyfin h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        .jellyfin-mock {
+            background: #1a1a2e;
+            padding: 20px;
+            border-radius: 8px;
+            position: relative;
+        }
+        .movie-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        .movie-info {
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎭 Parody Critics</h1>
+            <p>API Integration Test Page</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🏥 API Health Check</h2>
+            <div id="health-status" class="status loading">Testing...</div>
+            <div id="health-info" class="api-info" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 API Statistics</h2>
+            <div id="stats-status" class="status loading">Loading...</div>
+            <div id="stats-info" class="api-info" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>👥 Available Characters</h2>
+            <div id="characters-status" class="status loading">Loading...</div>
+            <div id="characters-info" class="api-info" style="display: none;"></div>
+        </div>
+
+        <div class="simulate-jellyfin">
+            <h3>🎬 Jellyfin Integration Simulation</h3>
+            <div class="jellyfin-mock" id="jellyfin-simulation">
+                <div class="movie-title">El Vengador Tóxico</div>
+                <div class="movie-info">2025 • Acción • TMDB: 338969</div>
+                <!-- Critics will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Include our API client -->
+    <script src="frontend/parody-critics-api-client.js"></script>
+
+    <script>
+        // Test API endpoints
+        async function testAPI() {
+            const API_BASE = 'http://localhost:8000/api';
+
+            // Test health
+            try {
+                const healthResponse = await fetch(`${API_BASE}/health`);
+                const healthData = await healthResponse.json();
+
+                document.getElementById('health-status').textContent = 'Healthy ✅';
+                document.getElementById('health-status').className = 'status success';
+                document.getElementById('health-info').innerHTML = `<pre>${JSON.stringify(healthData, null, 2)}</pre>`;
+                document.getElementById('health-info').style.display = 'block';
+            } catch (error) {
+                document.getElementById('health-status').textContent = 'Error ❌';
+                document.getElementById('health-status').className = 'status error';
+                document.getElementById('health-info').innerHTML = `<pre>Error: ${error.message}</pre>`;
+                document.getElementById('health-info').style.display = 'block';
+            }
+
+            // Test stats
+            try {
+                const statsResponse = await fetch(`${API_BASE}/stats`);
+                const statsData = await statsResponse.json();
+
+                document.getElementById('stats-status').textContent = 'Loaded ✅';
+                document.getElementById('stats-status').className = 'status success';
+                document.getElementById('stats-info').innerHTML = `<pre>${JSON.stringify(statsData, null, 2)}</pre>`;
+                document.getElementById('stats-info').style.display = 'block';
+            } catch (error) {
+                document.getElementById('stats-status').textContent = 'Error ❌';
+                document.getElementById('stats-status').className = 'status error';
+                document.getElementById('stats-info').innerHTML = `<pre>Error: ${error.message}</pre>`;
+                document.getElementById('stats-info').style.display = 'block';
+            }
+
+            // Test characters
+            try {
+                const charactersResponse = await fetch(`${API_BASE}/characters`);
+                const charactersData = await charactersResponse.json();
+
+                document.getElementById('characters-status').textContent = 'Loaded ✅';
+                document.getElementById('characters-status').className = 'status success';
+                document.getElementById('characters-info').innerHTML = `<pre>${JSON.stringify(charactersData, null, 2)}</pre>`;
+                document.getElementById('characters-info').style.display = 'block';
+            } catch (error) {
+                document.getElementById('characters-status').textContent = 'Error ❌';
+                document.getElementById('characters-status').className = 'status error';
+                document.getElementById('characters-info').innerHTML = `<pre>Error: ${error.message}</pre>`;
+                document.getElementById('characters-info').style.display = 'block';
+            }
+        }
+
+        // Simulate Jellyfin page for testing critics injection
+        function simulateJellyfinPage() {
+            // Mock Jellyfin environment
+            window.location.hash = '#/details?id=test123&context=movies';
+
+            // Mock ApiClient
+            window.ApiClient = {
+                getCurrentUserId: () => 'test-user',
+                getItem: (userId, itemId) => Promise.resolve({
+                    Id: itemId,
+                    Name: 'El Vengador Tóxico',
+                    ProviderIds: {
+                        Tmdb: '338969'
+                    }
+                })
+            };
+        }
+
+        // Initialize tests
+        document.addEventListener('DOMContentLoaded', () => {
+            testAPI();
+            simulateJellyfinPage();
+
+            // Wait a bit then check if critics were injected
+            setTimeout(() => {
+                const criticsSection = document.querySelector('.parody-critics-section');
+                if (criticsSection) {
+                    console.log('🎭 Critics successfully injected!', criticsSection);
+                } else {
+                    console.log('🎭 No critics section found - checking injection logic...');
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

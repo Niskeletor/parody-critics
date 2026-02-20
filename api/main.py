@@ -16,9 +16,11 @@ from models.schemas import (
     StatsResponse, GenerationRequest, GenerationResponse,
     MediaType, SyncLogEntry
 )
+from config import get_config
 
-# Database path
-DB_PATH = Path(__file__).parent.parent / "database" / "critics.db"
+# Configuration
+config = get_config()
+DB_PATH = config.get_absolute_db_path()
 
 class DatabaseManager:
     """Database connection manager"""
@@ -78,12 +80,12 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware
+# CORS middleware with environment-specific origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your Jellyfin domain
+    allow_origins=config.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
 

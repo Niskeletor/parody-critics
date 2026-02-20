@@ -8,9 +8,23 @@
 
     const logPrefix = '🎭 Parody Critics API:';
 
-    // Configuration
+    // Configuration - Auto-detect API URL
+    const getApiBaseUrl = () => {
+        // Try to detect if we're in Jellyfin context
+        const currentHost = window.location.hostname;
+        const currentPort = window.location.port;
+
+        // If running on a specific server, use same host for API
+        if (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+            return `http://${currentHost}:8000/api`;
+        }
+
+        // Default to localhost for development
+        return 'http://localhost:8000/api';
+    };
+
     const CONFIG = {
-        API_BASE_URL: 'http://localhost:8000/api',
+        API_BASE_URL: getApiBaseUrl(),
         RETRY_ATTEMPTS: 3,
         RETRY_DELAY: 1000,
         CACHE_DURATION: 300000, // 5 minutes
