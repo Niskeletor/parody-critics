@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-02-21T03:15:57.431322",
+  "jellyfin_url": "http://192.168.45.181:8096",
+  "tests": {
+    "connection": {
+      "success": false,
+      "error": "[Errno 111] Connection refused"
+    }
+  }
+}

@@ -3,6 +3,8 @@ version: '3.8'
 services:
   parody-critics-api:
     build: .
+    env_file:
+      - .env
     container_name: parody-critics-api
     restart: unless-stopped
 
@@ -10,10 +12,32 @@ services:
       - "8000:8000"
 
     environment:
+      # Environment settings
       - PARODY_CRITICS_ENV=production
       - PARODY_CRITICS_HOST=0.0.0.0
       - PARODY_CRITICS_PORT=8000
       - PARODY_CRITICS_DB_PATH=/app/data/critics.db
+
+      # Jellyfin Configuration (from .env)
+      - JELLYFIN_URL=${JELLYFIN_URL}
+      - JELLYFIN_API_TOKEN=${JELLYFIN_API_TOKEN}
+      - JELLYFIN_DB_PATH=${JELLYFIN_DB_PATH}
+
+      # LLM Configuration (from .env)
+      - LLM_OLLAMA_URL=${LLM_OLLAMA_URL}
+      - LLM_PRIMARY_MODEL=${LLM_PRIMARY_MODEL}
+      - LLM_SECONDARY_MODEL=${LLM_SECONDARY_MODEL}
+      - LLM_TIMEOUT=${LLM_TIMEOUT:-180}
+      - LLM_MAX_RETRIES=${LLM_MAX_RETRIES:-2}
+      - LLM_ENABLE_FALLBACK=${LLM_ENABLE_FALLBACK:-true}
+
+      # Sync Configuration
+      - SYNC_BATCH_SIZE=100
+      - SYNC_MAX_CONCURRENT=5
+
+      # Performance
+      - PARODY_CRITICS_CACHE_DURATION=300
+      - PARODY_CRITICS_LOG_LEVEL=INFO
 
     volumes:
       # Persistir base de datos

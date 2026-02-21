@@ -5,6 +5,10 @@ Environment-based configuration for different deployment scenarios
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 class Config:
     """Base configuration class"""
@@ -18,7 +22,12 @@ class Config:
 
     # Jellyfin Settings
     JELLYFIN_URL = os.getenv('JELLYFIN_URL', 'http://localhost:8096')
-    JELLYFIN_API_KEY = os.getenv('JELLYFIN_API_KEY', '')
+    JELLYFIN_API_TOKEN = os.getenv('JELLYFIN_API_TOKEN', '')
+    JELLYFIN_DB_PATH = os.getenv('JELLYFIN_DB_PATH', '')
+
+    # Sync Settings
+    SYNC_BATCH_SIZE = int(os.getenv('SYNC_BATCH_SIZE', '100'))
+    SYNC_MAX_CONCURRENT = int(os.getenv('SYNC_MAX_CONCURRENT', '5'))
 
     # CORS Settings
     CORS_ORIGINS = [
@@ -42,6 +51,21 @@ class Config:
 
     # Logging
     LOG_LEVEL = os.getenv('PARODY_CRITICS_LOG_LEVEL', 'INFO')
+
+    # LLM Configuration
+    # Primary Ollama endpoint (local)
+    LLM_OLLAMA_URL = os.getenv('LLM_OLLAMA_URL', 'http://192.168.45.104:11434')
+    LLM_PRIMARY_MODEL = os.getenv('LLM_PRIMARY_MODEL', 'qwen3:8b')
+    LLM_SECONDARY_MODEL = os.getenv('LLM_SECONDARY_MODEL', 'gpt-oss:20b')
+
+    # Future cloud endpoints
+    LLM_OPENAI_API_KEY = os.getenv('LLM_OPENAI_API_KEY', '')
+    LLM_ANTHROPIC_API_KEY = os.getenv('LLM_ANTHROPIC_API_KEY', '')
+
+    # Generation settings
+    LLM_TIMEOUT = int(os.getenv('LLM_TIMEOUT', '180'))  # 3 minutes
+    LLM_MAX_RETRIES = int(os.getenv('LLM_MAX_RETRIES', '2'))
+    LLM_ENABLE_FALLBACK = os.getenv('LLM_ENABLE_FALLBACK', 'true').lower() == 'true'
 
     @classmethod
     def get_absolute_db_path(cls) -> str:
