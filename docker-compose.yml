@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  parody-critics-api:
+    build: .
+    container_name: parody-critics-api
+    restart: unless-stopped
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      - PARODY_CRITICS_ENV=production
+      - PARODY_CRITICS_HOST=0.0.0.0
+      - PARODY_CRITICS_PORT=8000
+      - PARODY_CRITICS_DB_PATH=/app/data/critics.db
+
+    volumes:
+      # Persistir base de datos
+      - parody_critics_data:/app/data
+
+    networks:
+      - parody-critics-net
+
+    labels:
+      - "traefik.enable=false"  # Sin proxy reverso por ahora
+      - "com.docker.compose.project=parody-critics"
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  parody_critics_data:
+    driver: local
+    labels:
+      - "com.docker.compose.project=parody-critics"
+      - "description=🎭 Parody Critics Database Storage"
+
+networks:
+  parody-critics-net:
+    driver: bridge
+    labels:
+      - "com.docker.compose.project=parody-critics"
+      - "description=🎭 Parody Critics Network"

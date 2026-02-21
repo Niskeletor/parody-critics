@@ -27,12 +27,22 @@
         }
     };
 
-    // Configuración API (NUEVA - conecta al backend real)
-    const API_CONFIG = {
-        BASE_URL: 'http://192.168.45.181:8002/api',
-        RETRY_ATTEMPTS: 2,
-        TIMEOUT: 5000
+    // Auto-Discovery Configuration (AGNÓSTICO)
+    const API_DISCOVERY_CONFIG = {
+        URLS_TO_TEST: [
+            'http://localhost:9999/api',           // Test local
+            'http://127.0.0.1:9999/api',          // Loopback
+            'http://localhost:8003/api',           // Docker local
+            'http://192.168.45.181:8003/api',      // Docker Stilgar
+            'http://localhost:8002/api',           // Stilgar local
+            'http://192.168.45.181:8002/api',      // Stilgar remoto
+            'http://parody-critics-api:8000/api'   // Docker interno
+        ],
+        TIMEOUT: 3000,
+        MAX_CONCURRENT: 2
     };
+
+    let WORKING_API_URL = null;
 
     // Fallback data (si API falla)
     const PARODY_CRITICS_FALLBACK = {
@@ -79,20 +89,63 @@ Esta película debería venir con **avisos de contenido** por sus múltiples vio
         }
     };
 
+    // Auto-Discovery: Encuentra API disponible
+    async function discoverWorkingAPI() {
+        if (WORKING_API_URL) return WORKING_API_URL;
+
+        console.log(`${logPrefix} 🔍 Starting API auto-discovery...`);
+
+        for (const url of API_DISCOVERY_CONFIG.URLS_TO_TEST) {
+            try {
+                console.log(`${logPrefix} Testing: ${url}`);
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), API_DISCOVERY_CONFIG.TIMEOUT);
+
+                const response = await fetch(`${url}/health`, {
+                    method: 'GET',
+                    signal: controller.signal,
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(`${logPrefix} ✅ SUCCESS: ${url} - ${data.status}`);
+                    WORKING_API_URL = url;
+                    return url;
+                }
+            } catch (error) {
+                console.log(`${logPrefix} ❌ FAILED: ${url} - ${error.message}`);
+            }
+        }
+
+        console.warn(`${logPrefix} 🚨 No API endpoints responded - using fallback`);
+        return null;
+    }
+
     // NUEVA: Función para obtener críticas desde API
     async function fetchCriticsFromAPI(tmdbId) {
         try {
-            console.log(`${logPrefix} Fetching from API: ${tmdbId}`);
+            // Auto-descubre la API si no la tenemos
+            const apiUrl = await discoverWorkingAPI();
+            if (!apiUrl) {
+                console.log(`${logPrefix} Using fallback data`);
+                return null;
+            }
 
-            const response = await fetch(`${API_CONFIG.BASE_URL}/critics/${tmdbId}`, {
+            console.log(`${logPrefix} Fetching from API: ${apiUrl}/critics/${tmdbId}`);
+
+            const response = await fetch(`${apiUrl}/critics/${tmdbId}`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
-                signal: AbortSignal.timeout(API_CONFIG.TIMEOUT)
+                signal: AbortSignal.timeout(3000)
             });
 
             if (response.ok) {
                 const data = await response.json();
-                console.log(`${logPrefix} ✅ API Success - ${data.total_critics} critics`);
+                console.log(`${logPrefix} ✅ API Success - ${data.total_critics} critics for "${data.title}"`);
 
                 // Convertir formato API a formato interno
                 const convertedCritics = {};
@@ -112,7 +165,7 @@ Esta película debería venir con **avisos de contenido** por sus múltiples vio
                 throw new Error(`API responded with ${response.status}`);
             }
         } catch (error) {
-            console.warn(`${logPrefix} API failed: ${error.message}`);
+            console.warn(`${logPrefix} API failed: ${error.message} - using fallback`);
             return null;
         }
     }

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 Parody Critics - Test Client</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        .movie-header {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .movie-poster {
+            width: 200px;
+            height: 300px;
+            background: linear-gradient(45deg, #333, #666);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+        }
+
+        .movie-info h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+            color: #fff;
+        }
+
+        .movie-info .year {
+            color: #ccc;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .movie-info .synopsis {
+            color: #ddd;
+            font-size: 1.1em;
+            line-height: 1.7;
+        }
+
+        .test-controls {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .test-controls h3 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        button.danger {
+            background: #f44336;
+        }
+
+        button.danger:hover {
+            background: #da190b;
+        }
+
+        .log-output {
+            background: #000;
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .api-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status-unknown { background: #666; color: white; }
+        .status-connected { background: #4CAF50; color: white; }
+        .status-fallback { background: #FF9800; color: white; }
+        .status-error { background: #f44336; color: white; }
+
+        /* Simulated Jellyfin environment styles */
+        .jellyfin-content {
+            min-height: 400px;
+            position: relative;
+        }
+
+        /* Critical: This simulates where Parody Critics would be inserted */
+        .insertion-point {
+            border: 2px dashed #333;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 Parody Critics - Test Environment</h1>
+        <p>Testing auto-discovery and API connectivity patterns</p>
+
+        <div class="test-controls">
+            <h3>🧪 Test Controls
+                <span id="apiStatus" class="api-status status-unknown">UNKNOWN</span>
+            </h3>
+
+            <button onclick="testAutoDiscovery()">🔍 Test Auto-Discovery</button>
+            <button onclick="testSpecificAPI()">🎯 Test Specific API</button>
+            <button onclick="testFallbackMode()">📦 Test Fallback</button>
+            <button onclick="injectCritics()">🎭 Inject Critics</button>
+            <button onclick="clearCritics()" class="danger">🗑️ Clear</button>
+            <button onclick="clearLog()" class="danger">📝 Clear Log</button>
+
+            <div class="log-output" id="logOutput"></div>
+        </div>
+
+        <!-- Simulated Movie Page -->
+        <div class="movie-header">
+            <div class="movie-poster">🎬</div>
+            <div class="movie-info">
+                <h1>El Vengador Tóxico</h1>
+                <div class="year">2025 • Action, Horror, Comedy</div>
+                <div class="synopsis">
+                    Un trabajador de limpieza se transforma en un héroe grotesco después de caer en un barril de desechos tóxicos.
+                    Ahora debe enfrentarse a los criminales que aterrorizan su ciudad natal con sus nuevas habilidades... peculiares.
+                </div>
+            </div>
+        </div>
+
+        <div class="jellyfin-content">
+            <div class="insertion-point" id="insertionPoint">
+                📍 Critics will be inserted here (simulating Jellyfin insertion point)
+            </div>
+        </div>
+    </div>
+
+    <!-- Critical: This simulates the window.ApiClient that Jellyfin provides -->
+    <script>
+        // Simulate Jellyfin's ApiClient
+        window.ApiClient = {
+            getCurrentUserId: () => 'test-user-id',
+            getItem: (userId, itemId) => Promise.resolve({
+                Id: itemId,
+                Name: 'El Vengador Tóxico',
+                ProviderIds: {
+                    Tmdb: '338969'
+                },
+                Type: 'Movie'
+            })
+        };
+
+        // Simulate current page URL structure
+        window.location.hash = '#/details?id=629a781f6b78a86dd28b952783edeafe&serverId=test-server';
+    </script>
+
+    <!-- The actual Parody Critics test script -->
+    <script>
+        // Test Environment Logger
+        function log(message, type = 'info') {
+            const logOutput = document.getElementById('logOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const typeEmoji = {
+                'info': 'ℹ️',
+                'success': '✅',
+                'warning': '⚠️',
+                'error': '❌'
+            };
+
+            logOutput.innerHTML += `<div>[${timestamp}] ${typeEmoji[type]} ${message}</div>`;
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('logOutput').innerHTML = '';
+        }
+
+        function updateApiStatus(status, text) {
+            const statusEl = document.getElementById('apiStatus');
+            statusEl.className = `api-status status-${status}`;
+            statusEl.textContent = text;
+        }
+
+        // Auto-Discovery Configuration (this is what we want to test)
+        const API_DISCOVERY_CONFIG = {
+            URLS_TO_TEST: [
+                'http://localhost:9999/api',           // Test server
+                'http://127.0.0.1:9999/api',          // Loopback
+                'http://localhost:8002/api',           // Current Stilgar port
+                'http://192.168.45.181:8002/api',      // External Stilgar
+                'http://parody-critics-api:8000/api'   // Future Docker name
+            ],
+            TIMEOUT: 3000,
+            MAX_CONCURRENT: 2
+        };
+
+        // Test Functions
+        async function testAutoDiscovery() {
+            log('🔍 Starting auto-discovery test...', 'info');
+            updateApiStatus('unknown', 'TESTING...');
+
+            for (const url of API_DISCOVERY_CONFIG.URLS_TO_TEST) {
+                try {
+                    log(`Testing: ${url}`, 'info');
+
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), API_DISCOVERY_CONFIG.TIMEOUT);
+
+                    const response = await fetch(`${url}/health`, {
+                        method: 'GET',
+                        signal: controller.signal,
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    clearTimeout(timeoutId);
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        log(`✅ SUCCESS: ${url} - ${data.status}`, 'success');
+                        updateApiStatus('connected', `CONNECTED: ${url}`);
+
+                        // Store the working URL globally for other tests
+                        window.WORKING_API_URL = url;
+                        return url;
+                    }
+                } catch (error) {
+                    log(`❌ FAILED: ${url} - ${error.message}`, 'error');
+                }
+            }
+
+            log('🚨 No API endpoints responded', 'error');
+            updateApiStatus('error', 'NO ENDPOINTS');
+            return null;
+        }
+
+        async function testSpecificAPI() {
+            if (!window.WORKING_API_URL) {
+                log('⚠️ No working API URL found. Run auto-discovery first.', 'warning');
+                return;
+            }
+
+            try {
+                log(`🎯 Testing specific endpoint: ${window.WORKING_API_URL}/critics/338969`, 'info');
+
+                const response = await fetch(`${window.WORKING_API_URL}/critics/338969`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Critics data loaded: ${data.total_critics} critics for "${data.title}"`, 'success');
+                    log(`📝 Critics: ${Object.keys(data.critics).join(', ')}`, 'info');
+
+                    // Store for injection test
+                    window.TEST_CRITICS_DATA = data;
+
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`❌ API test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testFallbackMode() {
+            log('📦 Testing fallback mode (simulated API failure)...', 'info');
+            updateApiStatus('fallback', 'FALLBACK MODE');
+
+            // Simulate fallback data
+            const fallbackData = {
+                tmdb_id: "338969",
+                title: "El Vengador Tóxico",
+                critics: {
+                    marco_aurelio: {
+                        author: "Marco Aurelio",
+                        rating: 8,
+                        content: "Como emperador y filósofo, he contemplado muchas transformaciones..."
+                    },
+                    rosario_costras: {
+                        author: "Rosario Costras",
+                        rating: 2,
+                        content: "Esta película perpetúa múltiples violencias sistémicas..."
+                    }
+                },
+                total_critics: 2
+            };
+
+            window.TEST_CRITICS_DATA = fallbackData;
+            log(`✅ Fallback data ready: ${fallbackData.total_critics} critics`, 'success');
+        }
+
+        function injectCritics() {
+            if (!window.TEST_CRITICS_DATA) {
+                log('⚠️ No critics data available. Run a test first.', 'warning');
+                return;
+            }
+
+            log('🎭 Injecting critics into page...', 'info');
+
+            // Simple injection simulation
+            const insertionPoint = document.getElementById('insertionPoint');
+            insertionPoint.innerHTML = `
+                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; border-left: 4px solid #4CAF50;">
+                    <h3>🎭 Críticos de la Casa (${window.TEST_CRITICS_DATA.total_critics})
+                        <span style="background: #4CAF50; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+                            ${window.WORKING_API_URL ? '🌐 API' : '📦 FALLBACK'}
+                        </span>
+                    </h3>
+
+                    ${Object.entries(window.TEST_CRITICS_DATA.critics).map(([key, critic]) => `
+                        <div style="margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 3px solid ${key === 'marco_aurelio' ? '#8B4513' : '#FF69B4'};">
+                            <strong style="color: ${key === 'marco_aurelio' ? '#8B4513' : '#FF69B4'};">
+                                ${key === 'marco_aurelio' ? '🏛️' : '🏳️‍⚧️'} ${critic.author}
+                            </strong>
+                            <span style="float: right; background: ${key === 'marco_aurelio' ? '#8B4513' : '#FF69B4'}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;">
+                                ⭐ ${critic.rating}/10
+                            </span>
+                            <div style="margin-top: 10px; line-height: 1.6;">
+                                ${critic.content.substring(0, 200)}...
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            log('✅ Critics injected successfully!', 'success');
+        }
+
+        function clearCritics() {
+            const insertionPoint = document.getElementById('insertionPoint');
+            insertionPoint.innerHTML = '📍 Critics will be inserted here (simulating Jellyfin insertion point)';
+            log('🗑️ Critics cleared', 'info');
+        }
+
+        // Auto-run discovery on page load
+        window.addEventListener('load', () => {
+            log('🚀 Test environment loaded', 'success');
+            log('👆 Click buttons above to test different scenarios', 'info');
+        });
+    </script>
+</body>
+</html>

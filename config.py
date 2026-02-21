@@ -24,7 +24,12 @@ class Config:
     CORS_ORIGINS = [
         "http://localhost:8096",
         "http://192.168.45.181:8096",
-        "http://127.0.0.1:8096"
+        "http://127.0.0.1:8096",
+        # Testing origins
+        "http://localhost:3000",
+        "http://localhost:8080",
+        "http://127.0.0.1:3000",
+        "null"  # For file:// protocol testing
     ]
 
     # Add custom origins from environment
