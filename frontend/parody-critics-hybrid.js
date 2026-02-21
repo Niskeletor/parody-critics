@@ -30,12 +30,11 @@
     // Auto-Discovery Configuration (AGNÓSTICO)
     const API_DISCOVERY_CONFIG = {
         URLS_TO_TEST: [
+            'http://192.168.45.181:8888/api',      // ← Stilgar remoto (LLM critics)
             'http://localhost:9999/api',           // Test local
             'http://127.0.0.1:9999/api',          // Loopback
-            'http://localhost:8003/api',           // Docker local
-            'http://192.168.45.181:8003/api',      // Docker Stilgar
-            'http://localhost:8002/api',           // Stilgar local
-            'http://192.168.45.181:8002/api',      // Stilgar remoto
+            'http://localhost:8888/api',           // Docker local
+            'http://192.168.45.181:8000/api',      // Stilgar backup
             'http://parody-critics-api:8000/api'   // Docker interno
         ],
         TIMEOUT: 3000,
