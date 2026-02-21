@@ -62,7 +62,7 @@ async def lifespan(app: FastAPI):
     print("🚀 Starting Parody Critics API...")
 
     # Verify database exists
-    if not DB_PATH.exists():
+    if not Path(DB_PATH).exists():
         print("❌ Database not found! Run database/init_db.py first")
         raise RuntimeError("Database not initialized")
 
