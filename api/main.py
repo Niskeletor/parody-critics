@@ -326,6 +326,55 @@ async def get_media(
 
     return media_list
 
+@app.get("/api/media/search", response_model=List[MediaInfo])
+async def search_media(
+    query: str = Query(..., min_length=2, description="Search query (minimum 2 characters)"),
+    limit: int = Query(20, le=50, description="Maximum number of results")
+):
+    """Search media by title with flexible matching"""
+
+    # Fixed search query with correct table relationships
+    search_query = """
+        SELECT m.id, m.tmdb_id, m.jellyfin_id, m.title, m.original_title,
+               m.year, m.type, m.genres, m.overview, m.poster_url, m.imdb_id,
+               m.vote_average, m.created_at,
+               CASE WHEN c.media_id IS NOT NULL THEN 1 ELSE 0 END as has_critics,
+               COUNT(c.id) as critics_count
+        FROM media m
+        LEFT JOIN critics c ON m.id = c.media_id
+        WHERE UPPER(m.title) LIKE UPPER(?) OR UPPER(m.original_title) LIKE UPPER(?)
+        GROUP BY m.id
+        ORDER BY m.vote_average DESC
+        LIMIT ?
+    """
+
+    # Create search patterns - simplified for now
+    search_pattern = f"%{query}%"
+
+    params = [
+        search_pattern,  # WHERE: LIKE title
+        search_pattern,  # WHERE: LIKE original_title
+        limit            # LIMIT clause
+    ]
+
+    rows = db_manager.execute_query(search_query, params)
+
+    media_list = []
+    for row in rows:
+        row_dict = dict(row)
+        row_dict['has_critics'] = bool(row_dict['has_critics'])
+
+        # Parse genres if present
+        if row_dict['genres']:
+            try:
+                row_dict['genres'] = json.loads(row_dict['genres'])
+            except json.JSONDecodeError:
+                row_dict['genres'] = []
+
+        media_list.append(MediaInfo(**row_dict))
+
+    return media_list
+
 @app.get("/api/sync-logs", response_model=List[SyncLogEntry])
 async def get_sync_logs(limit: int = Query(10, le=100, description="Limit results")):
     """Get recent sync operation logs"""

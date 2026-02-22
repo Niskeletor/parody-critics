@@ -110,4 +110,5 @@ def get_config(environment: str = None) -> Config:
     if environment is None:
         environment = os.getenv('PARODY_CRITICS_ENV', 'development')
 
-    return config_map.get(environment, DevelopmentConfig)
+    config_class = config_map.get(environment, DevelopmentConfig)
+    return config_class()

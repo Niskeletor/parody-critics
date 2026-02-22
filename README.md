@@ -41,11 +41,53 @@ A comprehensive system for adding humorous, character-driven movie and TV show r
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.9+
-- Jellyfin server running
-- JavaScript Injector plugin for Jellyfin
+- **Python 3.11+** (Required for modern FastAPI features)
+- **Jellyfin server** running and accessible
+- **Ollama** (Optional, for AI-powered reviews)
+- **JavaScript Injector plugin** for Jellyfin (for frontend integration)
+
+**Recommended System Requirements:**
+- 8GB+ RAM (for LLM processing)
+- 10GB+ free disk space (for models and database)
+- Network access to Jellyfin and Ollama servers
 
 ### Installation
+
+#### 🧙‍♂️ Option 1: Setup Wizard (Recommended)
+
+Use our interactive setup wizard for the easiest installation:
+
+```bash
+# Clone and navigate
+git clone https://github.com/your-username/parody-critics-jellyfin.git
+cd parody-critics-jellyfin
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the setup wizard
+python simple_wizard.py
+```
+
+The wizard will:
+- ✅ Check all system dependencies
+- ✅ Test connections to Jellyfin and Ollama servers
+- ✅ Create optimized `.env` configuration
+- ✅ Provide next steps for deployment
+
+**Wizard Options:**
+```bash
+python simple_wizard.py --help           # Show all options
+python simple_wizard.py --demo           # Run with pre-filled demo values
+python simple_wizard.py --skip-deps      # Skip dependency checks
+python simple_wizard.py --config-only    # Only create configuration
+```
+
+#### 📋 Option 2: Manual Installation
 
 1. **Clone and setup:**
    ```bash
@@ -56,19 +98,24 @@ A comprehensive system for adding humorous, character-driven movie and TV show r
    pip install -r requirements.txt
    ```
 
-2. **Initialize database:**
+2. **Configure environment:**
+   ```bash
+   # Copy and edit configuration
+   cp .env.example .env
+   nano .env  # Update JELLYFIN_URL, LLM settings, etc.
+   ```
+
+3. **Initialize database:**
    ```bash
    python run_setup.py
    ```
 
-3. **Start the API server:**
+4. **Start the API server:**
    ```bash
-   source venv/bin/activate
-   cd api
-   python main.py
+   python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
    ```
 
-4. **Add to Jellyfin:**
+5. **Add to Jellyfin:**
    - Install JavaScript Injector plugin
    - Add the frontend script (see `frontend/` folder)
 
@@ -261,13 +308,61 @@ parody-critics-api/
 3. Create personality prompts for LLM generation
 4. Re-run database initialization
 
-## 🤖 AI Integration (Planned)
+## 🤖 AI Integration
 
-The system is designed to integrate with LLM services for automatic review generation:
+### LLM Integration with Ollama
 
+The system integrates with **Ollama** for local AI-powered review generation:
+
+#### Supported Models
+- **QWen3:8B**: Primary model for fast, coherent reviews
+- **GPT-OSS:20B**: Secondary/fallback model for complex analysis
+- **Custom Models**: Any Ollama-compatible model
+
+#### Setup Ollama Integration
+
+1. **Install Ollama** (if not already installed):
+   ```bash
+   # Linux/macOS
+   curl -fsSL https://ollama.com/install.sh | sh
+
+   # Or visit https://ollama.com for other installation methods
+   ```
+
+2. **Pull recommended models:**
+   ```bash
+   ollama pull qwen3:8b        # Primary model (~5GB)
+   ollama pull gpt-oss:20b     # Secondary model (~12GB)
+   ```
+
+3. **Configure in the setup wizard:**
+   ```bash
+   python simple_wizard.py
+   # The wizard will auto-detect your Ollama models and configure them
+   ```
+
+4. **Manual configuration (optional):**
+   ```bash
+   # .env file
+   LLM_OLLAMA_URL=http://localhost:11434        # Ollama server URL
+   LLM_PRIMARY_MODEL=qwen3:8b                   # Default model
+   LLM_SECONDARY_MODEL=gpt-oss:20b              # Fallback model
+   LLM_TIMEOUT=180                              # Request timeout (seconds)
+   LLM_MAX_RETRIES=2                            # Retry attempts
+   LLM_ENABLE_FALLBACK=true                     # Use fallback model on failure
+   ```
+
+#### LLM Features
+- **🎭 Character Consistency**: Each critic maintains their unique voice
+- **🔄 Automatic Fallback**: Switches to secondary model if primary fails
+- **⚡ Caching**: Reviews are cached to avoid regeneration
+- **🛡️ Privacy**: All processing done locally with Ollama
+- **⚖️ Load Balancing**: Distributes requests across available models
+
+### Cloud LLM Support (Future)
 - **OpenAI GPT-4**: Premium, highest quality
 - **Anthropic Claude**: Great reasoning and character consistency
-- **Local LLMs**: Privacy-focused, cost-effective
+- **Google Gemini**: Multimodal capabilities
 
 ## 📊 Database Schema
 
@@ -276,6 +371,55 @@ The SQLite database includes tables for:
 - `characters` - Critic personality definitions
 - `critics` - Generated reviews
 - `sync_log` - Synchronization tracking
+
+## 🛠️ Troubleshooting
+
+### Setup Wizard Issues
+
+**Wizard fails with "module not found" errors:**
+```bash
+# Make sure you're in the virtual environment
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+**Connection test failures:**
+- **Jellyfin**: Check URL format (include `http://`) and port
+- **Ollama**: Ensure Ollama is running (`ollama serve`)
+- **Models**: Pull required models (`ollama pull qwen3:8b`)
+
+**Port 8000 already in use:**
+```bash
+# Check what's using the port
+lsof -i :8000
+# Kill the process or use a different port
+```
+
+**EOF errors during interactive setup:**
+- Use `--demo` mode for non-interactive testing
+- Ensure terminal supports input (not running in background)
+
+### LLM Integration Issues
+
+**Models not detected:**
+```bash
+# Check Ollama status
+ollama list
+ollama serve  # If not running
+
+# Test connection manually
+curl http://localhost:11434/api/tags
+```
+
+**Generation timeouts:**
+- Increase `LLM_TIMEOUT` in `.env`
+- Use smaller models (qwen3:8b instead of larger models)
+- Check system resources (RAM/CPU)
+
+**Character inconsistency:**
+- Update character prompts in database
+- Clear review cache
+- Tune model temperature settings
 
 ## 🐛 Contributing
 

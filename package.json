@@ -1,0 +1,51 @@
+{
+  "name": "parody-critics-api",
+  "version": "1.0.0",
+  "description": "A comprehensive system for adding humorous, character-driven movie and TV show reviews to your Jellyfin media server.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "jest",
+    "test:e2e": "playwright test",
+    "test:full": "node tools/comprehensive-test-suite.js",
+    "test:quick": "node tools/test-button.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "dev": "nodemon server.js",
+    "debug": "node --inspect-brk server.js",
+    "health": "curl -f http://localhost:8877/api/health || exit 1",
+    "install-browsers": "npx playwright install",
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Niskeletor/parody-critics.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Niskeletor/parody-critics/issues"
+  },
+  "homepage": "https://github.com/Niskeletor/parody-critics#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "browser-sync": "^3.0.4",
+    "cypress": "^15.10.0",
+    "eslint": "^10.0.1",
+    "husky": "^9.1.7",
+    "jest": "^30.2.0",
+    "json-server": "^1.0.0-beta.9",
+    "lighthouse": "^13.0.3",
+    "msw": "^2.12.10",
+    "nodemon": "^3.1.14",
+    "playwright": "^1.58.2",
+    "prettier": "^3.8.1",
+    "webpack-bundle-analyzer": "^5.2.0"
+  }
+}

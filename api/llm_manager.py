@@ -5,18 +5,35 @@ Hybrid LLM system with local and cloud fallback for critic generation
 import httpx
 import asyncio
 import time
-import logging
+import json
+from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List
-from config import get_config
+from dataclasses import dataclass, asdict
 
-logger = logging.getLogger(__name__)
+# Import our logging system
+from utils.logger import get_logger, LogTimer, log_exception
+from config import Config
+
+logger = get_logger('llm_manager')
 
 class CriticGenerationManager:
     """Manage LLM endpoints with fallback for critic generation"""
 
     def __init__(self):
-        self.config = get_config()
+        self.config = Config()
         self.setup_endpoints()
+
+        # Statistics tracking
+        self.generation_stats = {
+            'total_requests': 0,
+            'successful_requests': 0,
+            'failed_requests': 0,
+            'total_tokens': 0,
+            'total_time': 0.0,
+            'character_stats': {}
+        }
+
+        logger.info("CriticGenerationManager initialized successfully")
 
     def setup_endpoints(self):
         """Setup available LLM endpoints with priority order"""
@@ -40,7 +57,7 @@ class CriticGenerationManager:
         }
 
         # Future cloud endpoints
-        if self.config.LLM_OPENAI_API_KEY:
+        if hasattr(self.config, 'LLM_OPENAI_API_KEY') and self.config.LLM_OPENAI_API_KEY:
             self.endpoints["openai_gpt4"] = {
                 "url": "https://api.openai.com/v1/chat/completions",
                 "model": "gpt-4",
@@ -49,6 +66,9 @@ class CriticGenerationManager:
                 "speed": "fast",
                 "cost": "paid"
             }
+            logger.info("OpenAI endpoint configured")
+
+        logger.info(f"Configured {len(self.endpoints)} LLM endpoints: {list(self.endpoints.keys())}")
 
     async def health_check_endpoint(self, endpoint_name: str) -> Dict[str, Any]:
         """Check if an endpoint is healthy and responsive"""
@@ -74,6 +94,7 @@ class CriticGenerationManager:
 
         except Exception as e:
             logger.warning(f"Health check failed for {endpoint_name}: {str(e)}")
+            log_exception(logger, e, f"Health check for {endpoint_name}")
             return {
                 "status": "unhealthy",
                 "error": str(e)
@@ -97,18 +118,36 @@ class CriticGenerationManager:
                 key=lambda x: x[1]["priority"]
             )
 
+        # Update stats
+        self.generation_stats['total_requests'] += 1
+
+        # Track character usage
+        if character not in self.generation_stats['character_stats']:
+            self.generation_stats['character_stats'][character] = {
+                'requests': 0,
+                'successful': 0,
+                'avg_time': 0.0
+            }
+
+        self.generation_stats['character_stats'][character]['requests'] += 1
+
         prompt = self._build_character_prompt(character, media_info)
         attempts = []
+
+        logger.info(f"Starting critic generation - Character: {character}, Media: {media_info.get('title', 'Unknown')}")
 
         for endpoint_name, endpoint_config in endpoints_to_try:
             try:
                 logger.info(f"Attempting generation with {endpoint_name} ({endpoint_config['model']})")
 
                 start_time = time.time()
-                result = await self._generate_with_endpoint(
-                    endpoint_config,
-                    prompt
-                )
+
+                with LogTimer(logger, f"LLM generation ({endpoint_name})"):
+                    result = await self._generate_with_endpoint(
+                        endpoint_config,
+                        prompt
+                    )
+
                 generation_time = time.time() - start_time
 
                 attempts.append({
@@ -119,7 +158,17 @@ class CriticGenerationManager:
                     "response": result["response"]
                 })
 
-                logger.info(f"Generation successful with {endpoint_name} in {generation_time:.1f}s")
+                # Update success stats
+                self.generation_stats['successful_requests'] += 1
+                self.generation_stats['total_time'] += generation_time
+                self.generation_stats['character_stats'][character]['successful'] += 1
+
+                # Update character average time
+                char_stats = self.generation_stats['character_stats'][character]
+                if char_stats['successful'] > 0:
+                    char_stats['avg_time'] = ((char_stats['avg_time'] * (char_stats['successful'] - 1)) + generation_time) / char_stats['successful']
+
+                logger.info(f"✅ Generation successful with {endpoint_name} in {generation_time:.1f}s - Character: {character}")
 
                 return {
                     "success": True,
@@ -134,29 +183,37 @@ class CriticGenerationManager:
 
             except Exception as e:
                 error_msg = str(e)
-                logger.warning(f"Generation failed with {endpoint_name}: {error_msg}")
+                logger.warning(f"❌ Generation failed with {endpoint_name}: {error_msg}")
+                log_exception(logger, e, f"Generation with {endpoint_name}")
 
                 attempts.append({
                     "endpoint": endpoint_name,
                     "model": endpoint_config["model"],
                     "status": "failed",
-                    "error": error_msg
+                    "error": error_msg,
+                    "timestamp": datetime.now().isoformat()
                 })
 
-                if not self.config.LLM_ENABLE_FALLBACK:
+                if not getattr(self.config, 'LLM_ENABLE_FALLBACK', True):
                     # If fallback is disabled, stop after first failure
+                    logger.info("Fallback disabled - stopping after first failure")
                     break
 
                 continue
 
         # All endpoints failed
-        logger.error(f"All endpoints failed for character {character}")
+        self.generation_stats['failed_requests'] += 1
+
+        error_summary = f"All {len(endpoints_to_try)} endpoints failed for character {character}"
+        logger.error(f"🚨 {error_summary}")
+
         return {
             "success": False,
             "error": "All LLM endpoints failed",
             "character": character,
             "media_title": media_info.get("title", "Unknown"),
-            "attempts": attempts
+            "attempts": attempts,
+            "timestamp": datetime.now().isoformat()
         }
 
     async def _generate_with_endpoint(
@@ -182,17 +239,37 @@ class CriticGenerationManager:
 
     async def _generate_ollama(self, url: str, model: str, prompt: str) -> Dict[str, Any]:
         """Generate using Ollama endpoint"""
-        async with httpx.AsyncClient(timeout=self.config.LLM_TIMEOUT) as client:
-            response = await client.post(
-                f"{url}/api/generate",
-                json={
-                    "model": model,
-                    "prompt": prompt,
-                    "stream": False
+        timeout = getattr(self.config, 'LLM_TIMEOUT', 180)
+
+        logger.debug(f"Sending request to Ollama: {url} with model {model}")
+
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            payload = {
+                "model": model,
+                "prompt": prompt,
+                "stream": False,
+                "options": {
+                    "temperature": 0.8,
+                    "max_tokens": 500,
+                    "top_p": 0.9
                 }
-            )
-            response.raise_for_status()
-            return response.json()
+            }
+
+            try:
+                response = await client.post(f"{url}/api/generate", json=payload)
+                response.raise_for_status()
+
+                result = response.json()
+                logger.debug(f"Ollama response received - Response length: {len(result.get('response', ''))}")
+
+                return result
+
+            except httpx.TimeoutException:
+                raise Exception(f"Ollama request timed out after {timeout}s")
+            except httpx.HTTPStatusError as e:
+                raise Exception(f"Ollama HTTP error {e.response.status_code}: {e.response.text}")
+            except Exception as e:
+                raise Exception(f"Ollama request failed: {str(e)}")
 
     async def _generate_openai(self, model: str, prompt: str) -> Dict[str, Any]:
         """Generate using OpenAI endpoint (future implementation)"""
