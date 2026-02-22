@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 Parody Critics - Críticas Cinematográficas Paródicas</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo">
+                    <span class="logo-icon">🎭</span>
+                    Parody Critics
+                </h1>
+                <nav class="nav">
+                    <button class="nav-btn active" data-view="home">🏠 Inicio</button>
+                    <button class="nav-btn" data-view="media">🎬 Películas & Series</button>
+                    <button class="nav-btn" data-view="critics">📝 Críticas</button>
+                    <button class="nav-btn" data-view="generate">✨ Generar</button>
+                    <button class="nav-btn" data-view="status">📊 Sistema</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Home View -->
+            <section class="view active" id="home-view">
+                <div class="hero">
+                    <h2 class="hero-title">Críticas Cinematográficas con IA</h2>
+                    <p class="hero-subtitle">
+                        Descubre cómo Marco Aurelio y Rosario Costras analizan tus películas y series favoritas
+                    </p>
+                    <div class="hero-stats">
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-media">-</div>
+                            <div class="stat-label">Películas & Series</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-critics">-</div>
+                            <div class="stat-label">Críticas Generadas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="system-status">-</div>
+                            <div class="stat-label">Estado del Sistema</div>
+                        </div>
+                    </div>
+                    <div class="cta-buttons">
+                        <button class="btn-primary" data-view="media">🎬 Explorar Películas</button>
+                        <button class="btn-secondary" data-view="generate">✨ Generar Crítica</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Media List View -->
+            <section class="view" id="media-view">
+                <div class="view-header">
+                    <h2>🎬 Películas & Series</h2>
+                    <div class="view-controls">
+                        <select class="filter-select" id="type-filter">
+                            <option value="">Todos los tipos</option>
+                            <option value="movie">Películas</option>
+                            <option value="series">Series</option>
+                        </select>
+                        <select class="filter-select" id="critics-filter">
+                            <option value="">Todos</option>
+                            <option value="true">Con críticas</option>
+                            <option value="false">Sin críticas</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="media-grid" id="media-grid">
+                    <div class="loading">🎬 Cargando películas...</div>
+                </div>
+            </section>
+
+            <!-- Critics View -->
+            <section class="view" id="critics-view">
+                <div class="view-header">
+                    <h2>📝 Críticas Recientes</h2>
+                </div>
+                <div class="critics-list" id="critics-list">
+                    <div class="loading">📝 Cargando críticas...</div>
+                </div>
+            </section>
+
+            <!-- Generate View -->
+            <section class="view" id="generate-view">
+                <div class="generate-section">
+                    <h2>✨ Generar Nueva Crítica</h2>
+                    <div class="generate-form">
+                        <div class="form-group">
+                            <label for="media-select">Selecciona una película o serie:</label>
+                            <select class="form-select" id="media-select">
+                                <option value="">Cargando medios...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Selecciona el crítico:</label>
+                            <div class="character-selector" id="character-selector">
+                                <div class="loading">👥 Cargando personajes...</div>
+                            </div>
+                        </div>
+                        <button class="btn-generate" id="generate-btn" disabled>
+                            <span class="btn-text">✨ Generar Crítica</span>
+                            <span class="btn-loading hidden">🎭 Generando...</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Generation Result -->
+                <div class="generation-result hidden" id="generation-result">
+                    <h3>🎉 ¡Crítica Generada!</h3>
+                    <div class="critic-card" id="generated-critic">
+                        <!-- Generated critic will be inserted here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Status View -->
+            <section class="view" id="status-view">
+                <div class="status-section">
+                    <h2>📊 Estado del Sistema</h2>
+
+                    <!-- System Health -->
+                    <div class="status-grid">
+                        <div class="status-card">
+                            <h3>🏥 Salud del Sistema</h3>
+                            <div class="health-status" id="health-status">
+                                <div class="loading">Verificando...</div>
+                            </div>
+                        </div>
+
+                        <!-- LLM Status -->
+                        <div class="status-card">
+                            <h3>🤖 Estado de LLM</h3>
+                            <div class="llm-status" id="llm-status">
+                                <div class="loading">Verificando modelos...</div>
+                            </div>
+                        </div>
+
+                        <!-- Database Stats -->
+                        <div class="status-card">
+                            <h3>📊 Estadísticas de Base de Datos</h3>
+                            <div class="db-stats" id="db-stats">
+                                <div class="loading">Cargando estadísticas...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Parody Critics - Sistema de Críticas Paródicas con IA</p>
+            <p class="footer-tech">Powered by FastAPI + Qwen3:8b + GPT-OSS:20b</p>
+        </div>
+    </footer>
+
+    <!-- Modal for displaying critics -->
+    <div class="modal hidden" id="critic-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close">&times;</button>
+            <div class="modal-body" id="modal-body">
+                <!-- Critic content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

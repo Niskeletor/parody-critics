@@ -3,3 +3,7 @@ uvicorn[standard]
 pydantic
 httpx
 python-dotenv
+click
+rich
+questionary
+requests
