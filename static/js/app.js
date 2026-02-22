@@ -21,7 +21,8 @@ class ParodyCriticsApp {
             isGroupedView: false,
             currentFilters: {
                 type: '',
-                critics: ''
+                critics: '',
+                letter: ''
             }
         };
 
@@ -184,6 +185,7 @@ class ParodyCriticsApp {
             let url = `/media?limit=${this.mediaState.limit}&offset=${this.mediaState.currentOffset}`;
             if (typeFilter) url += `&type=${typeFilter}`;
             if (criticsFilter) url += `&has_critics=${criticsFilter}`;
+            if (this.mediaState.currentFilters.letter) url += `&start_letter=${this.mediaState.currentFilters.letter}`;
 
             const newMedia = await this.fetchAPI(url);
 
@@ -230,6 +232,9 @@ class ParodyCriticsApp {
                 this.loadMediaData();
             });
         });
+
+        // Generate alphabet navigation
+        this.generateAlphabetNavigation();
     }
 
     setupInfiniteScroll() {
@@ -423,6 +428,80 @@ class ParodyCriticsApp {
         }
 
         console.log(`🔄 Switched to ${this.mediaState.isGroupedView ? 'grouped' : 'list'} view`);
+    }
+
+    // Filter by alphabet letter
+    filterByLetter(letter) {
+        // Update the letter filter
+        this.mediaState.currentFilters.letter = letter;
+
+        // Update active letter button
+        document.querySelectorAll('.letter-btn').forEach(btn => btn.classList.remove('active'));
+        if (letter) {
+            const activeBtn = document.querySelector(`[data-letter="${letter}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+        } else {
+            // If no letter (show all), activate the "TODOS" button
+            const todosBtn = document.querySelector('[data-letter=""]');
+            if (todosBtn) todosBtn.classList.add('active');
+        }
+
+        console.log(`🔤 Filtering by letter: ${letter || 'ALL'}`);
+
+        // Reset pagination and reload media
+        this.resetMediaPagination();
+        this.loadMediaData();
+    }
+
+    // Generate alphabet navigation
+    generateAlphabetNavigation() {
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        const container = document.getElementById('alphabet-navigation');
+        if (!container) return;
+
+        let html = '<div class="alphabet-nav">';
+
+        // "Todos" button
+        html += `<button class="letter-btn active" onclick="app.filterByLetter('')" data-letter="">TODOS</button>`;
+
+        // Numbers button
+        html += `<button class="letter-btn" onclick="app.filterByLetter('0-9')" data-letter="0-9">#</button>`;
+
+        // Alphabet buttons
+        alphabet.forEach(letter => {
+            html += `<button class="letter-btn" onclick="app.filterByLetter('${letter}')" data-letter="${letter}">${letter}</button>`;
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
+
+        console.log('🔤 Alphabet navigation generated');
+    }
+
+    // Reset media pagination state
+    resetMediaPagination() {
+        this.mediaState.currentData = [];
+        this.mediaState.currentOffset = 0;
+        this.mediaState.hasMore = true;
+        this.mediaState.isLoading = false;
+    }
+
+    // Filter media data by letter
+    filterDataByLetter(data, letter) {
+        if (!letter) return data;
+
+        return data.filter(item => {
+            const title = item.title || '';
+            const firstChar = title.charAt(0).toUpperCase();
+
+            if (letter === '0-9') {
+                // Filter for numbers and special characters
+                return /^[0-9]/.test(firstChar);
+            } else {
+                // Filter for specific letter
+                return firstChar === letter;
+            }
+        });
     }
 
     async showMediaDetails(tmdbId) {

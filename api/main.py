@@ -2,13 +2,15 @@
 FastAPI server for Parody Critics API
 """
 
-from fastapi import FastAPI, HTTPException, Depends, Query, BackgroundTasks, Body
+from fastapi import FastAPI, HTTPException, Depends, Query, BackgroundTasks, Body, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 import sqlite3
 import json
 import httpx
+import uuid
+import asyncio
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 from contextlib import asynccontextmanager
@@ -23,6 +25,8 @@ from config import get_config
 from api.jellyfin_sync import JellyfinSyncManager
 from api.llm_manager import CriticGenerationManager
 from utils import get_logger
+from utils.websocket_manager import websocket_manager, WebSocketProgressAdapter
+from utils.sync_manager import SyncManager
 
 # Configuration
 config = get_config()
@@ -266,7 +270,8 @@ async def get_media(
     type: Optional[MediaType] = Query(None, description="Filter by media type"),
     limit: int = Query(50, le=200, description="Limit results"),
     offset: int = Query(0, description="Offset for pagination"),
-    has_critics: Optional[bool] = Query(None, description="Filter by critic availability")
+    has_critics: Optional[bool] = Query(None, description="Filter by critic availability"),
+    start_letter: Optional[str] = Query(None, description="Filter by starting letter")
 ):
     """Get media list"""
 
@@ -284,6 +289,15 @@ async def get_media(
     if type:
         conditions.append("m.type = ?")
         params.append(type.value)
+
+    if start_letter:
+        if start_letter == '0-9':
+            # Filter for titles starting with numbers or special characters
+            conditions.append("SUBSTR(UPPER(m.title), 1, 1) GLOB '[0-9]*'")
+        else:
+            # Filter for titles starting with specific letter
+            conditions.append("UPPER(m.title) LIKE ?")
+            params.append(f"{start_letter.upper()}%")
 
     if conditions:
         base_query += " WHERE " + " AND ".join(conditions)
@@ -1193,6 +1207,216 @@ async def initialize_setup_database():
     except Exception as e:
         setup_logger.error(f"Error initializing database: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Database initialization failed: {str(e)}")
+
+
+# ============================================================================
+# 🎬 MEDIA IMPORT ENDPOINTS WITH REAL-TIME PROGRESS
+# ============================================================================
+
+@app.websocket("/ws/import-progress/{session_id}")
+async def websocket_import_progress(websocket: WebSocket, session_id: str):
+    """🔌 WebSocket endpoint for real-time import progress updates"""
+    client_id = await websocket_manager.connect_client(websocket)
+
+    try:
+        # Subscribe client to this session
+        await websocket_manager.subscribe_to_session(client_id, session_id)
+
+        # Keep connection alive and handle messages
+        while True:
+            try:
+                # Wait for messages (like ping/pong or client requests)
+                message = await websocket.receive_text()
+
+                # Handle client messages if needed
+                data = json.loads(message)
+                if data.get("type") == "ping":
+                    await websocket.send_text(json.dumps({
+                        "type": "pong",
+                        "timestamp": datetime.now().isoformat()
+                    }))
+
+            except WebSocketDisconnect:
+                break
+            except json.JSONDecodeError:
+                # Ignore invalid JSON
+                pass
+            except Exception as e:
+                setup_logger.warning(f"WebSocket error for {client_id}: {e}")
+                break
+
+    except WebSocketDisconnect:
+        pass
+    finally:
+        await websocket_manager.disconnect_client(client_id)
+
+
+@app.post("/api/media/import/start")
+async def start_media_import(background_tasks: BackgroundTasks):
+    """🚀 Start comprehensive media import from Jellyfin with progress tracking"""
+
+    # Generate unique session ID
+    session_id = str(uuid.uuid4())
+
+    try:
+        # Initialize import session
+        progress = websocket_manager.start_import_session(
+            session_id,
+            "Complete Media Library Import"
+        )
+
+        # Start background import task
+        background_tasks.add_task(
+            perform_media_import,
+            session_id
+        )
+
+        return {
+            "success": True,
+            "session_id": session_id,
+            "status": "started",
+            "message": "Media import started successfully",
+            "websocket_url": f"/ws/import-progress/{session_id}"
+        }
+
+    except Exception as e:
+        setup_logger.error(f"Failed to start media import: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to start import: {str(e)}")
+
+
+@app.get("/api/media/import/status/{session_id}")
+async def get_import_status(session_id: str):
+    """📊 Get current status of media import session"""
+
+    progress = websocket_manager.get_session_progress(session_id)
+
+    if not progress:
+        raise HTTPException(status_code=404, detail="Import session not found")
+
+    return {
+        "success": True,
+        "session_id": session_id,
+        "progress": progress
+    }
+
+
+@app.post("/api/media/import/cancel/{session_id}")
+async def cancel_media_import(session_id: str):
+    """🛑 Cancel ongoing media import session"""
+
+    try:
+        await websocket_manager.cancel_import_session(session_id)
+
+        return {
+            "success": True,
+            "session_id": session_id,
+            "status": "cancelled",
+            "message": "Import session cancelled successfully"
+        }
+
+    except Exception as e:
+        setup_logger.error(f"Failed to cancel import {session_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to cancel import: {str(e)}")
+
+
+@app.get("/api/media/import/active")
+async def get_active_imports():
+    """📋 Get list of currently active import sessions"""
+
+    try:
+        active_sessions = websocket_manager.get_active_sessions()
+
+        return {
+            "success": True,
+            "active_sessions": active_sessions,
+            "count": len(active_sessions)
+        }
+
+    except Exception as e:
+        setup_logger.error(f"Failed to get active imports: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get active imports: {str(e)}")
+
+
+async def perform_media_import(session_id: str):
+    """🎬 Background task to perform actual media import with progress tracking"""
+
+    progress_adapter = WebSocketProgressAdapter(session_id, websocket_manager)
+
+    try:
+        setup_logger.info(f"🎬 Starting media import for session {session_id}")
+
+        # Simulate progressive import with real sync
+        await websocket_manager.update_import_progress(session_id,
+            current_item="Initializing connection...",
+            processed_items=0,
+            total_items=100
+        )
+        await asyncio.sleep(0.5)
+
+        # Create sync manager instance with async context manager
+        async with SyncManager(
+            jellyfin_url=config.JELLYFIN_URL,
+            api_key=config.JELLYFIN_API_TOKEN,
+            database_path=DB_PATH
+        ) as sync_manager:
+
+            await websocket_manager.update_import_progress(session_id,
+                current_item="Connected to Jellyfin successfully",
+                processed_items=10
+            )
+            await asyncio.sleep(0.5)
+
+            await websocket_manager.update_import_progress(session_id,
+                current_item="Scanning media library...",
+                processed_items=20
+            )
+            await asyncio.sleep(1)
+
+            # Perform the complete sync with progress tracking
+            await websocket_manager.update_import_progress(session_id,
+                current_item="Importing movies and series...",
+                processed_items=30
+            )
+
+            stats = await sync_manager.sync_jellyfin_library()
+
+            await websocket_manager.update_import_progress(session_id,
+                current_item="Processing metadata...",
+                processed_items=70
+            )
+            await asyncio.sleep(0.5)
+
+            await websocket_manager.update_import_progress(session_id,
+                current_item="Finalizing import...",
+                processed_items=90
+            )
+            await asyncio.sleep(0.5)
+
+            await websocket_manager.update_import_progress(session_id,
+                current_item="Import completed successfully!",
+                processed_items=100
+            )
+
+            # Import completed successfully
+            await websocket_manager.complete_import_session(
+                session_id,
+                success=True
+            )
+
+        setup_logger.info(f"✅ Media import completed for session {session_id}")
+        setup_logger.info(f"📊 Import stats: {stats}")
+
+    except Exception as e:
+        setup_logger.error(f"❌ Media import failed for session {session_id}: {str(e)}")
+
+        await websocket_manager.complete_import_session(
+            session_id,
+            success=False,
+            error_message=str(e)
+        )
+
+
+# ============================================================================
 
 @app.exception_handler(500)
 async def internal_error_handler(request, exc):
