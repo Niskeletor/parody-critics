@@ -6,10 +6,24 @@
 
 class ParodyCriticsApp {
     constructor() {
-        this.apiBase = 'http://localhost:8888/api';
+        this.apiBase = `${window.location.protocol}//${window.location.host}/api`;
         this.currentView = 'home';
         this.selectedCharacter = null;
         this.selectedMedia = null;
+
+        // Media pagination state
+        this.mediaState = {
+            currentData: [],
+            isLoading: false,
+            hasMore: true,
+            currentOffset: 0,
+            limit: 200,
+            isGroupedView: false,
+            currentFilters: {
+                type: '',
+                critics: ''
+            }
+        };
 
         this.init();
     }
@@ -144,27 +158,66 @@ class ParodyCriticsApp {
         }
     }
 
-    async loadMediaData() {
+    async loadMediaData(reset = true) {
         const mediaGrid = document.getElementById('media-grid');
-        mediaGrid.innerHTML = '<div class="loading">🎬 Cargando películas y series...</div>';
+
+        if (reset) {
+            // Reset state for new search
+            this.mediaState.currentData = [];
+            this.mediaState.currentOffset = 0;
+            this.mediaState.hasMore = true;
+            mediaGrid.innerHTML = '<div class="loading">🎬 Cargando películas y series...</div>';
+        } else if (this.mediaState.isLoading || !this.mediaState.hasMore) {
+            return; // Already loading or no more data
+        }
+
+        this.mediaState.isLoading = true;
 
         try {
             const typeFilter = document.getElementById('type-filter').value;
             const criticsFilter = document.getElementById('critics-filter').value;
 
-            let url = '/media?limit=50';
+            // Update current filters
+            this.mediaState.currentFilters.type = typeFilter;
+            this.mediaState.currentFilters.critics = criticsFilter;
+
+            let url = `/media?limit=${this.mediaState.limit}&offset=${this.mediaState.currentOffset}`;
             if (typeFilter) url += `&type=${typeFilter}`;
             if (criticsFilter) url += `&has_critics=${criticsFilter}`;
 
-            const media = await this.fetchAPI(url);
-            this.renderMediaGrid(media);
+            const newMedia = await this.fetchAPI(url);
 
-            // Setup filters
-            this.setupMediaFilters();
+            if (newMedia.length === 0) {
+                this.mediaState.hasMore = false;
+                if (this.mediaState.currentData.length === 0) {
+                    mediaGrid.innerHTML = '<div class="loading">📭 No se encontraron películas</div>';
+                }
+            } else {
+                // Add new media to current data
+                this.mediaState.currentData = [...this.mediaState.currentData, ...newMedia];
+                this.mediaState.currentOffset += newMedia.length;
+
+                // If we got less than the limit, we've reached the end
+                if (newMedia.length < this.mediaState.limit) {
+                    this.mediaState.hasMore = false;
+                }
+
+                this.renderMediaGrid(this.mediaState.currentData);
+            }
+
+            // Setup filters and infinite scroll on first load
+            if (reset) {
+                this.setupMediaFilters();
+                this.setupInfiniteScroll();
+            }
 
         } catch (error) {
             console.error('Failed to load media:', error);
-            mediaGrid.innerHTML = '<div class="loading">❌ Error loading media</div>';
+            if (reset) {
+                mediaGrid.innerHTML = '<div class="loading">❌ Error loading media</div>';
+            }
+        } finally {
+            this.mediaState.isLoading = false;
         }
     }
 
@@ -179,6 +232,28 @@ class ParodyCriticsApp {
         });
     }
 
+    setupInfiniteScroll() {
+        // Remove any existing scroll listeners to avoid duplicates
+        window.removeEventListener('scroll', this.handleScroll);
+
+        // Bind the scroll handler to preserve 'this' context
+        this.handleScroll = this.handleScroll.bind(this);
+        window.addEventListener('scroll', this.handleScroll);
+    }
+
+    handleScroll() {
+        // Check if we're near the bottom of the page
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+
+        // Load more when user is 300px from bottom
+        if (scrollTop + windowHeight >= documentHeight - 300) {
+            console.log('📜 Scroll detected near bottom, loading more media...');
+            this.loadMediaData(false); // false = don't reset, append more data
+        }
+    }
+
     renderMediaGrid(media) {
         const mediaGrid = document.getElementById('media-grid');
 
@@ -187,7 +262,36 @@ class ParodyCriticsApp {
             return;
         }
 
-        mediaGrid.innerHTML = media.map(item => `
+        let mediaHTML;
+
+        if (this.mediaState.isGroupedView) {
+            // Grouped view
+            mediaHTML = this.renderGroupedView(media);
+        } else {
+            // List view
+            mediaHTML = this.renderListView(media);
+        }
+
+        // Add loading indicator if more content is available
+        if (this.mediaState.isLoading && this.mediaState.hasMore) {
+            mediaHTML += `
+                <div class="media-loading" id="media-loading">
+                    <div class="loading">📽️ Cargando más películas...</div>
+                </div>
+            `;
+        } else if (!this.mediaState.hasMore && media.length > 0) {
+            mediaHTML += `
+                <div class="media-end" id="media-end">
+                    <div class="loading">🎬 Has visto todas las ${media.length} películas y series disponibles</div>
+                </div>
+            `;
+        }
+
+        mediaGrid.innerHTML = mediaHTML;
+    }
+
+    renderListView(media) {
+        return media.map(item => `
             <div class="media-card" onclick="app.showMediaDetails('${item.tmdb_id}')">
                 <div class="media-card-header">
                     <h3 class="media-title">${item.title}</h3>
@@ -210,6 +314,115 @@ class ParodyCriticsApp {
                 </div>
             </div>
         `).join('');
+    }
+
+    renderGroupedView(media) {
+        const groups = this.groupMediaByPattern(media);
+
+        return groups.map(group => `
+            <div class="media-group">
+                <div class="group-header">
+                    <h3 class="group-title">${group.name}</h3>
+                    <span class="group-count">${group.count} elementos</span>
+                </div>
+                <div class="group-content">
+                    ${group.items.map(item => `
+                        <div class="media-card-compact" onclick="app.showMediaDetails('${item.tmdb_id}')">
+                            <div class="compact-header">
+                                <h4 class="compact-title">${item.title}</h4>
+                                <span class="compact-meta">${item.year || 'N/A'} • ${item.type}</span>
+                            </div>
+                            <div class="compact-footer">
+                                ${item.vote_average ? `<span class="compact-rating">⭐ ${item.vote_average}</span>` : ''}
+                                <span class="compact-critics ${item.has_critics ? 'has-critics' : ''}">
+                                    ${item.critics_count > 0 ? `📝 ${item.critics_count}` : '📝 0'}
+                                </span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Group media by detected patterns in titles
+    groupMediaByPattern(media) {
+        const groups = new Map();
+
+        media.forEach(item => {
+            const group = this.detectMediaGroup(item.title);
+            if (!groups.has(group)) {
+                groups.set(group, []);
+            }
+            groups.get(group).push(item);
+        });
+
+        // Sort groups by name and convert to array
+        return Array.from(groups.entries())
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([groupName, items]) => ({
+                name: groupName,
+                items: items.sort((a, b) => a.title.localeCompare(b.title)),
+                count: items.length
+            }));
+    }
+
+    // Detect group for a media title
+    detectMediaGroup(title) {
+        // Collection tags [TAG]
+        const collectionMatch = title.match(/^\[([^\]]+)\]/);
+        if (collectionMatch) {
+            const tag = collectionMatch[1];
+            if (tag === 'GAL') return '🌍 Colección Galega';
+            if (tag.match(/^\d{4}$/)) return `🗓️ Colección ${tag}`;
+            return `📚 ${tag}`;
+        }
+
+        // Series patterns (numbers + similar titles)
+        const seriesPatterns = [
+            { pattern: /^(\d+)\s+(ninjas?|pequeños ninjas?)/, name: '🥷 Serie Ninjas' },
+            { pattern: /^(Fast|Rapido|A todo gas|2 Fast)/i, name: '🏎️ Fast & Furious' },
+            { pattern: /Matrix/i, name: '💊 Matrix Series' },
+            { pattern: /Terminator/i, name: '🤖 Terminator Series' },
+            { pattern: /Star Wars/i, name: '⭐ Star Wars' },
+            { pattern: /Marvel|Avengers|Spider|Iron Man|Thor|Hulk/i, name: '🦸 Marvel Universe' },
+            { pattern: /DC|Batman|Superman|Wonder Woman/i, name: '🦇 DC Universe' },
+        ];
+
+        for (const serie of seriesPatterns) {
+            if (serie.pattern.test(title)) {
+                return serie.name;
+            }
+        }
+
+        // Alphabetical grouping for remaining items
+        const firstLetter = title.charAt(0).toUpperCase();
+        if (firstLetter >= 'A' && firstLetter <= 'D') return '🔤 A - D';
+        if (firstLetter >= 'E' && firstLetter <= 'H') return '🔤 E - H';
+        if (firstLetter >= 'I' && firstLetter <= 'L') return '🔤 I - L';
+        if (firstLetter >= 'M' && firstLetter <= 'P') return '🔤 M - P';
+        if (firstLetter >= 'Q' && firstLetter <= 'T') return '🔤 Q - T';
+        if (firstLetter >= 'U' && firstLetter <= 'Z') return '🔤 U - Z';
+
+        // Numbers and symbols
+        if (/^[0-9]/.test(firstLetter)) return '🔢 Números';
+        return '❓ Otros';
+    }
+
+    // Toggle between grouped and list view
+    toggleGroupView() {
+        this.mediaState.isGroupedView = !this.mediaState.isGroupedView;
+
+        // Update button text
+        const toggleButton = document.getElementById('group-toggle');
+        toggleButton.textContent = this.mediaState.isGroupedView ? '📄 Vista Lista' : '📚 Vista Agrupada';
+
+        // Re-render with current data
+        if (this.mediaState.currentData.length > 0) {
+            this.renderMediaGrid(this.mediaState.currentData);
+        }
+
+        console.log(`🔄 Switched to ${this.mediaState.isGroupedView ? 'grouped' : 'list'} view`);
     }
 
     async showMediaDetails(tmdbId) {
@@ -347,7 +560,7 @@ class ParodyCriticsApp {
         const mediaSelect = document.getElementById('media-select');
 
         try {
-            const media = await this.fetchAPI('/media?limit=100');
+            const media = await this.fetchAPI('/media?limit=200');
 
             mediaSelect.innerHTML = '<option value="">Selecciona una película o serie...</option>' +
                 media.map(item => `
@@ -722,9 +935,533 @@ class ParodyCriticsApp {
     showError(message) {
         this.showMessage(message, 'error');
     }
+
+    // ========================================
+    // 🎬 Media Import with Real-time Progress
+    // ========================================
+
+    async startMediaImport() {
+        try {
+            console.log('🎬 Starting media import...');
+
+            const response = await fetch(`${this.apiBase}/media/import/start`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                console.log('✅ Import started successfully:', data.session_id);
+
+                // Show progress modal
+                this.showImportProgress(data.session_id);
+
+                this.showMessage('Import started! Check the progress panel.', 'success');
+            } else {
+                throw new Error('Failed to start import');
+            }
+
+        } catch (error) {
+            console.error('❌ Failed to start import:', error);
+            this.showError('Failed to start media import. Please try again.');
+        }
+    }
+
+    showImportProgress(sessionId) {
+        // Create or show import progress modal/panel
+        let progressModal = document.getElementById('import-progress-modal');
+
+        if (!progressModal) {
+            progressModal = this.createImportProgressModal(sessionId);
+            document.body.appendChild(progressModal);
+        }
+
+        progressModal.classList.remove('hidden');
+
+        // Connect to WebSocket for real-time updates
+        this.connectToImportProgress(sessionId);
+    }
+
+    createImportProgressModal(sessionId) {
+        const modal = document.createElement('div');
+        modal.id = 'import-progress-modal';
+        modal.className = 'import-progress-modal';
+        modal.innerHTML = `
+            <div class="import-progress-content">
+                <div class="import-progress-header">
+                    <h3>🎬 Importing Media Library</h3>
+                    <button class="close-import-btn" onclick="app.closeImportModal()">&times;</button>
+                </div>
+
+                <div class="import-progress-body">
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="import-progress-fill"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span id="import-percentage">0%</span>
+                            <span id="import-status">Starting...</span>
+                        </div>
+                    </div>
+
+                    <div class="import-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Items:</span>
+                            <span id="total-items">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Processed:</span>
+                            <span id="processed-items">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">New:</span>
+                            <span id="new-items" class="stat-success">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Updated:</span>
+                            <span id="updated-items" class="stat-warning">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Unchanged:</span>
+                            <span id="unchanged-items" class="stat-info">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Errors:</span>
+                            <span id="error-items" class="stat-error">0</span>
+                        </div>
+                    </div>
+
+                    <div class="current-operation">
+                        <strong>Current:</strong>
+                        <span id="current-item">Initializing...</span>
+                    </div>
+
+                    <div class="import-actions">
+                        <button id="cancel-import-btn" class="btn-cancel" onclick="app.cancelImport('${sessionId}')">
+                            Cancel Import
+                        </button>
+                    </div>
+
+                    <div class="import-log" id="import-log">
+                        <div class="log-entry">🎬 Import session started...</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add CSS styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .import-progress-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+            }
+
+            .import-progress-content {
+                background: var(--surface-color);
+                border-radius: 16px;
+                padding: 2rem;
+                max-width: 600px;
+                width: 90vw;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            }
+
+            .import-progress-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 2rem;
+                padding-bottom: 1rem;
+                border-bottom: 2px solid var(--border-color);
+            }
+
+            .import-progress-header h3 {
+                color: var(--accent-color);
+                font-size: 1.5rem;
+                margin: 0;
+            }
+
+            .close-import-btn {
+                background: none;
+                border: none;
+                font-size: 2rem;
+                color: var(--text-secondary);
+                cursor: pointer;
+                padding: 0;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                transition: all 0.3s ease;
+            }
+
+            .close-import-btn:hover {
+                background: var(--error-color);
+                color: white;
+            }
+
+            .progress-container {
+                margin-bottom: 2rem;
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 20px;
+                background: var(--background-color);
+                border-radius: 10px;
+                overflow: hidden;
+                margin-bottom: 1rem;
+                border: 2px solid var(--border-color);
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, var(--accent-color), var(--accent-dark));
+                width: 0%;
+                transition: width 0.3s ease;
+                position: relative;
+            }
+
+            .progress-fill::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+                animation: shimmer 2s infinite;
+            }
+
+            @keyframes shimmer {
+                0% { transform: translateX(-100%); }
+                100% { transform: translateX(100%); }
+            }
+
+            .progress-text {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-weight: 600;
+            }
+
+            #import-percentage {
+                font-size: 1.2rem;
+                color: var(--accent-color);
+            }
+
+            .import-stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 1rem;
+                margin-bottom: 2rem;
+                padding: 1.5rem;
+                background: var(--background-color);
+                border-radius: 12px;
+                border: 2px solid var(--border-color);
+            }
+
+            .stat-item {
+                display: flex;
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stat-label {
+                font-size: 0.85rem;
+                color: var(--text-secondary);
+                margin-bottom: 0.5rem;
+            }
+
+            .stat-item span:last-child {
+                font-weight: 600;
+                font-size: 1.1rem;
+            }
+
+            .stat-success { color: var(--success-color); }
+            .stat-warning { color: var(--warning-color); }
+            .stat-info { color: var(--accent-color); }
+            .stat-error { color: var(--error-color); }
+
+            .current-operation {
+                padding: 1rem;
+                background: var(--background-color);
+                border-radius: 8px;
+                margin-bottom: 1.5rem;
+                border-left: 4px solid var(--accent-color);
+            }
+
+            .current-operation strong {
+                color: var(--text-primary);
+            }
+
+            #current-item {
+                color: var(--accent-color);
+                font-weight: 500;
+                margin-left: 0.5rem;
+            }
+
+            .import-actions {
+                margin-bottom: 1.5rem;
+                text-align: center;
+            }
+
+            .btn-cancel {
+                background: var(--error-color);
+                color: white;
+                border: none;
+                padding: 0.75rem 2rem;
+                border-radius: 8px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .btn-cancel:hover {
+                background: #dc2626;
+                transform: translateY(-2px);
+            }
+
+            .import-log {
+                max-height: 200px;
+                overflow-y: auto;
+                background: #1f1f1f;
+                color: #e5e5e5;
+                padding: 1rem;
+                border-radius: 8px;
+                font-family: 'Courier New', monospace;
+                font-size: 0.85rem;
+                line-height: 1.4;
+            }
+
+            .log-entry {
+                margin-bottom: 0.5rem;
+                padding: 0.25rem 0;
+                border-bottom: 1px solid #333;
+            }
+
+            .log-entry:last-child {
+                border-bottom: none;
+            }
+        `;
+
+        document.head.appendChild(style);
+        return modal;
+    }
+
+    connectToImportProgress(sessionId) {
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${wsProtocol}//${window.location.host}/ws/import-progress/${sessionId}`;
+        console.log(`🔌 Connecting to WebSocket: ${wsUrl}`);
+
+        this.importWebSocket = new WebSocket(wsUrl);
+
+        this.importWebSocket.onopen = () => {
+            console.log('✅ WebSocket connected');
+            this.addLogEntry('🔌 Connected to progress stream');
+        };
+
+        this.importWebSocket.onmessage = (event) => {
+            try {
+                const message = JSON.parse(event.data);
+                console.log('📨 WebSocket message:', message);
+
+                switch (message.type) {
+                    case 'import_progress':
+                        this.updateImportProgress(message.data);
+                        break;
+                    case 'import_completed':
+                        this.handleImportCompleted(message.data);
+                        break;
+                    case 'import_error':
+                        this.handleImportError(message.data);
+                        break;
+                    case 'import_cancelled':
+                        this.handleImportCancelled(message.data);
+                        break;
+                    case 'pong':
+                        console.log('🏓 Pong received');
+                        break;
+                }
+            } catch (error) {
+                console.error('❌ Error parsing WebSocket message:', error);
+            }
+        };
+
+        this.importWebSocket.onclose = () => {
+            console.log('🔌 WebSocket connection closed');
+            this.addLogEntry('🔌 Connection closed');
+        };
+
+        this.importWebSocket.onerror = (error) => {
+            console.error('❌ WebSocket error:', error);
+            this.addLogEntry('❌ Connection error');
+        };
+
+        // Send periodic ping
+        this.importPingInterval = setInterval(() => {
+            if (this.importWebSocket.readyState === WebSocket.OPEN) {
+                this.importWebSocket.send(JSON.stringify({ type: 'ping' }));
+            }
+        }, 30000);
+    }
+
+    updateImportProgress(data) {
+        // Update progress bar
+        document.getElementById('import-progress-fill').style.width = `${data.percentage}%`;
+        document.getElementById('import-percentage').textContent = `${Math.round(data.percentage)}%`;
+        document.getElementById('import-status').textContent = data.status;
+
+        // Update statistics
+        document.getElementById('total-items').textContent = data.total_items;
+        document.getElementById('processed-items').textContent = data.processed_items;
+        document.getElementById('new-items').textContent = data.new_items;
+        document.getElementById('updated-items').textContent = data.updated_items;
+        document.getElementById('unchanged-items').textContent = data.unchanged_items;
+        document.getElementById('error-items').textContent = data.errors;
+
+        // Update current item
+        document.getElementById('current-item').textContent = data.current_item || 'Processing...';
+
+        // Add log entry for progress
+        if (data.current_item) {
+            this.addLogEntry(`📄 Processing: ${data.current_item}`);
+        }
+    }
+
+    handleImportCompleted(data) {
+        document.getElementById('import-status').textContent = 'Import Completed!';
+        document.getElementById('current-item').textContent = 'All items processed successfully';
+
+        this.addLogEntry('✅ Import completed successfully!');
+        this.addLogEntry(`📊 Final stats: ${data.processed_items} items processed`);
+
+        // Hide cancel button
+        document.getElementById('cancel-import-btn').style.display = 'none';
+
+        // Close WebSocket
+        this.closeImportWebSocket();
+
+        // Show success message
+        this.showMessage('Media import completed successfully!', 'success');
+    }
+
+    handleImportError(data) {
+        document.getElementById('import-status').textContent = 'Import Failed';
+        document.getElementById('current-item').textContent = 'Error occurred during import';
+
+        this.addLogEntry(`❌ Import failed: ${data.error_messages?.join(', ') || 'Unknown error'}`);
+
+        // Hide cancel button
+        document.getElementById('cancel-import-btn').style.display = 'none';
+
+        // Close WebSocket
+        this.closeImportWebSocket();
+
+        // Show error message
+        this.showError('Media import failed. Check the log for details.');
+    }
+
+    handleImportCancelled(data) {
+        document.getElementById('import-status').textContent = 'Import Cancelled';
+        document.getElementById('current-item').textContent = 'Import was cancelled by user';
+
+        this.addLogEntry('🛑 Import cancelled by user');
+
+        // Hide cancel button
+        document.getElementById('cancel-import-btn').style.display = 'none';
+
+        // Close WebSocket
+        this.closeImportWebSocket();
+
+        // Show info message
+        this.showMessage('Media import was cancelled.', 'warning');
+    }
+
+    async cancelImport(sessionId) {
+        try {
+            const response = await fetch(`${this.apiBase}/media/import/cancel/${sessionId}`, {
+                method: 'POST'
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.addLogEntry('🛑 Cancellation requested...');
+            } else {
+                throw new Error('Failed to cancel import');
+            }
+        } catch (error) {
+            console.error('❌ Failed to cancel import:', error);
+            this.showError('Failed to cancel import');
+        }
+    }
+
+    addLogEntry(message) {
+        const logContainer = document.getElementById('import-log');
+        if (logContainer) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+            logContainer.appendChild(entry);
+
+            // Scroll to bottom
+            logContainer.scrollTop = logContainer.scrollHeight;
+
+            // Limit log entries to prevent memory issues
+            const entries = logContainer.children;
+            if (entries.length > 100) {
+                logContainer.removeChild(entries[0]);
+            }
+        }
+    }
+
+    closeImportModal() {
+        console.log('🚪 Closing import modal');
+
+        // Hide the modal
+        const modal = document.getElementById('import-progress-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none'; // Force hide with CSS
+        }
+
+        // Close WebSocket connection
+        this.closeImportWebSocket();
+    }
+
+    closeImportWebSocket() {
+        if (this.importWebSocket) {
+            this.importWebSocket.close();
+            this.importWebSocket = null;
+        }
+
+        if (this.importPingInterval) {
+            clearInterval(this.importPingInterval);
+            this.importPingInterval = null;
+        }
+    }
 }
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new ParodyCriticsApp();
+    // Also assign to global scope for onclick handlers
+    globalThis.app = window.app;
+    console.log('🎭 Parody Critics App initialized and available globally:', window.app);
 });
