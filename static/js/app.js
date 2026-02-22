@@ -95,6 +95,16 @@ class ParodyCriticsApp {
             targetView.classList.add('active');
             this.currentView = viewName;
 
+            // Update navigation buttons
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(btn => {
+                if (btn.dataset.view === viewName) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
             // Load view-specific data
             this.loadViewData(viewName);
         }
@@ -233,6 +243,23 @@ class ParodyCriticsApp {
             });
         });
 
+        // Setup event delegation for generate critic buttons
+        const mediaGrid = document.getElementById('media-grid');
+        mediaGrid.addEventListener('click', (e) => {
+            if (e.target.classList.contains('generate-critic-btn') ||
+                e.target.classList.contains('compact-generate-btn')) {
+                e.stopPropagation();
+                const tmdbId = e.target.dataset.tmdbId;
+                const title = e.target.dataset.title;
+
+                if (tmdbId && title) {
+                    this.openGenerateCriticModal(tmdbId, title);
+                } else {
+                    console.error('❌ Missing tmdbId or title in button data');
+                }
+            }
+        });
+
         // Generate alphabet navigation
         this.generateAlphabetNavigation();
     }
@@ -297,8 +324,8 @@ class ParodyCriticsApp {
 
     renderListView(media) {
         return media.map(item => `
-            <div class="media-card" onclick="app.showMediaDetails('${item.tmdb_id}')">
-                <div class="media-card-header">
+            <div class="media-card">
+                <div class="media-card-header" onclick="app.showMediaDetails('${item.tmdb_id}')">
                     <h3 class="media-title">${item.title}</h3>
                     <div class="media-meta">
                         <span class="media-type ${item.type}">${item.type}</span>
@@ -306,7 +333,7 @@ class ParodyCriticsApp {
                         ${item.vote_average ? `<div class="rating-badge">⭐ ${item.vote_average}</div>` : ''}
                     </div>
                 </div>
-                <div class="media-card-body">
+                <div class="media-card-body" onclick="app.showMediaDetails('${item.tmdb_id}')">
                     <p class="media-description">${item.overview || 'No description available'}</p>
                     <div class="media-genres">
                         ${(item.genres || []).map(genre => `<span class="genre-tag">${genre}</span>`).join('')}
@@ -316,6 +343,10 @@ class ParodyCriticsApp {
                     <span class="critics-count ${item.has_critics ? 'has-critics' : ''}">
                         ${item.critics_count > 0 ? `📝 ${item.critics_count} críticas` : '📝 Sin críticas'}
                     </span>
+                    <button class="btn btn-primary btn-sm generate-critic-btn"
+                            data-tmdb-id="${item.tmdb_id}" data-title="${item.title}">
+                        🎭 Generar Crítica
+                    </button>
                 </div>
             </div>
         `).join('');
@@ -332,8 +363,8 @@ class ParodyCriticsApp {
                 </div>
                 <div class="group-content">
                     ${group.items.map(item => `
-                        <div class="media-card-compact" onclick="app.showMediaDetails('${item.tmdb_id}')">
-                            <div class="compact-header">
+                        <div class="media-card-compact">
+                            <div class="compact-header" onclick="app.showMediaDetails('${item.tmdb_id}')">
                                 <h4 class="compact-title">${item.title}</h4>
                                 <span class="compact-meta">${item.year || 'N/A'} • ${item.type}</span>
                             </div>
@@ -342,6 +373,10 @@ class ParodyCriticsApp {
                                 <span class="compact-critics ${item.has_critics ? 'has-critics' : ''}">
                                     ${item.critics_count > 0 ? `📝 ${item.critics_count}` : '📝 0'}
                                 </span>
+                                <button class="btn btn-primary btn-xs compact-generate-btn"
+                                        data-tmdb-id="${item.tmdb_id}" data-title="${item.title}">
+                                    🎭
+                                </button>
                             </div>
                         </div>
                     `).join('')}
@@ -608,8 +643,8 @@ class ParodyCriticsApp {
         // Load characters
         await this.loadCharacters();
 
-        // Load media for selection
-        await this.loadMediaForGeneration();
+        // Setup media search
+        this.setupMediaSearch();
 
         // Setup form handlers
         this.setupGenerateForm();
@@ -635,23 +670,173 @@ class ParodyCriticsApp {
         }
     }
 
-    async loadMediaForGeneration() {
-        const mediaSelect = document.getElementById('media-select');
+    setupMediaSearch() {
+        const searchInput = document.getElementById('media-search');
+        const searchResults = document.getElementById('search-results');
+        const selectedDisplay = document.getElementById('selected-media-display');
+
+        let searchTimeout;
+        let currentResults = [];
+        let selectedIndex = -1;
+
+        // Initialize search state
+        this.currentSearchResults = [];
+
+        // Search input handler
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+
+            if (query.length < 2) {
+                this.hideSearchResults();
+                return;
+            }
+
+            // Debounce search requests
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                this.performMediaSearch(query);
+            }, 300);
+        });
+
+        // Keyboard navigation
+        searchInput.addEventListener('keydown', (e) => {
+            if (!searchResults.classList.contains('show')) return;
+
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, currentResults.length - 1);
+                    this.highlightSearchResult(selectedIndex);
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    this.highlightSearchResult(selectedIndex);
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    if (selectedIndex >= 0 && currentResults[selectedIndex]) {
+                        this.selectMediaFromSearch(currentResults[selectedIndex]);
+                    }
+                    break;
+                case 'Escape':
+                    e.preventDefault();
+                    this.hideSearchResults();
+                    break;
+            }
+        });
+
+        // Click outside to close
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.media-search-container')) {
+                this.hideSearchResults();
+            }
+        });
+    }
+
+    async performMediaSearch(query) {
+        const searchResults = document.getElementById('search-results');
 
         try {
-            const media = await this.fetchAPI('/media?limit=200');
+            // Double-check query length to prevent API errors
+            if (query.length < 2) {
+                searchResults.innerHTML = '<div class="search-no-results">⚠️ Escribe al menos 2 caracteres</div>';
+                searchResults.classList.add('show');
+                return;
+            }
 
-            mediaSelect.innerHTML = '<option value="">Selecciona una película o serie...</option>' +
-                media.map(item => `
-                    <option value="${item.tmdb_id}" data-title="${item.title}" data-type="${item.type}">
-                        ${item.title} (${item.year}) - ${item.type}
-                    </option>
-                `).join('');
+            // Show loading state
+            searchResults.innerHTML = '<div class="search-loading">🔍 Buscando...</div>';
+            searchResults.classList.add('show');
+
+            // Perform search
+            const results = await this.fetchAPI(`/media/search?query=${encodeURIComponent(query)}&limit=20`);
+
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="search-no-results">No se encontraron resultados</div>';
+                currentResults = [];
+                selectedIndex = -1;
+                return;
+            }
+
+            // Display results
+            currentResults = results;
+            this.currentSearchResults = results;
+            selectedIndex = -1;
+
+            searchResults.innerHTML = results.map((item, index) => `
+                <div class="search-result-item" data-index="${index}" onclick="app.selectMediaFromSearch(app.currentSearchResults[${index}])">
+                    <div>
+                        <div class="search-result-title">${item.title}</div>
+                        <div class="search-result-meta">
+                            <span class="search-result-type">${item.type}</span>
+                            <span>${item.year}</span>
+                            ${item.has_critics ? '<span>✅ Con críticas</span>' : '<span>➕ Sin críticas</span>'}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
 
         } catch (error) {
-            console.error('Failed to load media for generation:', error);
-            mediaSelect.innerHTML = '<option value="">Error loading media</option>';
+            console.error('Search failed:', error);
+
+            let errorMessage = '❌ Error en la búsqueda';
+
+            // Check for specific error types
+            if (error.message.includes('400')) {
+                errorMessage = '⚠️ Escribe al menos 2 caracteres';
+            } else if (error.message.includes('500')) {
+                errorMessage = '❌ Error del servidor';
+            } else if (error.message.includes('404')) {
+                errorMessage = '❌ Servicio no encontrado';
+            }
+
+            searchResults.innerHTML = `<div class="search-no-results">${errorMessage}</div>`;
+            currentResults = [];
+            selectedIndex = -1;
         }
+    }
+
+    highlightSearchResult(index) {
+        const items = document.querySelectorAll('.search-result-item');
+        items.forEach((item, i) => {
+            item.classList.toggle('selected', i === index);
+        });
+    }
+
+    selectMediaFromSearch(media) {
+        if (!media) return;
+
+        // Store selected media
+        this.selectedMedia = media.tmdb_id;
+        this.selectedMediaData = media;
+
+        // Update search input
+        document.getElementById('media-search').value = media.title;
+
+        // Show selected media info
+        const selectedDisplay = document.getElementById('selected-media-display');
+        const titleElement = document.getElementById('selected-media-title');
+        const metaElement = document.getElementById('selected-media-meta');
+
+        titleElement.textContent = media.title;
+        metaElement.innerHTML = `
+            <span class="search-result-type">${media.type}</span>
+            <span>${media.year}</span>
+            ${media.has_critics ? '<span>✅ Ya tiene críticas</span>' : '<span>➕ Sin críticas aún</span>'}
+        `;
+
+        selectedDisplay.classList.add('show');
+
+        // Hide search results
+        this.hideSearchResults();
+
+        // Update generate button
+        this.updateGenerateButton();
+    }
+
+    hideSearchResults() {
+        document.getElementById('search-results').classList.remove('show');
     }
 
     selectCharacter(characterId) {
@@ -670,13 +855,7 @@ class ParodyCriticsApp {
     }
 
     setupGenerateForm() {
-        const mediaSelect = document.getElementById('media-select');
         const generateBtn = document.getElementById('generate-btn');
-
-        mediaSelect.addEventListener('change', (e) => {
-            this.selectedMedia = e.target.value;
-            this.updateGenerateButton();
-        });
 
         generateBtn.addEventListener('click', () => {
             this.generateCritic();
@@ -711,7 +890,7 @@ class ParodyCriticsApp {
 
             // Generate critic
             const result = await this.fetchAPI(
-                `/generate/critic/${this.selectedMedia}?character=${encodeURIComponent(characterName)}`,
+                `/generate/critic/${this.selectedMedia.tmdb_id}?character=${encodeURIComponent(characterName)}`,
                 'POST'
             );
 
@@ -934,6 +1113,63 @@ class ParodyCriticsApp {
             modal.style.zIndex = '-1';
             console.log('✅ Modal ensured hidden');
         }
+    }
+
+    openGenerateCriticModal(tmdbId, title) {
+        console.log(`🎭 Opening generate critic modal for: ${title} (${tmdbId})`);
+
+        // Set the selected media for the generator
+        this.selectedMedia = {
+            tmdb_id: tmdbId,
+            title: title
+        };
+
+        // Update the media display in the generator
+        this.updateSelectedDisplay();
+
+        // Switch to the generator tab
+        this.showView('generate');
+
+        // Show success message
+        this.showMessage(`🎬 Listo para generar crítica de "${title}"`, 'success');
+
+        console.log('✅ Generator ready for media:', this.selectedMedia);
+    }
+
+    updateSelectedDisplay() {
+        if (!this.selectedMedia) {
+            console.log('❌ No selected media to display');
+            return;
+        }
+
+        console.log('📋 Updating selected media display for:', this.selectedMedia);
+
+        // Show selected media info
+        const selectedDisplay = document.getElementById('selected-media-display');
+        const titleElement = document.getElementById('selected-media-title');
+        const metaElement = document.getElementById('selected-media-meta');
+
+        if (!selectedDisplay || !titleElement || !metaElement) {
+            console.error('❌ Selected display elements not found');
+            return;
+        }
+
+        titleElement.textContent = this.selectedMedia.title;
+        metaElement.innerHTML = `
+            <span class="search-result-type">movie</span>
+            <span>Seleccionado desde lista</span>
+            <span>✅ Listo para generar</span>
+        `;
+
+        selectedDisplay.classList.add('show');
+
+        // Hide search results
+        this.hideSearchResults();
+
+        // Update generate button
+        this.updateGenerateButton();
+
+        console.log('✅ Selected media display updated');
     }
 
     // ========================================

@@ -111,10 +111,23 @@
                     <h2>✨ Generar Nueva Crítica</h2>
                     <div class="generate-form">
                         <div class="form-group">
-                            <label for="media-select">Selecciona una película o serie:</label>
-                            <select class="form-select" id="media-select">
-                                <option value="">Cargando medios...</option>
-                            </select>
+                            <label for="media-search">Busca una película o serie:</label>
+                            <div class="media-search-container">
+                                <input
+                                    type="text"
+                                    class="form-input"
+                                    id="media-search"
+                                    placeholder="Escribe para buscar películas y series..."
+                                    autocomplete="off"
+                                >
+                                <div class="search-results" id="search-results">
+                                    <!-- Search results will appear here -->
+                                </div>
+                                <div class="search-selected-media" id="selected-media-display">
+                                    <div class="search-selected-title" id="selected-media-title"></div>
+                                    <div class="search-selected-meta" id="selected-media-meta"></div>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Selecciona el crítico:</label>
