@@ -2,11 +2,13 @@
 FastAPI server for Parody Critics API
 """
 
-from fastapi import FastAPI, HTTPException, Depends, Query, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Depends, Query, BackgroundTasks, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 import sqlite3
 import json
+import httpx
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 from contextlib import asynccontextmanager
@@ -20,10 +22,14 @@ from models.schemas import (
 from config import get_config
 from api.jellyfin_sync import JellyfinSyncManager
 from api.llm_manager import CriticGenerationManager
+from utils import get_logger
 
 # Configuration
 config = get_config()
 DB_PATH = config.get_absolute_db_path()
+
+# Setup logging for setup wizard
+setup_logger = get_logger('setup_wizard')
 
 class DatabaseManager:
     """Database connection manager"""
@@ -122,15 +128,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount static files for the frontend
+static_dir = Path(__file__).parent.parent / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
 # Routes
 
 @app.get("/")
 async def root():
-    """API root endpoint"""
+    """Serve the frontend application"""
+    from fastapi.responses import FileResponse
+    static_dir = Path(__file__).parent.parent / "static"
+    index_file = static_dir / "index.html"
+
+    if index_file.exists():
+        return FileResponse(str(index_file))
+
+    # Fallback to API info if no frontend
     return {
         "message": "Parody Critics API",
         "version": "1.0.0",
-        "docs": "/docs"
+        "docs": "/docs",
+        "frontend": "/static/index.html"
     }
 
 @app.get("/api/critics/{tmdb_id}", response_model=CriticsResponse)
@@ -713,6 +733,176 @@ async def test_llm_generation(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Test failed: {str(e)}")
 
+# ========================================
+# Setup Wizard Endpoints
+# ========================================
+
+@app.post("/api/setup/check-requirements")
+async def check_system_requirements():
+    """🔍 Check system requirements for setup wizard"""
+    setup_logger.info("🔍 Setup wizard: Checking system requirements")
+
+    try:
+        result = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "checks": {},
+            "overall_status": "unknown",
+            "ready_for_setup": False
+        }
+
+        # 1. Check Database
+        setup_logger.debug("Checking database status...")
+        db_check = await _check_database_status()
+        result["checks"]["database"] = db_check
+        setup_logger.info(f"Database check: {db_check['status']}")
+
+        # 2. Check LLM System
+        setup_logger.debug("Checking LLM system status...")
+        llm_check = await _check_llm_status()
+        result["checks"]["llm"] = llm_check
+        setup_logger.info(f"LLM check: {llm_check['status']}")
+
+        # 3. Check Port availability
+        setup_logger.debug("Checking port status...")
+        port_check = _check_port_status()
+        result["checks"]["port"] = port_check
+        setup_logger.info(f"Port check: {port_check['status']}")
+
+        # Determine overall status
+        all_checks = [db_check, llm_check, port_check]
+        failed_checks = [c for c in all_checks if c["status"] != "healthy"]
+
+        if not failed_checks:
+            result["overall_status"] = "healthy"
+            result["ready_for_setup"] = True
+        elif len(failed_checks) <= 1:
+            result["overall_status"] = "warning"
+            result["ready_for_setup"] = True
+        else:
+            result["overall_status"] = "error"
+            result["ready_for_setup"] = False
+
+        setup_logger.info(f"✅ Setup requirements check completed: {result['overall_status']}")
+        return result
+
+    except Exception as e:
+        setup_logger.error(f"❌ Setup requirements check failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Requirements check failed: {str(e)}")
+
+
+async def _check_database_status() -> Dict[str, Any]:
+    """Check database status for setup wizard"""
+    try:
+        db_path = Path(DB_PATH)
+
+        if not db_path.exists():
+            return {
+                "status": "missing",
+                "message": "Database file does not exist",
+                "path": str(db_path),
+                "needs_setup": True
+            }
+
+        # Check if database has required tables
+        with sqlite3.connect(DB_PATH) as conn:
+            cursor = conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            tables = [row[0] for row in cursor.fetchall()]
+
+            required_tables = ['media', 'critics', 'characters']
+            missing_tables = [t for t in required_tables if t not in tables]
+
+            if missing_tables:
+                return {
+                    "status": "incomplete",
+                    "message": f"Missing tables: {', '.join(missing_tables)}",
+                    "path": str(db_path),
+                    "needs_setup": True
+                }
+
+            # Check if characters exist
+            cursor = conn.execute("SELECT COUNT(*) FROM characters")
+            character_count = cursor.fetchone()[0]
+
+            if character_count == 0:
+                return {
+                    "status": "empty",
+                    "message": "Database exists but has no characters",
+                    "path": str(db_path),
+                    "needs_setup": True
+                }
+
+            return {
+                "status": "healthy",
+                "message": f"Database ready with {character_count} characters",
+                "path": str(db_path),
+                "needs_setup": False
+            }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Database check failed: {str(e)}",
+            "path": str(db_path) if 'db_path' in locals() else "unknown",
+            "needs_setup": True
+        }
+
+
+async def _check_llm_status() -> Dict[str, Any]:
+    """Check LLM system status for setup wizard"""
+    try:
+        if not llm_manager:
+            return {
+                "status": "unavailable",
+                "message": "LLM manager not initialized",
+                "endpoints": {},
+                "needs_setup": False  # This is a system issue, not setup
+            }
+
+        # Reuse the existing system status check from CLI
+        status = await llm_manager.get_system_status()
+
+        if status['system_status'] == 'operational':
+            return {
+                "status": "healthy",
+                "message": f"{status['healthy_endpoints']}/{status['total_endpoints']} endpoints healthy",
+                "endpoints": status['endpoints'],
+                "needs_setup": False
+            }
+        else:
+            return {
+                "status": "degraded",
+                "message": f"Only {status['healthy_endpoints']}/{status['total_endpoints']} endpoints healthy",
+                "endpoints": status['endpoints'],
+                "needs_setup": False  # LLM issues aren't fixed by setup
+            }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"LLM check failed: {str(e)}",
+            "endpoints": {},
+            "needs_setup": False
+        }
+
+
+def _check_port_status() -> Dict[str, Any]:
+    """Check if current port is working"""
+    try:
+        # If we're responding to this request, the port is working
+        return {
+            "status": "healthy",
+            "message": "API server is responding",
+            "port": 8888,  # Current port
+            "needs_setup": False
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Port check failed: {str(e)}",
+            "port": 8888,
+            "needs_setup": False
+        }
+
 # Error handlers
 @app.exception_handler(404)
 async def not_found_handler(request, exc):
@@ -720,6 +910,289 @@ async def not_found_handler(request, exc):
         status_code=404,
         content={"error": "Not found", "detail": str(exc.detail) if hasattr(exc, 'detail') else "Resource not found"}
     )
+
+# ========================================
+# Setup Wizard Interactive Endpoints
+# ========================================
+
+@app.post("/api/setup/test-jellyfin")
+async def test_jellyfin_connection(request: dict = Body(...)):
+    """🎬 Test Jellyfin connection with user-provided configuration"""
+    setup_logger.info("🎬 Setup wizard: Testing Jellyfin connection")
+
+    try:
+        url = request.get("url", "").strip()
+        api_token = request.get("api_token", "").strip()
+
+        if not url:
+            raise HTTPException(status_code=400, detail="URL is required")
+
+        setup_logger.debug(f"Testing Jellyfin connection to: {url}")
+
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            # Test basic connection
+            try:
+                response = await client.get(f"{url}/System/Info/Public")
+                response.raise_for_status()
+
+                server_info = response.json()
+                server_name = server_info.get('ServerName', 'Unknown')
+                version = server_info.get('Version', 'Unknown')
+
+                setup_logger.info(f"Successfully connected to Jellyfin: {server_name} v{version}")
+
+                result = {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "success": True,
+                    "server_name": server_name,
+                    "version": version,
+                    "message": f"Connected to {server_name} (v{version})"
+                }
+
+                # Test API token if provided
+                if api_token:
+                    setup_logger.debug("Testing API token validity")
+                    headers = {"X-MediaBrowser-Token": api_token}
+                    try:
+                        users_response = await client.get(f"{url}/Users", headers=headers)
+                        users_response.raise_for_status()
+
+                        users = users_response.json()
+                        setup_logger.info(f"API token valid - found {len(users)} users")
+                        result["api_token_valid"] = True
+                        result["users_count"] = len(users)
+                        result["message"] += f" | API token valid ({len(users)} users)"
+
+                    except httpx.HTTPStatusError as e:
+                        setup_logger.warning(f"API token test failed: HTTP {e.response.status_code}")
+                        result["api_token_valid"] = False
+                        result["api_token_error"] = f"HTTP {e.response.status_code}: {e.response.text}"
+
+                setup_logger.info(f"✅ Jellyfin connection test completed: {result['message']}")
+                return result
+
+            except httpx.ConnectError:
+                error_msg = f"Cannot reach server at {url}"
+                setup_logger.error(f"Jellyfin connection failed - network error: {error_msg}")
+                return {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "success": False,
+                    "error": f"Connection error: {error_msg}",
+                    "suggestion": "Check if the URL is correct and the server is running"
+                }
+
+            except httpx.TimeoutException:
+                error_msg = "Server took too long to respond (>15s)"
+                setup_logger.error(f"Jellyfin connection timeout: {error_msg}")
+                return {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "success": False,
+                    "error": f"Timeout error: {error_msg}",
+                    "suggestion": "Check if the server is responding or try a different URL"
+                }
+
+            except httpx.HTTPStatusError as e:
+                error_msg = f"HTTP {e.response.status_code}: {e.response.text}"
+                setup_logger.error(f"Jellyfin HTTP error: {error_msg}")
+                return {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "success": False,
+                    "error": error_msg,
+                    "suggestion": "Check if this is a valid Jellyfin server URL"
+                }
+
+    except Exception as e:
+        setup_logger.error(f"Unexpected error during Jellyfin connection test: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Connection test failed: {str(e)}")
+
+@app.post("/api/setup/test-ollama")
+async def test_ollama_connection(request: dict = Body(...)):
+    """🤖 Test Ollama connection and get available models"""
+    setup_logger.info("🤖 Setup wizard: Testing Ollama connection")
+
+    try:
+        url = request.get("url", "").strip()
+
+        if not url:
+            raise HTTPException(status_code=400, detail="URL is required")
+
+        setup_logger.debug(f"Testing Ollama connection to: {url}")
+
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            try:
+                response = await client.get(f"{url}/api/tags")
+                response.raise_for_status()
+
+                models_data = response.json()
+                available_models = []
+
+                for model in models_data.get("models", []):
+                    model_info = {
+                        "name": model["name"],
+                        "size": model.get("size", 0),
+                        "size_gb": f"{model.get('size', 0) / (1024**3):.1f}GB" if model.get('size') else "Unknown",
+                        "modified_at": model.get("modified_at", "")
+                    }
+                    available_models.append(model_info)
+
+                if available_models:
+                    setup_logger.info(f"Successfully connected to Ollama - found {len(available_models)} models")
+
+                    result = {
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "success": True,
+                        "models_count": len(available_models),
+                        "models": available_models,
+                        "message": f"Connected to Ollama ({len(available_models)} models available)",
+                        "suggested_primary": available_models[0]["name"] if available_models else "qwen3:8b",
+                        "suggested_secondary": available_models[1]["name"] if len(available_models) > 1 else "gpt-oss:20b"
+                    }
+
+                    setup_logger.info(f"✅ Ollama connection test completed: {result['message']}")
+                    return result
+                else:
+                    setup_logger.warning("Ollama connection successful but no models found")
+                    return {
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "success": False,
+                        "error": "No models found in Ollama",
+                        "suggestion": "Pull a model first: 'ollama pull qwen2:7b' or 'ollama pull llama2:7b'"
+                    }
+
+            except httpx.ConnectError:
+                error_msg = f"Cannot reach Ollama server at {url}"
+                setup_logger.error(f"Ollama connection failed - network error: {error_msg}")
+                return {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "success": False,
+                    "error": f"Connection error: {error_msg}",
+                    "suggestion": "Check if Ollama is running and the URL is correct"
+                }
+
+            except httpx.TimeoutException:
+                error_msg = "Ollama server took too long to respond (>15s)"
+                setup_logger.error(f"Ollama connection timeout: {error_msg}")
+                return {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "success": False,
+                    "error": f"Timeout error: {error_msg}",
+                    "suggestion": "Check if Ollama server is responding"
+                }
+
+            except httpx.HTTPStatusError as e:
+                error_msg = f"HTTP {e.response.status_code}: {e.response.text}"
+                setup_logger.error(f"Ollama HTTP error: {error_msg}")
+                return {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "success": False,
+                    "error": error_msg,
+                    "suggestion": "Check if this is a valid Ollama server URL"
+                }
+
+    except Exception as e:
+        setup_logger.error(f"Unexpected error during Ollama connection test: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Connection test failed: {str(e)}")
+
+@app.post("/api/setup/save-configuration")
+async def save_setup_configuration(config: dict = Body(...)):
+    """💾 Save setup configuration to .env file"""
+    setup_logger.info("💾 Setup wizard: Saving configuration to .env file")
+
+    try:
+        project_root = Path(__file__).parent.parent
+        env_file = project_root / '.env'
+
+        setup_logger.debug(f"Saving configuration to: {env_file}")
+
+        # Validate required configuration
+        required_fields = ["JELLYFIN_URL", "LLM_OLLAMA_URL", "LLM_PRIMARY_MODEL"]
+        missing_fields = [field for field in required_fields if not config.get(field)]
+
+        if missing_fields:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Missing required configuration: {', '.join(missing_fields)}"
+            )
+
+        # Build .env content
+        env_content = []
+        env_content.append("# Parody Critics Configuration")
+        env_content.append(f"# Generated on {datetime.utcnow().isoformat()}")
+        env_content.append("")
+
+        # Jellyfin Configuration
+        env_content.append("# Jellyfin Configuration")
+        env_content.append(f"JELLYFIN_URL={config['JELLYFIN_URL']}")
+        if config.get("JELLYFIN_API_TOKEN"):
+            env_content.append(f"JELLYFIN_API_TOKEN={config['JELLYFIN_API_TOKEN']}")
+        if config.get("JELLYFIN_DB_PATH"):
+            env_content.append(f"JELLYFIN_DB_PATH={config['JELLYFIN_DB_PATH']}")
+        env_content.append("")
+
+        # LLM Configuration
+        env_content.append("# LLM Configuration")
+        env_content.append(f"LLM_OLLAMA_URL={config['LLM_OLLAMA_URL']}")
+        env_content.append(f"LLM_PRIMARY_MODEL={config['LLM_PRIMARY_MODEL']}")
+        if config.get("LLM_SECONDARY_MODEL"):
+            env_content.append(f"LLM_SECONDARY_MODEL={config['LLM_SECONDARY_MODEL']}")
+        env_content.append(f"LLM_TIMEOUT={config.get('LLM_TIMEOUT', '180')}")
+        env_content.append(f"LLM_MAX_RETRIES={config.get('LLM_MAX_RETRIES', '2')}")
+        env_content.append(f"LLM_ENABLE_FALLBACK={config.get('LLM_ENABLE_FALLBACK', 'true')}")
+        env_content.append("")
+
+        # Additional Configuration
+        if config.get("LOG_LEVEL"):
+            env_content.append("# Logging")
+            env_content.append(f"PARODY_CRITICS_LOG_LEVEL={config['LOG_LEVEL']}")
+
+        # Write to file
+        with open(env_file, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(env_content))
+
+        setup_logger.info(f"✅ Configuration saved to {env_file}")
+
+        return {
+            "timestamp": datetime.utcnow().isoformat(),
+            "success": True,
+            "message": "Configuration saved successfully",
+            "file_path": str(env_file),
+            "preview": '\n'.join(env_content[:15]) + ("\n..." if len(env_content) > 15 else "")
+        }
+
+    except Exception as e:
+        setup_logger.error(f"Error saving configuration: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to save configuration: {str(e)}")
+
+@app.post("/api/setup/initialize-database")
+async def initialize_setup_database():
+    """🗄️ Initialize database for first-time setup"""
+    setup_logger.info("🗄️ Setup wizard: Initializing database")
+
+    try:
+        # Import database initialization
+        from pathlib import Path
+        import sys
+        sys.path.append(str(Path(__file__).parent.parent))
+        from init_database import create_database_schema
+
+        # Initialize database
+        result = await create_database_schema()
+
+        if result.get("success"):
+            setup_logger.info("✅ Database initialized successfully")
+            return {
+                "timestamp": datetime.utcnow().isoformat(),
+                "success": True,
+                "message": "Database initialized successfully",
+                "details": result
+            }
+        else:
+            setup_logger.error("❌ Database initialization failed")
+            raise HTTPException(status_code=500, detail="Database initialization failed")
+
+    except Exception as e:
+        setup_logger.error(f"Error initializing database: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database initialization failed: {str(e)}")
 
 @app.exception_handler(500)
 async def internal_error_handler(request, exc):
