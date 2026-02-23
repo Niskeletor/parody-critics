@@ -21,6 +21,7 @@ class CriticGenerationManager:
 
     def __init__(self):
         self.config = Config()
+        self.db_path = self.config.get_absolute_db_path()
         self.setup_endpoints()
 
         # Statistics tracking
@@ -69,6 +70,33 @@ class CriticGenerationManager:
             logger.info("OpenAI endpoint configured")
 
         logger.info(f"Configured {len(self.endpoints)} LLM endpoints: {list(self.endpoints.keys())}")
+
+    def _get_character_from_db(self, character_name: str) -> Dict[str, Any]:
+        """Get character data from database"""
+        import sqlite3
+
+        try:
+            conn = sqlite3.connect(self.db_path)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                SELECT id, name, emoji, personality, description
+                FROM characters
+                WHERE name = ? AND active = TRUE
+            """, (character_name,))
+
+            row = cursor.fetchone()
+            conn.close()
+
+            if row:
+                return dict(row)
+            else:
+                return None
+
+        except Exception as e:
+            logger.error(f"Error getting character from database: {e}")
+            return None
 
     async def health_check_endpoint(self, endpoint_name: str) -> Dict[str, Any]:
         """Check if an endpoint is healthy and responsive"""
@@ -286,7 +314,59 @@ class CriticGenerationManager:
         genres = media_info.get("genres", "Géneros desconocidos")
         synopsis = media_info.get("synopsis", "Sin sinopsis disponible")
 
-        # Character-specific prompts
+        # Get character from database first
+        character_data = self._get_character_from_db(character)
+
+        if character_data:
+            # Build dynamic prompt from character data
+            character_personality = character_data.get('personality', '')
+            character_description = character_data.get('description', '')
+            character_emoji = character_data.get('emoji', '🎭')
+
+            # If description contains detailed instructions, use it as the main personality prompt
+            if len(character_description) > 50:  # Assume detailed description
+                character_prompt = f"""{character_description}
+
+INFORMACIÓN DE LA OBRA:
+Título: "{title}" ({year})
+Tipo: {media_type.title()}
+Géneros: {genres}
+Sinopsis: {synopsis}
+
+INSTRUCCIONES:
+Escribe una crítica de máximo 150 palabras como {character} que incluya:
+1. **Puntuación**: Califica del 1 al 10 la obra
+2. **Análisis personal**: Analiza desde tu perspectiva única y personalidad
+3. **Tono auténtico**: Mantén tu personalidad y manera de expresarte
+4. **Reacción genuina**: Expresa tu verdadera reacción a la obra
+
+Estructura tu respuesta claramente con la puntuación al inicio."""
+                return character_prompt
+            else:
+                # Use personality-based prompt for simpler characters
+                character_prompt = f"""Eres {character} {character_emoji}. Tu personalidad es: {character_personality}.
+
+{character_description}
+
+Debes escribir una crítica de {'película' if media_type == 'movie' else 'serie'} desde tu perspectiva única.
+
+INFORMACIÓN DE LA OBRA:
+Título: "{title}" ({year})
+Tipo: {media_type.title()}
+Géneros: {genres}
+Sinopsis: {synopsis}
+
+INSTRUCCIONES:
+Escribe una crítica de máximo 150 palabras que incluya:
+1. **Puntuación**: Califica del 1 al 10 la obra
+2. **Análisis desde tu personalidad**: Analiza según tu forma de ser
+3. **Tono auténtico**: Mantén tu personalidad característica
+4. **Perspectiva única**: Aplica tu punto de vista personal
+
+Estructura tu respuesta claramente con la puntuación al inicio."""
+                return character_prompt
+
+        # Fallback to hardcoded prompts for legacy characters
         character_prompts = {
             "Marco Aurelio": f"""Eres Marco Aurelio, el emperador filósofo romano (121-180 d.C.). Debes escribir una crítica de {'película' if media_type == 'movie' else 'serie'} desde tu perspectiva estoica y filosófica.
 

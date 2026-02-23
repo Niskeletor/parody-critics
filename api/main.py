@@ -500,12 +500,14 @@ async def generate_critic_for_media(
     if not llm_manager:
         raise HTTPException(status_code=503, detail="LLM system not available")
 
-    # Valid characters
-    valid_characters = ["Marco Aurelio", "Rosario Costras"]
-    if character not in valid_characters:
+    # Validate character exists in database
+    character_query = "SELECT id FROM characters WHERE name = ? AND active = TRUE"
+    character_row = db_manager.execute_query(character_query, (character,), fetch_one=True)
+
+    if not character_row:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid character. Must be one of: {', '.join(valid_characters)}"
+            detail=f"Invalid character. Character '{character}' not found or inactive."
         )
 
     # Get media information from database
@@ -612,12 +614,14 @@ async def generate_batch_critics(
     if not llm_manager:
         raise HTTPException(status_code=503, detail="LLM system not available")
 
-    # Valid characters
-    valid_characters = ["Marco Aurelio", "Rosario Costras"]
-    if character not in valid_characters:
+    # Validate character exists in database
+    character_query = "SELECT id FROM characters WHERE name = ? AND active = TRUE"
+    character_row = db_manager.execute_query(character_query, (character,), fetch_one=True)
+
+    if not character_row:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid character. Must be one of: {', '.join(valid_characters)}"
+            detail=f"Invalid character. Character '{character}' not found or inactive."
         )
 
     # Get character ID
@@ -1611,6 +1615,478 @@ async def perform_media_import(session_id: str):
             error_message=str(e)
         )
 
+
+# ============================================================================
+# 🎭 Character Management API Endpoints
+# ============================================================================
+
+@app.post("/api/characters")
+async def create_character(character_data: dict = Body(...)):
+    """Create a new character"""
+    try:
+        # Validate required fields
+        if not character_data.get('name'):
+            raise HTTPException(status_code=400, detail="Character name is required")
+
+        # Check if character already exists
+        check_query = "SELECT id FROM characters WHERE name = ?"
+        existing = db_manager.execute_query(check_query, (character_data['name'],), fetch_one=True)
+
+        if existing:
+            raise HTTPException(status_code=409, detail=f"Character '{character_data['name']}' already exists")
+
+        # Generate character ID from name (lowercase, replace spaces with underscores, remove special chars)
+        import re
+        character_id = re.sub(r'[^a-z0-9_]', '', character_data['name'].lower().replace(' ', '_').replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u').replace('ñ', 'n'))
+
+        # Ensure ID is unique
+        base_id = character_id
+        counter = 1
+        while True:
+            check_id_query = "SELECT id FROM characters WHERE id = ?"
+            existing_id = db_manager.execute_query(check_id_query, (character_id,), fetch_one=True)
+            if not existing_id:
+                break
+            character_id = f"{base_id}_{counter}"
+            counter += 1
+
+        # Insert new character
+        insert_query = """
+            INSERT INTO characters (id, name, emoji, personality, description, color, border_color, accent_color, active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, TRUE)
+        """
+        db_manager.execute_insert(insert_query, (
+            character_id,
+            character_data['name'],
+            character_data.get('emoji', '🎭'),
+            character_data.get('personality', ''),
+            character_data.get('description', ''),
+            character_data.get('color', '#6366f1'),  # Default indigo color
+            character_data.get('border_color', '#4f46e5'),  # Default indigo border
+            character_data.get('accent_color', '#8b5cf6')   # Default purple accent
+        ))
+
+        return {
+            "success": True,
+            "id": character_id,
+            "message": f"Character '{character_data['name']}' created successfully"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        setup_logger.error(f"❌ Error creating character: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error creating character: {str(e)}")
+
+@app.put("/api/characters/{character_id}")
+async def update_character(character_id: str, character_data: dict = Body(...)):
+    """Update an existing character"""
+    try:
+        # Check if character exists
+        check_query = "SELECT id FROM characters WHERE id = ?"
+        existing = db_manager.execute_query(check_query, (character_id,), fetch_one=True)
+
+        if not existing:
+            raise HTTPException(status_code=404, detail=f"Character not found: {character_id}")
+
+        # Validate required fields
+        if not character_data.get('name'):
+            raise HTTPException(status_code=400, detail="Character name is required")
+
+        # Check if name conflicts with another character
+        name_check_query = "SELECT id FROM characters WHERE name = ? AND id != ?"
+        name_conflict = db_manager.execute_query(
+            name_check_query,
+            (character_data['name'], character_id),
+            fetch_one=True
+        )
+
+        if name_conflict:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Character name '{character_data['name']}' is already taken"
+            )
+
+        # Update character
+        update_query = """
+            UPDATE characters
+            SET name = ?, emoji = ?, personality = ?, description = ?, color = ?, border_color = ?, accent_color = ?
+            WHERE id = ?
+        """
+        db_manager.execute_query(update_query, (
+            character_data['name'],
+            character_data.get('emoji', '🎭'),
+            character_data.get('personality', ''),
+            character_data.get('description', ''),
+            character_data.get('color', '#6366f1'),  # Default indigo color
+            character_data.get('border_color', '#4f46e5'),  # Default indigo border
+            character_data.get('accent_color', '#8b5cf6'),   # Default purple accent
+            character_id
+        ))
+
+        return {
+            "success": True,
+            "id": character_id,
+            "message": f"Character '{character_data['name']}' updated successfully"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        setup_logger.error(f"❌ Error updating character {character_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error updating character: {str(e)}")
+
+@app.delete("/api/characters/{character_id}")
+async def delete_character(character_id: str):
+    """Delete a character and all its critics"""
+    try:
+        # Check if character exists
+        check_query = "SELECT id, name FROM characters WHERE id = ?"
+        character = db_manager.execute_query(check_query, (character_id,), fetch_one=True)
+
+        if not character:
+            raise HTTPException(status_code=404, detail=f"Character not found: {character_id}")
+
+        character_name = character[1]
+
+        # Get count of critics that will be deleted
+        count_query = "SELECT COUNT(*) FROM critics WHERE character_id = ?"
+        critics_count = db_manager.execute_query(count_query, (character_id,), fetch_one=True)[0]
+
+        # Delete all critics by this character first (foreign key constraint)
+        delete_critics_query = "DELETE FROM critics WHERE character_id = ?"
+        db_manager.execute_query(delete_critics_query, (character_id,))
+
+        # Delete the character
+        delete_character_query = "DELETE FROM characters WHERE id = ?"
+        db_manager.execute_query(delete_character_query, (character_id,))
+
+        return {
+            "success": True,
+            "message": f"Character '{character_name}' and {critics_count} critics deleted successfully"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        setup_logger.error(f"❌ Error deleting character {character_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error deleting character: {str(e)}")
+
+@app.delete("/api/characters/{character_id}/critics")
+async def delete_character_critics(character_id: str):
+    """Delete all critics written by a specific character"""
+    try:
+        # Check if character exists
+        check_query = "SELECT id, name FROM characters WHERE id = ?"
+        character = db_manager.execute_query(check_query, (character_id,), fetch_one=True)
+
+        if not character:
+            raise HTTPException(status_code=404, detail=f"Character not found: {character_id}")
+
+        character_name = character[1]
+
+        # Get count of critics that will be deleted
+        count_query = "SELECT COUNT(*) FROM critics WHERE character_id = ?"
+        critics_count = db_manager.execute_query(count_query, (character_id,), fetch_one=True)[0]
+
+        # Delete all critics by this character
+        delete_query = "DELETE FROM critics WHERE character_id = ?"
+        db_manager.execute_query(delete_query, (character_id,))
+
+        return {
+            "success": True,
+            "message": f"All {critics_count} critics by '{character_name}' deleted successfully"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        setup_logger.error(f"❌ Error deleting critics for character {character_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error deleting critics: {str(e)}")
+
+@app.post("/api/characters/import")
+async def import_characters(import_data: dict = Body(...)):
+    """Import characters from file content"""
+    try:
+        filename = import_data.get('filename', '')
+        content = import_data.get('content', '')
+        overwrite = import_data.get('overwrite', False)
+
+        if not content:
+            raise HTTPException(status_code=400, detail="File content is required")
+
+        imported_count = 0
+        errors = []
+
+        if filename.endswith('.json'):
+            # JSON format import
+            try:
+                characters_data = json.loads(content)
+
+                if not isinstance(characters_data, list):
+                    characters_data = [characters_data]
+
+                for char_data in characters_data:
+                    try:
+                        # Check if character exists
+                        check_query = "SELECT id FROM characters WHERE name = ?"
+                        existing = db_manager.execute_query(
+                            check_query,
+                            (char_data.get('name', ''),),
+                            fetch_one=True
+                        )
+
+                        if existing and not overwrite:
+                            errors.append(f"Character '{char_data.get('name')}' already exists (skipped)")
+                            continue
+
+                        if existing and overwrite:
+                            # Update existing character
+                            update_query = """
+                                UPDATE characters
+                                SET emoji = ?, personality = ?, description = ?, color = ?, border_color = ?, accent_color = ?
+                                WHERE name = ?
+                            """
+                            db_manager.execute_query(update_query, (
+                                char_data.get('emoji', '🎭'),
+                                char_data.get('personality', ''),
+                                char_data.get('description', ''),
+                                char_data.get('color', '#6366f1'),
+                                char_data.get('border_color', '#4f46e5'),
+                                char_data.get('accent_color', '#8b5cf6'),
+                                char_data['name']
+                            ))
+                        else:
+                            # Insert new character
+                            insert_query = """
+                                INSERT INTO characters (name, emoji, personality, description, color, border_color, accent_color, active)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)
+                            """
+                            db_manager.execute_insert(insert_query, (
+                                char_data['name'],
+                                char_data.get('emoji', '🎭'),
+                                char_data.get('personality', ''),
+                                char_data.get('description', ''),
+                                char_data.get('color', '#6366f1'),
+                                char_data.get('border_color', '#4f46e5'),
+                                char_data.get('accent_color', '#8b5cf6')
+                            ))
+
+                        imported_count += 1
+
+                    except Exception as e:
+                        errors.append(f"Error importing character '{char_data.get('name', 'unknown')}': {str(e)}")
+
+            except json.JSONDecodeError as e:
+                raise HTTPException(status_code=400, detail=f"Invalid JSON format: {str(e)}")
+
+        elif filename.endswith('.md'):
+            # Markdown format import (basic implementation)
+            lines = content.split('\n')
+            current_character = {}
+
+            for line in lines:
+                line = line.strip()
+
+                if line.startswith('# ') or line.startswith('## '):
+                    # Save previous character if exists
+                    if current_character.get('name'):
+                        try:
+                            # Check if character exists
+                            check_query = "SELECT id FROM characters WHERE name = ?"
+                            existing = db_manager.execute_query(
+                                check_query,
+                                (current_character['name'],),
+                                fetch_one=True
+                            )
+
+                            if existing and not overwrite:
+                                errors.append(f"Character '{current_character['name']}' already exists (skipped)")
+                            else:
+                                if existing and overwrite:
+                                    # Update existing
+                                    update_query = """
+                                        UPDATE characters
+                                        SET emoji = ?, personality = ?, description = ?, color = ?, border_color = ?, accent_color = ?
+                                        WHERE name = ?
+                                    """
+                                    db_manager.execute_query(update_query, (
+                                        current_character.get('emoji', '🎭'),
+                                        current_character.get('personality', ''),
+                                        current_character.get('description', ''),
+                                        current_character.get('color', '#6366f1'),
+                                        current_character.get('border_color', '#4f46e5'),
+                                        current_character.get('accent_color', '#8b5cf6'),
+                                        current_character['name']
+                                    ))
+                                else:
+                                    # Insert new
+                                    insert_query = """
+                                        INSERT INTO characters (name, emoji, personality, description, color, border_color, accent_color, active)
+                                        VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)
+                                    """
+                                    db_manager.execute_insert(insert_query, (
+                                        current_character['name'],
+                                        current_character.get('emoji', '🎭'),
+                                        current_character.get('personality', ''),
+                                        current_character.get('description', ''),
+                                        current_character.get('color', '#6366f1'),
+                                        current_character.get('border_color', '#4f46e5'),
+                                        current_character.get('accent_color', '#8b5cf6')
+                                    ))
+
+                                imported_count += 1
+
+                        except Exception as e:
+                            errors.append(f"Error importing character '{current_character['name']}': {str(e)}")
+
+                    # Start new character
+                    current_character = {
+                        'name': line.replace('#', '').strip(),
+                        'emoji': '🎭',
+                        'personality': '',
+                        'description': ''
+                    }
+
+                elif line.startswith('**Emoji:**'):
+                    current_character['emoji'] = line.replace('**Emoji:**', '').strip()
+                elif line.startswith('**Personalidad:**'):
+                    current_character['personality'] = line.replace('**Personalidad:**', '').strip()
+                elif line and not line.startswith('#'):
+                    # Add to description
+                    if current_character.get('description'):
+                        current_character['description'] += ' ' + line
+                    else:
+                        current_character['description'] = line
+
+            # Process last character
+            if current_character.get('name'):
+                try:
+                    check_query = "SELECT id FROM characters WHERE name = ?"
+                    existing = db_manager.execute_query(
+                        check_query,
+                        (current_character['name'],),
+                        fetch_one=True
+                    )
+
+                    if existing and not overwrite:
+                        errors.append(f"Character '{current_character['name']}' already exists (skipped)")
+                    else:
+                        if existing and overwrite:
+                            update_query = """
+                                UPDATE characters
+                                SET emoji = ?, personality = ?, description = ?, color = ?, border_color = ?, accent_color = ?
+                                WHERE name = ?
+                            """
+                            db_manager.execute_query(update_query, (
+                                current_character.get('emoji', '🎭'),
+                                current_character.get('personality', ''),
+                                current_character.get('description', ''),
+                                current_character.get('color', '#6366f1'),
+                                current_character.get('border_color', '#4f46e5'),
+                                current_character.get('accent_color', '#8b5cf6'),
+                                current_character['name']
+                            ))
+                        else:
+                            insert_query = """
+                                INSERT INTO characters (name, emoji, personality, description, color, border_color, accent_color, active)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)
+                            """
+                            db_manager.execute_insert(insert_query, (
+                                current_character['name'],
+                                current_character.get('emoji', '🎭'),
+                                current_character.get('personality', ''),
+                                current_character.get('description', ''),
+                                current_character.get('color', '#6366f1'),
+                                current_character.get('border_color', '#4f46e5'),
+                                current_character.get('accent_color', '#8b5cf6')
+                            ))
+
+                        imported_count += 1
+
+                except Exception as e:
+                    errors.append(f"Error importing character '{current_character['name']}': {str(e)}")
+
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported file format. Use .json or .md")
+
+        result = {
+            "success": True,
+            "imported": imported_count,
+            "message": f"Successfully imported {imported_count} characters"
+        }
+
+        if errors:
+            result["errors"] = errors
+            result["message"] += f" (with {len(errors)} errors/skipped)"
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        setup_logger.error(f"❌ Error importing characters: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error importing characters: {str(e)}")
+
+@app.get("/api/characters/export")
+async def export_characters():
+    """Export all characters to Markdown format"""
+    try:
+        # Get all characters
+        query = "SELECT * FROM characters WHERE active = TRUE ORDER BY name"
+        characters = db_manager.execute_query(query)
+
+        if not characters:
+            return {
+                "success": True,
+                "data": "# Personajes\n\nNo hay personajes disponibles para exportar.\n",
+                "filename": "personajes.md"
+            }
+
+        # Generate Markdown content
+        md_content = "# 🎭 Personajes de Parody Critics\n\n"
+        md_content += f"Exportado el: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        md_content += f"Total de personajes: {len(characters)}\n\n"
+        md_content += "---\n\n"
+
+        for char in characters:
+            char_dict = dict(char)
+            md_content += f"## {char_dict['name']}\n\n"
+            md_content += f"**Emoji:** {char_dict.get('emoji', '🎭')}\n\n"
+            md_content += f"**Personalidad:** {char_dict.get('personality', 'No especificada')}\n\n"
+
+            description = char_dict.get('description', 'Sin descripción disponible')
+            md_content += f"**Descripción:**\n{description}\n\n"
+
+            # Get character stats
+            stats_query = """
+                SELECT COUNT(*) as total_critics,
+                       AVG(rating) as avg_rating
+                FROM critics
+                WHERE character_id = ?
+            """
+            stats = db_manager.execute_query(stats_query, (char_dict['id'],), fetch_one=True)
+
+            if stats and stats[0] > 0:
+                md_content += f"**Estadísticas:**\n"
+                md_content += f"- Críticas escritas: {stats[0]}\n"
+                md_content += f"- Rating promedio: {stats[1]:.1f}/10\n\n"
+            else:
+                md_content += "**Estadísticas:** Sin críticas escritas aún\n\n"
+
+            md_content += "---\n\n"
+
+        filename = f"personajes_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+
+        return {
+            "success": True,
+            "data": md_content,
+            "filename": filename
+        }
+
+    except Exception as e:
+        setup_logger.error(f"❌ Error exporting characters: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error exporting characters: {str(e)}")
 
 # ============================================================================
 
