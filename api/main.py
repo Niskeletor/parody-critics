@@ -727,6 +727,153 @@ async def generate_batch_critics(
         "results": results
     }
 
+@app.post("/api/generate/cart-batch")
+async def generate_cart_batch_critics(
+    request: dict
+):
+    """Generate critics for specific media items and characters from cart"""
+    if not llm_manager:
+        raise HTTPException(status_code=503, detail="LLM system not available")
+
+    try:
+        # Extract data from request
+        media_items = request.get("media_items", [])
+        selected_critics = request.get("selected_critics", [])
+
+        if not media_items:
+            raise HTTPException(status_code=400, detail="No media items provided")
+
+        if not selected_critics:
+            raise HTTPException(status_code=400, detail="No critics selected")
+
+        # Validate critic IDs exist
+        critics_placeholders = ",".join(["?" for _ in selected_critics])
+        critics_query = f"SELECT id, name FROM characters WHERE id IN ({critics_placeholders})"
+        valid_critics = db_manager.execute_query(critics_query, selected_critics)
+
+        if len(valid_critics) != len(selected_critics):
+            raise HTTPException(status_code=400, detail="Some selected critics are invalid")
+
+        # Validate media items exist
+        media_tmdb_ids = [item.get("tmdb_id") for item in media_items]
+        media_placeholders = ",".join(["?" for _ in media_tmdb_ids])
+        media_query = f"""
+            SELECT id, tmdb_id, title, year, type, genres, overview
+            FROM media
+            WHERE tmdb_id IN ({media_placeholders})
+        """
+        valid_media = db_manager.execute_query(media_query, [str(tmdb_id) for tmdb_id in media_tmdb_ids])
+
+        if len(valid_media) != len(media_items):
+            raise HTTPException(status_code=400, detail="Some media items are invalid")
+
+        # Convert to dict for easier lookup
+        media_dict = {row[1]: dict(zip(["id", "tmdb_id", "title", "year", "type", "genres", "overview"], row)) for row in valid_media}
+        critic_dict = {row[0]: row[1] for row in valid_critics}
+
+        results = []
+        total_processed = 0
+        total_attempted = len(media_items) * len(selected_critics)
+
+        # Process each combination of media + critic
+        for media_item in media_items:
+            tmdb_id = str(media_item.get("tmdb_id"))
+            media_info = media_dict.get(tmdb_id)
+
+            if not media_info:
+                continue
+
+            for critic_id in selected_critics:
+                critic_name = critic_dict.get(critic_id)
+
+                if not critic_name:
+                    continue
+
+                try:
+                    # Check if this combination already exists
+                    existing_query = """
+                        SELECT id FROM critics
+                        WHERE media_id = ? AND character_id = ?
+                    """
+                    existing = db_manager.execute_query(existing_query, (media_info["id"], critic_id), fetch_one=True)
+
+                    if existing:
+                        results.append({
+                            "tmdb_id": tmdb_id,
+                            "title": media_info["title"],
+                            "critic": critic_name,
+                            "status": "skipped",
+                            "reason": "Critic already exists"
+                        })
+                        continue
+
+                    print(f"🎭 Generating critic: {critic_name} for {media_info['title']}")
+
+                    # Generate the critic
+                    parsed_critic = await llm_manager.generate_critic(
+                        character=critic_name,
+                        media_info=media_info
+                    )
+
+                    print(f"✅ Generated critic response: {type(parsed_critic)} - Keys: {list(parsed_critic.keys()) if isinstance(parsed_critic, dict) else 'Not a dict'}")
+
+                    # Extract the actual critic content from the response
+                    # The LLM manager returns: {'success', 'response', 'character', 'media_title', etc.}
+                    # We need to parse the actual critic from the 'response' field
+                    critic_content = parsed_critic.get("response", "")
+
+                    # For now, we'll use a default rating and store the full response
+                    # In future versions, we could parse the response to extract rating and content separately
+                    rating = 8.0  # Default rating, could be extracted from response later
+
+                    # Insert the new critic
+                    insert_query = """
+                        INSERT INTO critics (media_id, character_id, rating, content, generated_at)
+                        VALUES (?, ?, ?, ?, ?)
+                    """
+                    critic_db_id = db_manager.execute_insert(insert_query, (
+                        media_info["id"],
+                        critic_id,
+                        rating,
+                        critic_content,
+                        datetime.now().isoformat()
+                    ))
+
+                    results.append({
+                        "tmdb_id": tmdb_id,
+                        "title": media_info["title"],
+                        "critic": critic_name,
+                        "status": "success",
+                        "rating": rating,
+                        "critic_id": critic_db_id
+                    })
+                    total_processed += 1
+
+                except Exception as e:
+                    print(f"❌ Error in batch processing: {str(e)} - Type: {type(e)}")
+                    import traceback
+                    traceback.print_exc()
+
+                    results.append({
+                        "tmdb_id": tmdb_id,
+                        "title": media_info["title"],
+                        "critic": critic_name,
+                        "status": "error",
+                        "error": str(e)
+                    })
+
+        return {
+            "success": True,
+            "processed": total_processed,
+            "total_attempted": total_attempted,
+            "results": results
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Cart batch processing failed: {str(e)}")
+
 @app.get("/api/llm/status")
 async def get_llm_status():
     """Get LLM system status and endpoint health"""

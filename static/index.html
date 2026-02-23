@@ -26,6 +26,11 @@
                     <button class="nav-btn" data-view="generate">✨ Generar</button>
                     <button class="nav-btn" data-view="status">📊 Sistema</button>
                 </nav>
+                <div class="cart-container">
+                    <button class="cart-btn" id="cart-btn">
+                        🛒 <span class="cart-count" id="cart-count">0</span>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -193,6 +198,100 @@
             <p class="footer-tech">Powered by FastAPI + Qwen3:8b + GPT-OSS:20b</p>
         </div>
     </footer>
+
+    <!-- Cart Side Panel with Overlay -->
+    <div class="cart-overlay hidden" id="cart-overlay" onclick="app.closeCart()"></div>
+    <div class="cart-panel hidden" id="cart-panel">
+        <div class="cart-panel-content">
+            <div class="cart-header">
+                <h3>🛒 Carrito de Críticas</h3>
+                <button class="cart-close" onclick="app.closeCart()">&times;</button>
+            </div>
+            <div class="cart-body">
+                <div class="cart-items" id="cart-items">
+                    <div class="empty-cart">
+                        <p>🎬 Tu carrito está vacío</p>
+                        <p>Selecciona películas y series para generar críticas</p>
+                    </div>
+                </div>
+                <div class="cart-footer">
+                    <div class="cart-total">
+                        Total: <span id="cart-total-count">0</span> elementos
+                    </div>
+                    <button class="btn-primary cart-checkout" id="cart-checkout-btn" onclick="app.proceedToCheckout()" disabled>
+                        ✨ Procesar Críticas
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout View -->
+    <section class="view" id="checkout-view">
+        <div class="checkout-container">
+            <div class="checkout-header">
+                <h2>🎭 Checkout - Generar Críticas por Lotes</h2>
+                <button class="btn-back" onclick="app.showView('media')">← Volver a Películas</button>
+            </div>
+
+            <!-- Selected Media Summary -->
+            <div class="checkout-section">
+                <h3>📽️ Contenido Seleccionado</h3>
+                <div class="selected-media-list" id="checkout-media-list">
+                    <!-- Selected media items will be shown here -->
+                </div>
+            </div>
+
+            <!-- Critic Selection -->
+            <div class="checkout-section">
+                <h3>👥 Selecciona los Críticos</h3>
+                <div class="critics-selection" id="critics-selection">
+                    <!-- Critic checkboxes will be shown here -->
+                </div>
+            </div>
+
+            <!-- Processing Controls -->
+            <div class="checkout-section">
+                <div class="processing-controls">
+                    <button class="btn-primary" id="start-processing-btn" onclick="app.startBatchProcessing()" disabled>
+                        🚀 Iniciar Procesamiento
+                    </button>
+                    <button class="btn-secondary hidden" id="cancel-processing-btn" onclick="app.cancelBatchProcessing()">
+                        ⏹️ Cancelar
+                    </button>
+                </div>
+
+                <!-- Progress Section -->
+                <div class="progress-section hidden" id="progress-section">
+                    <h4>📊 Progreso del Procesamiento</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                        <div class="progress-text" id="progress-text">0%</div>
+                    </div>
+                    <div class="processing-details">
+                        <div class="processing-status" id="processing-status">Preparando...</div>
+                        <div class="processing-current" id="processing-current"></div>
+                        <div class="processing-stats">
+                            <span class="stat">✅ Completadas: <span id="completed-count">0</span></span>
+                            <span class="stat">❌ Errores: <span id="error-count">0</span></span>
+                            <span class="stat">⏳ Restantes: <span id="remaining-count">0</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="results-section hidden" id="results-section">
+                    <h4>🎉 Resultados del Procesamiento</h4>
+                    <div class="results-summary" id="results-summary"></div>
+                    <div class="results-list" id="results-list"></div>
+                    <div class="results-actions">
+                        <button class="btn-primary" onclick="app.resetCheckout()">🔄 Nueva Selección</button>
+                        <button class="btn-secondary" onclick="app.showView('critics')">📝 Ver Todas las Críticas</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Modal for displaying critics -->
     <div class="modal hidden" id="critic-modal">
