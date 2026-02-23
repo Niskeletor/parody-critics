@@ -23,7 +23,7 @@
                     <button class="nav-btn active" data-view="home">🏠 Inicio</button>
                     <button class="nav-btn" data-view="media">🎬 Películas & Series</button>
                     <button class="nav-btn" data-view="critics">📝 Críticas</button>
-                    <button class="nav-btn" data-view="generate">✨ Generar</button>
+                    <button class="nav-btn" data-view="characters">🎭 Personajes</button>
                     <button class="nav-btn" data-view="status">📊 Sistema</button>
                 </nav>
                 <div class="cart-container">
@@ -61,7 +61,6 @@
                     </div>
                     <div class="cta-buttons">
                         <button class="btn-primary" data-view="media">🎬 Explorar Películas</button>
-                        <button class="btn-secondary" data-view="generate">✨ Generar Crítica</button>
                     </div>
                 </div>
             </section>
@@ -110,51 +109,32 @@
                 </div>
             </section>
 
-            <!-- Generate View -->
-            <section class="view" id="generate-view">
-                <div class="generate-section">
-                    <h2>✨ Generar Nueva Crítica</h2>
-                    <div class="generate-form">
-                        <div class="form-group">
-                            <label for="media-search">Busca una película o serie:</label>
-                            <div class="media-search-container">
-                                <input
-                                    type="text"
-                                    class="form-input"
-                                    id="media-search"
-                                    placeholder="Escribe para buscar películas y series..."
-                                    autocomplete="off"
-                                >
-                                <div class="search-results" id="search-results">
-                                    <!-- Search results will appear here -->
-                                </div>
-                                <div class="search-selected-media" id="selected-media-display">
-                                    <div class="search-selected-title" id="selected-media-title"></div>
-                                    <div class="search-selected-meta" id="selected-media-meta"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Selecciona el crítico:</label>
-                            <div class="character-selector" id="character-selector">
-                                <div class="loading">👥 Cargando personajes...</div>
-                            </div>
-                        </div>
-                        <button class="btn-generate" id="generate-btn" disabled>
-                            <span class="btn-text">✨ Generar Crítica</span>
-                            <span class="btn-loading hidden">🎭 Generando...</span>
+            <!-- Characters Management View -->
+            <section class="view" id="characters-view">
+                <div class="view-header">
+                    <h2>🎭 Gestión de Personajes</h2>
+                    <div class="characters-actions">
+                        <button class="btn-primary" id="add-character-btn">
+                            ➕ Nuevo Personaje
+                        </button>
+                        <button class="btn-secondary" id="import-characters-btn">
+                            📁 Importar Personajes
+                        </button>
+                        <button class="btn-secondary" id="export-characters-btn">
+                            💾 Exportar Personajes
                         </button>
                     </div>
                 </div>
 
-                <!-- Generation Result -->
-                <div class="generation-result hidden" id="generation-result">
-                    <h3>🎉 ¡Crítica Generada!</h3>
-                    <div class="critic-card" id="generated-critic">
-                        <!-- Generated critic will be inserted here -->
+                <!-- Characters List -->
+                <div class="characters-container">
+                    <div class="characters-grid" id="characters-grid">
+                        <div class="loading">🎭 Cargando personajes...</div>
                     </div>
                 </div>
             </section>
+
+            <!-- Generate View -->
 
             <!-- Status View -->
             <section class="view" id="status-view">
@@ -299,6 +279,122 @@
             <button class="modal-close" id="modal-close">&times;</button>
             <div class="modal-body" id="modal-body">
                 <!-- Critic content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Character Edit/Create Modal -->
+    <div class="modal hidden" id="character-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="character-modal-title">🎭 Nuevo Personaje</h3>
+                <button class="modal-close" id="character-modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="character-modal-body">
+                <form id="character-form" class="character-form">
+                    <input type="hidden" id="character-id" name="id">
+
+                    <div class="form-group">
+                        <label for="character-name">Nombre del Personaje *</label>
+                        <input type="text" id="character-name" name="name" required
+                               placeholder="Ej: Marco Aurelio">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="character-emoji">Emoji</label>
+                            <input type="text" id="character-emoji" name="emoji" maxlength="2"
+                                   placeholder="👑">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="character-personality">Personalidad *</label>
+                            <select id="character-personality" name="personality" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="stoic">Estoico</option>
+                                <option value="woke">Woke</option>
+                                <option value="snob">Snob</option>
+                                <option value="karen">Karen</option>
+                                <option value="millennial">Millennial</option>
+                                <option value="boomer">Boomer</option>
+                                <option value="nihilist">Nihilista</option>
+                                <option value="optimist">Optimista</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="character-description">Descripción *</label>
+                        <textarea id="character-description" name="description" required rows="3"
+                                  placeholder="Breve descripción del personaje y su estilo crítico..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="character-prompt">Prompt Template</label>
+                        <textarea id="character-prompt" name="prompt_template" rows="4"
+                                  placeholder="Template para el LLM (opcional, se generará automáticamente si se deja vacío)"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="character-color">Color Principal</label>
+                            <input type="color" id="character-color" name="color" value="#D4AF37">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="character-border">Color Borde</label>
+                            <input type="color" id="character-border" name="border_color" value="#B8860B">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="character-accent">Color Acento</label>
+                            <input type="color" id="character-accent" name="accent_color" value="#FFD700">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="character-cancel-btn">Cancelar</button>
+                        <button type="submit" class="btn-primary" id="character-save-btn">💾 Guardar Personaje</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Characters Modal -->
+    <div class="modal hidden" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📁 Importar Personajes</h3>
+                <button class="modal-close" id="import-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="import-options">
+                    <h4>Opciones de importación:</h4>
+
+                    <div class="import-method">
+                        <h5>📄 Desde archivo Markdown</h5>
+                        <p>Sube un archivo .md con la definición de personajes</p>
+                        <input type="file" id="import-file" accept=".md,.txt" multiple>
+                        <button class="btn-primary" id="import-file-btn">📁 Cargar Archivo(s)</button>
+                    </div>
+
+                    <div class="import-method">
+                        <h5>✍️ Pegar texto directo</h5>
+                        <textarea id="import-text" rows="8"
+                                  placeholder="Pega aquí el contenido Markdown con definiciones de personajes..."></textarea>
+                        <button class="btn-primary" id="import-text-btn">📝 Procesar Texto</button>
+                    </div>
+                </div>
+
+                <div class="import-preview hidden" id="import-preview">
+                    <h4>👀 Vista previa de personajes a importar:</h4>
+                    <div class="preview-list" id="preview-list"></div>
+                    <div class="import-actions">
+                        <button class="btn-secondary" id="import-cancel-btn">Cancelar</button>
+                        <button class="btn-primary" id="import-confirm-btn">✅ Confirmar Importación</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
