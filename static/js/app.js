@@ -151,15 +151,16 @@ class ParodyCriticsApp {
             case 'critics':
                 await this.loadCriticsData();
                 break;
-            case 'generate':
-                await this.loadGenerateData();
-                break;
             case 'status':
                 await this.loadStatusData();
                 break;
             case 'checkout':
                 // 🛒 Load checkout data
                 await this.loadCheckoutData();
+                break;
+            case 'characters':
+                // 🎭 Load characters management data
+                await this.loadCharactersData();
                 break;
         }
     }
@@ -286,22 +287,6 @@ class ParodyCriticsApp {
             });
         });
 
-        // Setup event delegation for generate critic buttons
-        const mediaGrid = document.getElementById('media-grid');
-        mediaGrid.addEventListener('click', (e) => {
-            if (e.target.classList.contains('generate-critic-btn') ||
-                e.target.classList.contains('compact-generate-btn')) {
-                e.stopPropagation();
-                const tmdbId = e.target.dataset.tmdbId;
-                const title = e.target.dataset.title;
-
-                if (tmdbId && title) {
-                    this.openGenerateCriticModal(tmdbId, title);
-                } else {
-                    console.error('❌ Missing tmdbId or title in button data');
-                }
-            }
-        });
 
         // Generate alphabet navigation
         this.generateAlphabetNavigation();
@@ -397,10 +382,6 @@ class ParodyCriticsApp {
                     <span class="critics-count ${item.has_critics ? 'has-critics' : ''}">
                         ${item.critics_count > 0 ? `📝 ${item.critics_count} críticas` : '📝 Sin críticas'}
                     </span>
-                    <button class="btn btn-primary btn-sm generate-critic-btn"
-                            data-tmdb-id="${item.tmdb_id}" data-title="${item.title}">
-                        🎭 Generar Crítica
-                    </button>
                 </div>
             </div>
         `).join('');
@@ -438,10 +419,6 @@ class ParodyCriticsApp {
                                 <span class="compact-critics ${item.has_critics ? 'has-critics' : ''}">
                                     ${item.critics_count > 0 ? `📝 ${item.critics_count}` : '📝 0'}
                                 </span>
-                                <button class="btn btn-primary btn-xs compact-generate-btn"
-                                        data-tmdb-id="${item.tmdb_id}" data-title="${item.title}">
-                                    🎭
-                                </button>
                             </div>
                         </div>
                     `).join('')}
@@ -704,16 +681,6 @@ class ParodyCriticsApp {
         `;
     }
 
-    async loadGenerateData() {
-        // Load characters
-        await this.loadCharacters();
-
-        // Setup media search
-        this.setupMediaSearch();
-
-        // Setup form handlers
-        this.setupGenerateForm();
-    }
 
     async loadCharacters() {
         const characterSelector = document.getElementById('character-selector');
@@ -735,174 +702,10 @@ class ParodyCriticsApp {
         }
     }
 
-    setupMediaSearch() {
-        const searchInput = document.getElementById('media-search');
-        const searchResults = document.getElementById('search-results');
-        const selectedDisplay = document.getElementById('selected-media-display');
 
-        let searchTimeout;
-        let currentResults = [];
-        let selectedIndex = -1;
 
-        // Initialize search state
-        this.currentSearchResults = [];
 
-        // Search input handler
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.trim();
 
-            if (query.length < 2) {
-                this.hideSearchResults();
-                return;
-            }
-
-            // Debounce search requests
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                this.performMediaSearch(query);
-            }, 300);
-        });
-
-        // Keyboard navigation
-        searchInput.addEventListener('keydown', (e) => {
-            if (!searchResults.classList.contains('show')) return;
-
-            switch (e.key) {
-                case 'ArrowDown':
-                    e.preventDefault();
-                    selectedIndex = Math.min(selectedIndex + 1, currentResults.length - 1);
-                    this.highlightSearchResult(selectedIndex);
-                    break;
-                case 'ArrowUp':
-                    e.preventDefault();
-                    selectedIndex = Math.max(selectedIndex - 1, -1);
-                    this.highlightSearchResult(selectedIndex);
-                    break;
-                case 'Enter':
-                    e.preventDefault();
-                    if (selectedIndex >= 0 && currentResults[selectedIndex]) {
-                        this.selectMediaFromSearch(currentResults[selectedIndex]);
-                    }
-                    break;
-                case 'Escape':
-                    e.preventDefault();
-                    this.hideSearchResults();
-                    break;
-            }
-        });
-
-        // Click outside to close
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.media-search-container')) {
-                this.hideSearchResults();
-            }
-        });
-    }
-
-    async performMediaSearch(query) {
-        const searchResults = document.getElementById('search-results');
-
-        try {
-            // Double-check query length to prevent API errors
-            if (query.length < 2) {
-                searchResults.innerHTML = '<div class="search-no-results">⚠️ Escribe al menos 2 caracteres</div>';
-                searchResults.classList.add('show');
-                return;
-            }
-
-            // Show loading state
-            searchResults.innerHTML = '<div class="search-loading">🔍 Buscando...</div>';
-            searchResults.classList.add('show');
-
-            // Perform search
-            const results = await this.fetchAPI(`/media/search?query=${encodeURIComponent(query)}&limit=20`);
-
-            if (results.length === 0) {
-                searchResults.innerHTML = '<div class="search-no-results">No se encontraron resultados</div>';
-                currentResults = [];
-                selectedIndex = -1;
-                return;
-            }
-
-            // Display results
-            currentResults = results;
-            this.currentSearchResults = results;
-            selectedIndex = -1;
-
-            searchResults.innerHTML = results.map((item, index) => `
-                <div class="search-result-item" data-index="${index}" onclick="app.selectMediaFromSearch(app.currentSearchResults[${index}])">
-                    <div>
-                        <div class="search-result-title">${item.title}</div>
-                        <div class="search-result-meta">
-                            <span class="search-result-type">${item.type}</span>
-                            <span>${item.year}</span>
-                            ${item.has_critics ? '<span>✅ Con críticas</span>' : '<span>➕ Sin críticas</span>'}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-
-        } catch (error) {
-            console.error('Search failed:', error);
-
-            let errorMessage = '❌ Error en la búsqueda';
-
-            // Check for specific error types
-            if (error.message.includes('400')) {
-                errorMessage = '⚠️ Escribe al menos 2 caracteres';
-            } else if (error.message.includes('500')) {
-                errorMessage = '❌ Error del servidor';
-            } else if (error.message.includes('404')) {
-                errorMessage = '❌ Servicio no encontrado';
-            }
-
-            searchResults.innerHTML = `<div class="search-no-results">${errorMessage}</div>`;
-            currentResults = [];
-            selectedIndex = -1;
-        }
-    }
-
-    highlightSearchResult(index) {
-        const items = document.querySelectorAll('.search-result-item');
-        items.forEach((item, i) => {
-            item.classList.toggle('selected', i === index);
-        });
-    }
-
-    selectMediaFromSearch(media) {
-        if (!media) return;
-
-        // Store selected media
-        this.selectedMedia = media.tmdb_id;
-        this.selectedMediaData = media;
-
-        // Update search input
-        document.getElementById('media-search').value = media.title;
-
-        // Show selected media info
-        const selectedDisplay = document.getElementById('selected-media-display');
-        const titleElement = document.getElementById('selected-media-title');
-        const metaElement = document.getElementById('selected-media-meta');
-
-        titleElement.textContent = media.title;
-        metaElement.innerHTML = `
-            <span class="search-result-type">${media.type}</span>
-            <span>${media.year}</span>
-            ${media.has_critics ? '<span>✅ Ya tiene críticas</span>' : '<span>➕ Sin críticas aún</span>'}
-        `;
-
-        selectedDisplay.classList.add('show');
-
-        // Hide search results
-        this.hideSearchResults();
-
-        // Update generate button
-        this.updateGenerateButton();
-    }
-
-    hideSearchResults() {
-        document.getElementById('search-results').classList.remove('show');
-    }
 
     selectCharacter(characterId) {
         // Remove previous selection
@@ -915,96 +718,13 @@ class ParodyCriticsApp {
         if (characterCard) {
             characterCard.classList.add('selected');
             this.selectedCharacter = characterId;
-            this.updateGenerateButton();
         }
     }
 
-    setupGenerateForm() {
-        const generateBtn = document.getElementById('generate-btn');
 
-        generateBtn.addEventListener('click', () => {
-            this.generateCritic();
-        });
-    }
 
-    updateGenerateButton() {
-        const generateBtn = document.getElementById('generate-btn');
-        const canGenerate = this.selectedCharacter && this.selectedMedia;
 
-        generateBtn.disabled = !canGenerate;
-    }
 
-    async generateCritic() {
-        if (!this.selectedCharacter || !this.selectedMedia) {
-            this.showMessage('Please select both a character and media', 'warning');
-            return;
-        }
-
-        const generateBtn = document.getElementById('generate-btn');
-        const btnText = generateBtn.querySelector('.btn-text');
-        const btnLoading = generateBtn.querySelector('.btn-loading');
-
-        // Show loading state
-        generateBtn.disabled = true;
-        btnText.classList.add('hidden');
-        btnLoading.classList.remove('hidden');
-
-        try {
-            // Get character name
-            const characterName = this.getCharacterName(this.selectedCharacter);
-
-            // Generate critic
-            const result = await this.fetchAPI(
-                `/generate/critic/${this.selectedMedia.tmdb_id}?character=${encodeURIComponent(characterName)}`,
-                'POST'
-            );
-
-            if (result.success) {
-                this.showGenerationResult(result);
-                this.showMessage('¡Crítica generada exitosamente!', 'success');
-            } else {
-                throw new Error(result.error || 'Generation failed');
-            }
-
-        } catch (error) {
-            console.error('Generation failed:', error);
-            this.showMessage('Error generating critic: ' + error.message, 'error');
-        } finally {
-            // Reset button
-            generateBtn.disabled = false;
-            btnText.classList.remove('hidden');
-            btnLoading.classList.add('hidden');
-        }
-    }
-
-    getCharacterName(characterId) {
-        const mapping = {
-            'marco_aurelio': 'Marco Aurelio',
-            'rosario_costras': 'Rosario Costras'
-        };
-        return mapping[characterId] || characterId;
-    }
-
-    showGenerationResult(result) {
-        const resultSection = document.getElementById('generation-result');
-        const criticCard = document.getElementById('generated-critic');
-
-        // Create mock critic object for rendering
-        const critic = {
-            author: result.character,
-            emoji: this.selectedCharacter === 'marco_aurelio' ? '👑' : '✊',
-            rating: result.rating,
-            content: result.content,
-            personality: this.selectedCharacter === 'marco_aurelio' ? 'stoic' : 'woke',
-            generated_at: new Date().toISOString()
-        };
-
-        criticCard.innerHTML = this.renderCriticCard(critic);
-        resultSection.classList.remove('hidden');
-
-        // Scroll to result
-        resultSection.scrollIntoView({ behavior: 'smooth' });
-    }
 
     async loadStatusData() {
         const healthStatus = document.getElementById('health-status');
@@ -1196,26 +916,6 @@ class ParodyCriticsApp {
         }
     }
 
-    openGenerateCriticModal(tmdbId, title) {
-        console.log(`🎭 Opening generate critic modal for: ${title} (${tmdbId})`);
-
-        // Set the selected media for the generator
-        this.selectedMedia = {
-            tmdb_id: tmdbId,
-            title: title
-        };
-
-        // Update the media display in the generator
-        this.updateSelectedDisplay();
-
-        // Switch to the generator tab
-        this.showView('generate');
-
-        // Show success message
-        this.showMessage(`🎬 Listo para generar crítica de "${title}"`, 'success');
-
-        console.log('✅ Generator ready for media:', this.selectedMedia);
-    }
 
     updateSelectedDisplay() {
         if (!this.selectedMedia) {
@@ -1244,11 +944,6 @@ class ParodyCriticsApp {
 
         selectedDisplay.classList.add('show');
 
-        // Hide search results
-        this.hideSearchResults();
-
-        // Update generate button
-        this.updateGenerateButton();
 
         console.log('✅ Selected media display updated');
     }
@@ -2630,6 +2325,522 @@ class ParodyCriticsApp {
 
         this.showMessage('🔄 Nueva selección iniciada', 'info');
         console.log('🔄 Checkout reset completed');
+    }
+
+    // ========================================
+    // 🎭 Characters Management System
+    // ========================================
+
+    async loadCharactersData() {
+        console.log('🎭 Loading characters management data...');
+
+        try {
+            // Setup character action buttons
+            this.setupCharacterActions();
+
+            // Load and display characters
+            await this.renderCharactersGrid();
+
+            console.log('✅ Characters data loaded successfully');
+        } catch (error) {
+            console.error('❌ Failed to load characters data:', error);
+            this.showError('Error cargando datos de personajes: ' + error.message);
+        }
+    }
+
+    setupCharacterActions() {
+        // Add character button
+        const addBtn = document.getElementById('add-character-btn');
+        if (addBtn) {
+            addBtn.addEventListener('click', () => this.openAddCharacterModal());
+        }
+
+        // Import characters button
+        const importBtn = document.getElementById('import-characters-btn');
+        if (importBtn) {
+            importBtn.addEventListener('click', () => this.openImportCharactersModal());
+        }
+
+        // Export characters button
+        const exportBtn = document.getElementById('export-characters-btn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => this.exportCharacters());
+        }
+
+        // Setup modal close buttons
+        this.setupCharacterModalEvents();
+
+        console.log('🎭 Character action buttons configured');
+    }
+
+    setupCharacterModalEvents() {
+        // Character modal events
+        const characterModal = document.getElementById('character-modal');
+        const characterModalClose = document.getElementById('character-modal-close');
+        const characterForm = document.getElementById('character-form');
+
+        if (characterModalClose) {
+            characterModalClose.addEventListener('click', () => this.closeCharacterModal());
+        }
+
+        if (characterModal) {
+            characterModal.addEventListener('click', (e) => {
+                if (e.target === characterModal) {
+                    this.closeCharacterModal();
+                }
+            });
+        }
+
+        if (characterForm) {
+            characterForm.addEventListener('submit', (e) => this.handleCharacterFormSubmit(e));
+        }
+
+        // Import modal events
+        const importModal = document.getElementById('import-modal');
+        const importModalClose = document.getElementById('import-modal-close');
+        const importForm = document.getElementById('import-form');
+
+        if (importModalClose) {
+            importModalClose.addEventListener('click', () => this.closeImportModal());
+        }
+
+        if (importModal) {
+            importModal.addEventListener('click', (e) => {
+                if (e.target === importModal) {
+                    this.closeImportModal();
+                }
+            });
+        }
+
+        if (importForm) {
+            importForm.addEventListener('submit', (e) => this.handleImportFormSubmit(e));
+        }
+    }
+
+    async renderCharactersGrid() {
+        const charactersGrid = document.getElementById('characters-grid');
+        if (!charactersGrid) return;
+
+        try {
+            charactersGrid.innerHTML = '<div class="loading">🎭 Cargando personajes...</div>';
+
+            const characters = await this.fetchAPI('/characters');
+
+            if (!characters || characters.length === 0) {
+                charactersGrid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎭</div>
+                        <h3>No hay personajes disponibles</h3>
+                        <p>Crea tu primer personaje crítico para comenzar</p>
+                        <button class="btn-primary" onclick="app.openAddCharacterModal()">
+                            ➕ Crear Personaje
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            characters.forEach(character => {
+                // Get character statistics (mock for now - will be replaced by API)
+                const criticsCount = Math.floor(Math.random() * 50) + 1; // Mock data
+                const avgRating = (Math.random() * 4 + 6).toFixed(1); // Mock data
+
+                html += `
+                    <div class="character-card" data-character-id="${character.id}">
+                        <div class="character-card-header">
+                            <div class="character-emoji">${character.emoji || '🎭'}</div>
+                            <div class="character-actions">
+                                <button class="btn-icon" onclick="app.editCharacter('${character.id}')" title="Editar">
+                                    ✏️
+                                </button>
+                                <button class="btn-icon btn-danger" onclick="app.deleteCharacter('${character.id}', '${character.name}')" title="Eliminar">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="character-card-body">
+                            <h3 class="character-name">${character.name}</h3>
+                            <p class="character-personality">${character.personality || 'Personalidad única'}</p>
+                            <p class="character-description">${character.description || 'Sin descripción'}</p>
+                        </div>
+
+                        <div class="character-card-stats">
+                            <div class="character-stat">
+                                <span class="stat-label">Críticas</span>
+                                <span class="stat-value">${criticsCount}</span>
+                            </div>
+                            <div class="character-stat">
+                                <span class="stat-label">Rating Promedio</span>
+                                <span class="stat-value">⭐ ${avgRating}</span>
+                            </div>
+                        </div>
+
+                        <div class="character-card-footer">
+                            <button class="btn-secondary btn-sm" onclick="app.viewCharacterCritics('${character.id}')">
+                                📝 Ver Críticas
+                            </button>
+                            <button class="btn-danger btn-sm" onclick="app.deleteAllCharacterCritics('${character.id}', '${character.name}')">
+                                🗑️ Eliminar Críticas
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            charactersGrid.innerHTML = html;
+
+        } catch (error) {
+            console.error('❌ Error rendering characters:', error);
+            charactersGrid.innerHTML = `
+                <div class="error-state">
+                    <div class="error-state-icon">❌</div>
+                    <h3>Error cargando personajes</h3>
+                    <p>${error.message}</p>
+                    <button class="btn-primary" onclick="app.renderCharactersGrid()">
+                        🔄 Reintentar
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // Open add character modal
+    openAddCharacterModal() {
+        this.currentEditingCharacter = null; // Reset editing state
+        this.showCharacterModal('Crear Nuevo Personaje');
+        console.log('🎭 Opening add character modal');
+    }
+
+    // Open edit character modal
+    async editCharacter(characterId) {
+        try {
+            console.log('🎭 Loading character for editing:', characterId);
+
+            const characters = await this.fetchAPI('/characters');
+            const character = characters.find(c => c.id === characterId);
+
+            if (!character) {
+                this.showError('Personaje no encontrado');
+                return;
+            }
+
+            this.currentEditingCharacter = character;
+            this.showCharacterModal('Editar Personaje', character);
+
+        } catch (error) {
+            console.error('❌ Error loading character for edit:', error);
+            this.showError('Error cargando personaje: ' + error.message);
+        }
+    }
+
+    // Show character modal
+    showCharacterModal(title, character = null) {
+        const modal = document.getElementById('character-modal');
+        const modalTitle = document.getElementById('character-modal-title');
+        const form = document.getElementById('character-form');
+
+        if (!modal || !modalTitle || !form) {
+            console.error('❌ Character modal elements not found');
+            return;
+        }
+
+        // Set modal title
+        modalTitle.textContent = title;
+
+        // Populate form if editing
+        if (character) {
+            document.getElementById('character-id').value = character.id || '';
+            document.getElementById('character-name').value = character.name || '';
+            document.getElementById('character-emoji').value = character.emoji || '🎭';
+            document.getElementById('character-personality').value = character.personality || '';
+            document.getElementById('character-description').value = character.description || '';
+        } else {
+            form.reset();
+            document.getElementById('character-emoji').value = '🎭';
+        }
+
+        // Show modal
+        modal.classList.remove('hidden');
+
+        // Focus first input
+        setTimeout(() => {
+            document.getElementById('character-name').focus();
+        }, 100);
+    }
+
+    // Close character modal
+    closeCharacterModal() {
+        const modal = document.getElementById('character-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            this.currentEditingCharacter = null;
+        }
+        console.log('🚪 Character modal closed');
+    }
+
+    // Handle character form submit
+    async handleCharacterFormSubmit(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+
+        const characterData = {
+            name: formData.get('name').trim(),
+            emoji: formData.get('emoji').trim() || '🎭',
+            personality: formData.get('personality').trim(),
+            description: formData.get('description').trim()
+        };
+
+        // Basic validation
+        if (!characterData.name) {
+            this.showError('El nombre del personaje es obligatorio');
+            return;
+        }
+
+        try {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '⏳ Guardando...';
+            submitBtn.disabled = true;
+
+            let result;
+            if (this.currentEditingCharacter) {
+                // Update existing character
+                characterData.id = this.currentEditingCharacter.id;
+                console.log('🔄 Updating character:', characterData);
+                result = await this.fetchAPI(`/characters/${this.currentEditingCharacter.id}`, 'PUT', characterData);
+            } else {
+                // Create new character
+                console.log('➕ Creating new character:', characterData);
+                result = await this.fetchAPI('/characters', 'POST', characterData);
+            }
+
+            if (result.success || result.id) {
+                this.showMessage(
+                    this.currentEditingCharacter ? 'Personaje actualizado correctamente' : 'Personaje creado correctamente',
+                    'success'
+                );
+                this.closeCharacterModal();
+                await this.renderCharactersGrid(); // Refresh the grid
+            } else {
+                throw new Error(result.error || 'Error guardando personaje');
+            }
+
+        } catch (error) {
+            console.error('❌ Error saving character:', error);
+            this.showError('Error guardando personaje: ' + error.message);
+        } finally {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.textContent = this.currentEditingCharacter ? '💾 Actualizar' : '➕ Crear';
+                submitBtn.disabled = false;
+            }
+        }
+    }
+
+    // Delete character
+    async deleteCharacter(characterId, characterName) {
+        const confirmed = confirm(
+            `¿Estás seguro de que quieres eliminar el personaje "${characterName}"?\n\n` +
+            `⚠️ Esta acción también eliminará todas las críticas escritas por este personaje.\n\n` +
+            `Esta acción no se puede deshacer.`
+        );
+
+        if (!confirmed) return;
+
+        try {
+            console.log('🗑️ Deleting character:', characterId);
+
+            const result = await this.fetchAPI(`/characters/${characterId}`, 'DELETE');
+
+            if (result.success) {
+                this.showMessage(`Personaje "${characterName}" eliminado correctamente`, 'success');
+                await this.renderCharactersGrid(); // Refresh the grid
+            } else {
+                throw new Error(result.error || 'Error eliminando personaje');
+            }
+
+        } catch (error) {
+            console.error('❌ Error deleting character:', error);
+            this.showError('Error eliminando personaje: ' + error.message);
+        }
+    }
+
+    // Delete all character critics
+    async deleteAllCharacterCritics(characterId, characterName) {
+        const confirmed = confirm(
+            `¿Estás seguro de que quieres eliminar TODAS las críticas de "${characterName}"?\n\n` +
+            `Esta acción eliminará permanentemente todas las críticas escritas por este personaje.\n\n` +
+            `Esta acción no se puede deshacer.`
+        );
+
+        if (!confirmed) return;
+
+        try {
+            console.log('🗑️ Deleting all critics for character:', characterId);
+
+            const result = await this.fetchAPI(`/characters/${characterId}/critics`, 'DELETE');
+
+            if (result.success) {
+                this.showMessage(`Todas las críticas de "${characterName}" han sido eliminadas`, 'success');
+                await this.renderCharactersGrid(); // Refresh to update stats
+            } else {
+                throw new Error(result.error || 'Error eliminando críticas');
+            }
+
+        } catch (error) {
+            console.error('❌ Error deleting character critics:', error);
+            this.showError('Error eliminando críticas: ' + error.message);
+        }
+    }
+
+    // View character critics
+    async viewCharacterCritics(characterId) {
+        try {
+            console.log('📝 Loading critics for character:', characterId);
+
+            // For now, we'll show a message. Later this could open a modal or navigate to a filtered critics view
+            this.showMessage('Funcionalidad en desarrollo: Ver críticas del personaje', 'info');
+
+            // TODO: Implement character-specific critics view
+
+        } catch (error) {
+            console.error('❌ Error loading character critics:', error);
+            this.showError('Error cargando críticas: ' + error.message);
+        }
+    }
+
+    // Open import characters modal
+    openImportCharactersModal() {
+        const modal = document.getElementById('import-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+
+            // Focus file input
+            setTimeout(() => {
+                const fileInput = document.getElementById('import-file');
+                if (fileInput) fileInput.focus();
+            }, 100);
+        }
+        console.log('📁 Opening import characters modal');
+    }
+
+    // Close import modal
+    closeImportModal() {
+        const modal = document.getElementById('import-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            // Reset form
+            const form = document.getElementById('import-form');
+            if (form) form.reset();
+        }
+        console.log('🚪 Import modal closed');
+    }
+
+    // Handle import form submit
+    async handleImportFormSubmit(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+        const file = formData.get('file');
+        const overwrite = formData.get('overwrite') === 'on';
+
+        if (!file) {
+            this.showError('Por favor selecciona un archivo');
+            return;
+        }
+
+        // Validate file type
+        if (!file.name.endsWith('.md') && !file.name.endsWith('.json')) {
+            this.showError('Solo se admiten archivos .md (Markdown) o .json');
+            return;
+        }
+
+        try {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '⏳ Importando...';
+            submitBtn.disabled = true;
+
+            // Read file content
+            const fileContent = await this.readFileAsText(file);
+
+            console.log('📁 Importing characters from file:', file.name);
+
+            // Send to API
+            const result = await this.fetchAPI('/characters/import', 'POST', {
+                filename: file.name,
+                content: fileContent,
+                overwrite: overwrite
+            });
+
+            if (result.success) {
+                this.showMessage(
+                    `Importación exitosa: ${result.imported || 0} personajes importados`,
+                    'success'
+                );
+                this.closeImportModal();
+                await this.renderCharactersGrid(); // Refresh the grid
+            } else {
+                throw new Error(result.error || 'Error en la importación');
+            }
+
+        } catch (error) {
+            console.error('❌ Error importing characters:', error);
+            this.showError('Error importando personajes: ' + error.message);
+        } finally {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.textContent = '📁 Importar';
+                submitBtn.disabled = false;
+            }
+        }
+    }
+
+    // Read file as text
+    readFileAsText(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = () => reject(new Error('Error leyendo el archivo'));
+            reader.readAsText(file, 'UTF-8');
+        });
+    }
+
+    // Export characters
+    async exportCharacters() {
+        try {
+            console.log('💾 Exporting all characters...');
+
+            const result = await this.fetchAPI('/characters/export');
+
+            if (result.success && result.data) {
+                // Create and download file
+                const blob = new Blob([result.data], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = result.filename || 'personajes.md';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                this.showMessage(`Personajes exportados a ${result.filename || 'personajes.md'}`, 'success');
+
+            } else {
+                throw new Error(result.error || 'Error en la exportación');
+            }
+
+        } catch (error) {
+            console.error('❌ Error exporting characters:', error);
+            this.showError('Error exportando personajes: ' + error.message);
+        }
     }
 }
 
