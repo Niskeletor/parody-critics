@@ -36,6 +36,12 @@ class ParodyCriticsApp {
             controller: null
         };
 
+        // 🗄️ Data Cache for performance
+        this.dataCache = {
+            characters: null,
+            media: null
+        };
+
         this.init();
     }
 
@@ -2182,6 +2188,30 @@ class ParodyCriticsApp {
         }
     }
 
+    // Get critic name by ID
+    async getCriticName(criticId) {
+        try {
+            // First check if we have characters data cached
+            if (this.dataCache.characters) {
+                const critic = this.dataCache.characters.find(c => c.id === criticId);
+                if (critic) return critic.name;
+            }
+
+            // Fetch characters if not cached
+            const response = await fetch('/api/characters');
+            if (!response.ok) throw new Error('Failed to fetch characters');
+
+            const characters = await response.json();
+            this.dataCache.characters = characters; // Cache for future use
+
+            const critic = characters.find(c => c.id === criticId);
+            return critic ? critic.name : criticId;
+        } catch (error) {
+            console.error('❌ Error getting critic name:', error);
+            return criticId; // Fallback to ID
+        }
+    }
+
     // Start batch processing
     async startBatchProcessing() {
         if (this.cart.size === 0 || this.batchProcessing.selectedCritics.size === 0) {
@@ -2214,47 +2244,108 @@ class ParodyCriticsApp {
             // Update initial progress
             this.updateProgressDisplay(0, totalOperations, 0, 'Iniciando procesamiento...', null);
 
-            // Call the new batch processing endpoint
-            const response = await fetch('/api/generate/cart-batch', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestPayload),
-                signal: this.batchProcessing.controller.signal
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'Error en el procesamiento');
-            }
-
-            const result = await response.json();
-
-            console.log('🎉 Batch processing completed:', result);
-
-            // Process the results
             let completed = 0;
             let errors = 0;
+            let currentOperation = 0;
 
-            result.results.forEach(item => {
-                if (item.status === 'success') {
-                    completed++;
-                } else {
-                    errors++;
+            // Process each combination individually for real-time progress
+            for (const mediaItem of mediaItems) {
+                for (const criticId of critics) {
+                    if (this.batchProcessing.controller.signal.aborted) {
+                        throw new Error('Procesamiento cancelado por el usuario');
+                    }
+
+                    currentOperation++;
+
+                    // Update progress with current operation
+                    const currentCritic = await this.getCriticName(criticId);
+                    this.updateProgressDisplay(
+                        completed,
+                        totalOperations,
+                        errors,
+                        'Procesando...',
+                        `${mediaItem.title} + ${currentCritic}`
+                    );
+
+                    try {
+                        // Process single critic for single media
+                        const singlePayload = {
+                            media_items: [mediaItem],
+                            selected_critics: [criticId]
+                        };
+
+                        console.log(`🎭 Processing ${currentOperation}/${totalOperations}: ${mediaItem.title} + ${currentCritic}`);
+
+                        const response = await fetch('/api/generate/cart-batch', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(singlePayload),
+                            signal: this.batchProcessing.controller.signal
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Error HTTP ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        const item = result.results[0]; // Single result
+
+                        if (item.status === 'success') {
+                            completed++;
+                            console.log(`✅ Success: ${item.title} + ${item.critic}`);
+                        } else {
+                            errors++;
+                            console.log(`⚠️ ${item.status}: ${item.title} + ${item.critic} - ${item.error || item.reason}`);
+                        }
+
+                        // Store result
+                        this.batchProcessing.results.push({
+                            media: { title: item.title || mediaItem.title, tmdb_id: item.tmdb_id || mediaItem.tmdb_id },
+                            critic: item.critic || currentCritic,
+                            status: item.status,
+                            result: item.status === 'success' ? { rating: item.rating } : null,
+                            error: item.error || item.reason
+                        });
+
+                        // Update progress after each completion
+                        this.updateProgressDisplay(
+                            completed,
+                            totalOperations,
+                            errors,
+                            currentOperation === totalOperations ? 'Procesamiento completado' : 'Procesando...',
+                            currentOperation === totalOperations ? null : `Completado: ${item.title} + ${item.critic}`
+                        );
+
+                        // Small delay to make progress visible
+                        await new Promise(resolve => setTimeout(resolve, 100));
+
+                    } catch (itemError) {
+                        errors++;
+                        console.error(`❌ Error processing ${mediaItem.title} + ${currentCritic}:`, itemError);
+
+                        this.batchProcessing.results.push({
+                            media: { title: mediaItem.title, tmdb_id: mediaItem.tmdb_id },
+                            critic: currentCritic,
+                            status: 'error',
+                            result: null,
+                            error: itemError.message
+                        });
+
+                        // Update progress with error
+                        this.updateProgressDisplay(
+                            completed,
+                            totalOperations,
+                            errors,
+                            'Procesando...',
+                            `Error: ${mediaItem.title} + ${currentCritic}`
+                        );
+                    }
                 }
+            }
 
-                this.batchProcessing.results.push({
-                    media: { title: item.title, tmdb_id: item.tmdb_id },
-                    critic: item.critic,
-                    status: item.status,
-                    result: item.status === 'success' ? { rating: item.rating } : null,
-                    error: item.error || item.reason
-                });
-            });
-
-            // Update final progress
-            this.updateProgressDisplay(completed, totalOperations, errors, 'Procesamiento completado', null);
+            console.log(`🎉 Batch processing completed: ${completed} success, ${errors} errors`);
 
             // Show completion
             this.handleBatchProcessingComplete(completed, errors, totalOperations);
@@ -2359,9 +2450,9 @@ class ParodyCriticsApp {
     }
 
     // Update progress display
-    updateProgressDisplay(completed, total, errors, currentMedia, currentCritic) {
-        const percentage = total > 0 ? (completed / total) * 100 : 0;
-        const remaining = total - completed;
+    updateProgressDisplay(completed, total, errors, status, currentItem) {
+        const percentage = total > 0 ? ((completed + errors) / total) * 100 : 0;
+        const remaining = total - completed - errors;
 
         // Update progress bar
         const progressFill = document.getElementById('progress-fill');
@@ -2371,11 +2462,11 @@ class ParodyCriticsApp {
             progressText.textContent = `${Math.round(percentage)}%`;
         }
 
-        // Update status
+        // Update status with more detailed information
         const statusElement = document.getElementById('processing-status');
         if (statusElement) {
-            if (currentMedia && currentCritic) {
-                statusElement.textContent = `Procesando: ${currentMedia} con ${currentCritic}`;
+            if (status) {
+                statusElement.textContent = `${status} (${completed + errors}/${total})`;
             } else {
                 statusElement.textContent = `Procesando... ${completed}/${total} completadas`;
             }
@@ -2384,17 +2475,21 @@ class ParodyCriticsApp {
         // Update current item
         const currentElement = document.getElementById('processing-current');
         if (currentElement) {
-            if (currentMedia && currentCritic) {
-                currentElement.textContent = `🎬 "${currentMedia}" por ${currentCritic}`;
+            if (currentItem) {
+                currentElement.textContent = `🎬 ${currentItem}`;
             } else {
-                currentElement.textContent = 'Preparando siguiente elemento...';
+                currentElement.textContent = percentage === 100 ? 'Completado' : 'Preparando siguiente elemento...';
             }
         }
 
         // Update statistics
-        document.getElementById('completed-count').textContent = completed;
-        document.getElementById('error-count').textContent = errors;
-        document.getElementById('remaining-count').textContent = remaining;
+        const completedElement = document.getElementById('completed-count');
+        const errorElement = document.getElementById('error-count');
+        const remainingElement = document.getElementById('remaining-count');
+
+        if (completedElement) completedElement.textContent = completed;
+        if (errorElement) errorElement.textContent = errors;
+        if (remainingElement) remainingElement.textContent = remaining;
     }
 
     // Cancel batch processing
