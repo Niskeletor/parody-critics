@@ -26,6 +26,16 @@ class ParodyCriticsApp {
             }
         };
 
+        // 🛒 E-commerce Cart System properties
+        this.cart = new Map(); // Map of tmdb_id -> media object
+        this.isCartOpen = false;
+        this.batchProcessing = {
+            isProcessing: false,
+            selectedCritics: new Set(),
+            results: [],
+            controller: null
+        };
+
         this.init();
     }
 
@@ -82,6 +92,20 @@ class ParodyCriticsApp {
                 });
             }
         });
+
+        // 🛒 Cart button event listener
+        const cartButton = document.getElementById('cart-btn');
+        if (cartButton) {
+            cartButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🛒 Cart button clicked');
+                this.toggleCart();
+            });
+            console.log('🛒 Cart button event listener added');
+        } else {
+            console.error('❌ Cart button not found during setup');
+        }
     }
 
     showView(viewName) {
@@ -126,6 +150,10 @@ class ParodyCriticsApp {
                 break;
             case 'status':
                 await this.loadStatusData();
+                break;
+            case 'checkout':
+                // 🛒 Load checkout data
+                await this.loadCheckoutData();
                 break;
         }
     }
@@ -215,6 +243,15 @@ class ParodyCriticsApp {
                 }
 
                 this.renderMediaGrid(this.mediaState.currentData);
+
+                // 🛒 Update cart selection states after rendering
+                // Use requestAnimationFrame for better timing
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        this.updateMediaCardSelectionStates();
+                        console.log('🛒 Updated selection states after render');
+                    }, 200);
+                });
             }
 
             // Setup filters and infinite scroll on first load
@@ -324,7 +361,18 @@ class ParodyCriticsApp {
 
     renderListView(media) {
         return media.map(item => `
-            <div class="media-card">
+            <div class="media-card" data-tmdb-id="${item.tmdb_id}">
+                <!-- 🛒 E-commerce Selection Checkbox -->
+                <div class="media-card-select" onclick="app.toggleMediaSelection({
+                    tmdb_id: '${item.tmdb_id}',
+                    title: '${item.title.replace(/'/g, "\\'")}',
+                    year: '${item.year || 'N/A'}',
+                    type: '${item.type}',
+                    poster_url: '${item.poster_url || ''}',
+                    has_critics: ${item.has_critics || false}
+                })">
+                </div>
+
                 <div class="media-card-header" onclick="app.showMediaDetails('${item.tmdb_id}')">
                     <h3 class="media-title">${item.title}</h3>
                     <div class="media-meta">
@@ -363,7 +411,18 @@ class ParodyCriticsApp {
                 </div>
                 <div class="group-content">
                     ${group.items.map(item => `
-                        <div class="media-card-compact">
+                        <div class="media-card-compact media-card" data-tmdb-id="${item.tmdb_id}">
+                            <!-- 🛒 E-commerce Selection Checkbox -->
+                            <div class="media-card-select" onclick="app.toggleMediaSelection({
+                                tmdb_id: '${item.tmdb_id}',
+                                title: '${item.title.replace(/'/g, "\\'")}',
+                                year: '${item.year || 'N/A'}',
+                                type: '${item.type}',
+                                poster_url: '${item.poster_url || ''}',
+                                has_critics: ${item.has_critics || false}
+                            })">
+                            </div>
+
                             <div class="compact-header" onclick="app.showMediaDetails('${item.tmdb_id}')">
                                 <h4 class="compact-title">${item.title}</h4>
                                 <span class="compact-meta">${item.year || 'N/A'} • ${item.type}</span>
@@ -1030,6 +1089,22 @@ class ParodyCriticsApp {
             healthStatus.innerHTML = '<div class="loading">❌ Error loading health status</div>';
             llmStatus.innerHTML = '<div class="loading">❌ Error loading LLM status</div>';
             dbStats.innerHTML = '<div class="loading">❌ Error loading database stats</div>';
+        }
+    }
+
+    async loadCheckoutData() {
+        console.log('🛒 Loading checkout data...');
+
+        // This function is called when showing the checkout view
+        // The actual data loading is handled by renderCheckoutView()
+        // which is called from proceedToCheckout()
+
+        try {
+            await this.renderCheckoutView();
+            console.log('✅ Checkout data loaded successfully');
+        } catch (error) {
+            console.error('❌ Failed to load checkout data:', error);
+            this.showMessage('Error cargando datos del checkout', 'error');
         }
     }
 
@@ -1770,6 +1845,696 @@ class ParodyCriticsApp {
             clearInterval(this.importPingInterval);
             this.importPingInterval = null;
         }
+    }
+
+    // ========================================
+    // 🛒 E-commerce Cart System
+    // ========================================
+
+    // Add media to cart
+    addToCart(mediaItem) {
+        const key = mediaItem.tmdb_id;
+
+        if (!this.cart.has(key)) {
+            this.cart.set(key, {
+                ...mediaItem,
+                addedAt: Date.now()
+            });
+
+            this.updateCartUI();
+            this.showMessage(`🛒 "${mediaItem.title}" agregado al carrito`, 'success');
+            console.log(`🛒 Added to cart:`, mediaItem);
+        } else {
+            this.showMessage(`"${mediaItem.title}" ya está en el carrito`, 'warning');
+        }
+    }
+
+    // Remove media from cart
+    removeFromCart(tmdbId) {
+        const item = this.cart.get(tmdbId);
+        if (item) {
+            this.cart.delete(tmdbId);
+            this.updateCartUI();
+            this.showMessage(`🗑️ "${item.title}" eliminado del carrito`, 'info');
+            console.log(`🗑️ Removed from cart:`, tmdbId);
+        }
+    }
+
+    // Clear entire cart
+    clearCart() {
+        this.cart.clear();
+        this.updateCartUI();
+        this.showMessage('🛒 Carrito vaciado', 'info');
+        console.log('🛒 Cart cleared');
+    }
+
+    // Toggle cart panel
+    toggleCart() {
+        const cartPanel = document.getElementById('cart-panel');
+
+        if (this.isCartOpen) {
+            this.closeCart();
+        } else {
+            this.openCart();
+        }
+    }
+
+    // Open cart panel
+    openCart() {
+        const cartPanel = document.getElementById('cart-panel');
+        const cartOverlay = document.getElementById('cart-overlay');
+        if (cartPanel && cartOverlay) {
+            // Show overlay first
+            cartOverlay.classList.remove('hidden');
+            cartOverlay.classList.add('show');
+            // Show panel
+            cartPanel.classList.remove('hidden');
+            cartPanel.classList.add('show');
+            this.isCartOpen = true;
+            this.renderCartItems();
+            console.log('🛒 Cart opened');
+        }
+    }
+
+    // Close cart panel
+    closeCart() {
+        const cartPanel = document.getElementById('cart-panel');
+        const cartOverlay = document.getElementById('cart-overlay');
+        if (cartPanel && cartOverlay) {
+            // Hide panel first
+            cartPanel.classList.remove('show');
+            cartPanel.classList.add('hidden');
+            // Hide overlay
+            cartOverlay.classList.remove('show');
+            cartOverlay.classList.add('hidden');
+            this.isCartOpen = false;
+            console.log('🛒 Cart closed');
+        }
+    }
+
+    // Update cart UI elements
+    updateCartUI() {
+        // Update cart count
+        const cartCount = document.getElementById('cart-count');
+        if (cartCount) {
+            cartCount.textContent = this.cart.size;
+        }
+
+        // Update total count
+        const totalCount = document.getElementById('cart-total-count');
+        if (totalCount) {
+            totalCount.textContent = this.cart.size;
+        }
+
+        // Update checkout button
+        const checkoutBtn = document.getElementById('cart-checkout-btn');
+        if (checkoutBtn) {
+            checkoutBtn.disabled = this.cart.size === 0;
+        }
+
+        // Update cart items if panel is open
+        if (this.isCartOpen) {
+            this.renderCartItems();
+        }
+
+        // Update media card selection states
+        this.updateMediaCardSelectionStates();
+    }
+
+    // Render cart items
+    renderCartItems() {
+        const cartItems = document.getElementById('cart-items');
+        if (!cartItems) return;
+
+        if (this.cart.size === 0) {
+            cartItems.innerHTML = `
+                <div class="empty-cart">
+                    <p>🎬 Tu carrito está vacío</p>
+                    <p>Selecciona películas y series para generar críticas</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        this.cart.forEach((item, tmdbId) => {
+            html += `
+                <div class="cart-item" data-tmdb-id="${tmdbId}">
+                    <img class="cart-item-poster"
+                         src="${item.poster_url || '/static/images/no-poster.png'}"
+                         alt="${item.title}"
+                         onerror="this.src='/static/images/no-poster.png'">
+                    <div class="cart-item-info">
+                        <div class="cart-item-title">${item.title}</div>
+                        <div class="cart-item-meta">
+                            ${item.year || 'N/A'} • ${item.type === 'movie' ? 'Película' : 'Serie'}
+                            ${item.has_critics ? ' • 📝 Con críticas' : ''}
+                        </div>
+                    </div>
+                    <button class="cart-item-remove" onclick="app.removeFromCart('${tmdbId}')">
+                        ✕
+                    </button>
+                </div>
+            `;
+        });
+
+        cartItems.innerHTML = html;
+    }
+
+    // Update media card selection states
+    updateMediaCardSelectionStates() {
+        console.log(`🛒 Updating selection states. Cart has ${this.cart.size} items`);
+
+        // Update all media cards to show selection state
+        const mediaCards = document.querySelectorAll('.media-card');
+        let updatedCount = 0;
+
+        mediaCards.forEach(card => {
+            const tmdbId = card.dataset.tmdbId;
+            const isSelected = this.cart.has(tmdbId);
+
+            // Toggle selected class
+            card.classList.toggle('selected', isSelected);
+
+            // Update selection checkbox
+            const selectCheckbox = card.querySelector('.media-card-select');
+            if (selectCheckbox) {
+                selectCheckbox.classList.toggle('selected', isSelected);
+                if (isSelected) {
+                    updatedCount++;
+                }
+            }
+        });
+
+        console.log(`🛒 Updated ${updatedCount} selected cards out of ${mediaCards.length} total cards`);
+    }
+
+    // Handle media card selection
+    toggleMediaSelection(mediaItem) {
+        const tmdbId = mediaItem.tmdb_id;
+
+        if (this.cart.has(tmdbId)) {
+            this.removeFromCart(tmdbId);
+        } else {
+            this.addToCart(mediaItem);
+        }
+    }
+
+    // Proceed to checkout
+    proceedToCheckout() {
+        if (this.cart.size === 0) {
+            this.showMessage('Carrito vacío. Selecciona contenido primero.', 'warning');
+            return;
+        }
+
+        // Close cart and show checkout view
+        this.closeCart();
+        this.showView('checkout');
+        this.renderCheckoutView();
+
+        console.log('🎭 Proceeding to checkout with items:', Array.from(this.cart.values()));
+    }
+
+    // Render checkout view
+    async renderCheckoutView() {
+        await this.renderCheckoutMediaList();
+        await this.renderCriticsSelection();
+        this.updateProcessingControls();
+    }
+
+    // Render selected media in checkout
+    renderCheckoutMediaList() {
+        const mediaList = document.getElementById('checkout-media-list');
+        if (!mediaList) return;
+
+        if (this.cart.size === 0) {
+            mediaList.innerHTML = `
+                <div class="empty-cart">
+                    <p>🎬 No hay contenido seleccionado</p>
+                    <p><a href="#" onclick="app.showView('media')">← Volver a seleccionar</a></p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        this.cart.forEach((item, tmdbId) => {
+            html += `
+                <div class="checkout-media-item" data-tmdb-id="${tmdbId}">
+                    <img class="checkout-media-poster"
+                         src="${item.poster_url || '/static/images/no-poster.png'}"
+                         alt="${item.title}"
+                         onerror="this.src='/static/images/no-poster.png'">
+                    <div class="checkout-media-info">
+                        <div class="checkout-media-title">${item.title}</div>
+                        <div class="checkout-media-meta">
+                            ${item.year || 'N/A'} • ${item.type === 'movie' ? 'Película' : 'Serie'}
+                            ${item.has_critics ? ' • 📝 Ya tiene críticas' : ' • ✨ Sin críticas'}
+                        </div>
+                    </div>
+                    <button class="checkout-media-remove" onclick="app.removeFromCartCheckout('${tmdbId}')">
+                        Eliminar
+                    </button>
+                </div>
+            `;
+        });
+
+        mediaList.innerHTML = html;
+    }
+
+    // Remove from cart in checkout view
+    removeFromCartCheckout(tmdbId) {
+        this.removeFromCart(tmdbId);
+        this.renderCheckoutMediaList();
+        this.updateProcessingControls();
+    }
+
+    // Render critics selection
+    async renderCriticsSelection() {
+        const criticsSelection = document.getElementById('critics-selection');
+        if (!criticsSelection) return;
+
+        try {
+            const characters = await this.fetchAPI('/characters');
+
+            let html = '';
+            characters.forEach(character => {
+                const isSelected = this.batchProcessing.selectedCritics.has(character.id);
+                html += `
+                    <div class="critic-checkbox-item ${isSelected ? 'selected' : ''}"
+                         onclick="app.toggleCriticSelection('${character.id}')">
+                        <input type="checkbox"
+                               class="critic-checkbox"
+                               id="critic-${character.id}"
+                               ${isSelected ? 'checked' : ''}
+                               onchange="app.toggleCriticSelection('${character.id}')">
+                        <div class="critic-info">
+                            <div class="critic-name">${character.name}</div>
+                            <div class="critic-description">${character.description || 'Crítico experto'}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            criticsSelection.innerHTML = html;
+
+        } catch (error) {
+            console.error('Error loading critics:', error);
+            criticsSelection.innerHTML = `
+                <div class="error-message">
+                    <p>❌ Error cargando críticos</p>
+                    <p>Por favor recarga la página</p>
+                </div>
+            `;
+        }
+    }
+
+    // Toggle critic selection
+    toggleCriticSelection(criticId) {
+        if (this.batchProcessing.selectedCritics.has(criticId)) {
+            this.batchProcessing.selectedCritics.delete(criticId);
+        } else {
+            this.batchProcessing.selectedCritics.add(criticId);
+        }
+
+        // Update UI
+        const checkboxItem = document.querySelector(`.critic-checkbox-item[onclick*="${criticId}"]`);
+        const checkbox = document.getElementById(`critic-${criticId}`);
+
+        if (checkboxItem && checkbox) {
+            const isSelected = this.batchProcessing.selectedCritics.has(criticId);
+            checkboxItem.classList.toggle('selected', isSelected);
+            checkbox.checked = isSelected;
+        }
+
+        this.updateProcessingControls();
+        console.log('👥 Selected critics:', Array.from(this.batchProcessing.selectedCritics));
+    }
+
+    // Update processing controls
+    updateProcessingControls() {
+        const startBtn = document.getElementById('start-processing-btn');
+        if (startBtn) {
+            const canStart = this.cart.size > 0 &&
+                           this.batchProcessing.selectedCritics.size > 0 &&
+                           !this.batchProcessing.isProcessing;
+            startBtn.disabled = !canStart;
+        }
+    }
+
+    // Start batch processing
+    async startBatchProcessing() {
+        if (this.cart.size === 0 || this.batchProcessing.selectedCritics.size === 0) {
+            this.showMessage('Selecciona contenido y críticos antes de procesar', 'warning');
+            return;
+        }
+
+        this.batchProcessing.isProcessing = true;
+        this.batchProcessing.results = [];
+        this.batchProcessing.controller = new AbortController();
+
+        // Update UI
+        this.showProgressSection();
+        this.hideResultsSection();
+        this.updateProcessingControlsForStart();
+
+        const mediaItems = Array.from(this.cart.values());
+        const critics = Array.from(this.batchProcessing.selectedCritics);
+        const totalOperations = mediaItems.length * critics.length;
+
+        console.log(`🚀 Starting batch processing: ${mediaItems.length} media × ${critics.length} critics = ${totalOperations} operations`);
+
+        // Prepare the request payload
+        const requestPayload = {
+            media_items: mediaItems,
+            selected_critics: critics
+        };
+
+        try {
+            // Update initial progress
+            this.updateProgressDisplay(0, totalOperations, 0, 'Iniciando procesamiento...', null);
+
+            // Call the new batch processing endpoint
+            const response = await fetch('/api/generate/cart-batch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestPayload),
+                signal: this.batchProcessing.controller.signal
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Error en el procesamiento');
+            }
+
+            const result = await response.json();
+
+            console.log('🎉 Batch processing completed:', result);
+
+            // Process the results
+            let completed = 0;
+            let errors = 0;
+
+            result.results.forEach(item => {
+                if (item.status === 'success') {
+                    completed++;
+                } else {
+                    errors++;
+                }
+
+                this.batchProcessing.results.push({
+                    media: { title: item.title, tmdb_id: item.tmdb_id },
+                    critic: item.critic,
+                    status: item.status,
+                    result: item.status === 'success' ? { rating: item.rating } : null,
+                    error: item.error || item.reason
+                });
+            });
+
+            // Update final progress
+            this.updateProgressDisplay(completed, totalOperations, errors, 'Procesamiento completado', null);
+
+            // Show completion
+            this.handleBatchProcessingComplete(completed, errors, totalOperations);
+
+        } catch (error) {
+            console.error('❌ Batch processing failed:', error);
+
+            if (error.name === 'AbortError') {
+                this.handleBatchProcessingError('Procesamiento cancelado por el usuario');
+            } else {
+                this.handleBatchProcessingError(error.message);
+            }
+        }
+    }
+
+    // Generate critic for batch processing
+    async generateCriticForBatch(tmdbId, criticId) {
+        const signal = this.batchProcessing.controller.signal;
+
+        const response = await fetch(`${this.apiBase}/generate/critic/${tmdbId}?character=${encodeURIComponent(criticId)}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            signal: signal
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(result.error || 'Generation failed');
+        }
+
+        return result;
+    }
+
+    // Show progress section
+    showProgressSection() {
+        const progressSection = document.getElementById('progress-section');
+        if (progressSection) {
+            progressSection.classList.remove('hidden');
+        }
+    }
+
+    // Hide progress section
+    hideProgressSection() {
+        const progressSection = document.getElementById('progress-section');
+        if (progressSection) {
+            progressSection.classList.add('hidden');
+        }
+    }
+
+    // Show results section
+    showResultsSection() {
+        const resultsSection = document.getElementById('results-section');
+        if (resultsSection) {
+            resultsSection.classList.remove('hidden');
+        }
+    }
+
+    // Hide results section
+    hideResultsSection() {
+        const resultsSection = document.getElementById('results-section');
+        if (resultsSection) {
+            resultsSection.classList.add('hidden');
+        }
+    }
+
+    // Update processing controls for start
+    updateProcessingControlsForStart() {
+        const startBtn = document.getElementById('start-processing-btn');
+        const cancelBtn = document.getElementById('cancel-processing-btn');
+
+        if (startBtn) {
+            startBtn.disabled = true;
+            startBtn.style.display = 'none';
+        }
+
+        if (cancelBtn) {
+            cancelBtn.classList.remove('hidden');
+            cancelBtn.disabled = false;
+        }
+    }
+
+    // Update processing controls for completion
+    updateProcessingControlsForCompletion() {
+        const startBtn = document.getElementById('start-processing-btn');
+        const cancelBtn = document.getElementById('cancel-processing-btn');
+
+        if (startBtn) {
+            startBtn.disabled = false;
+            startBtn.style.display = 'block';
+        }
+
+        if (cancelBtn) {
+            cancelBtn.classList.add('hidden');
+        }
+    }
+
+    // Update progress display
+    updateProgressDisplay(completed, total, errors, currentMedia, currentCritic) {
+        const percentage = total > 0 ? (completed / total) * 100 : 0;
+        const remaining = total - completed;
+
+        // Update progress bar
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        if (progressFill && progressText) {
+            progressFill.style.width = `${percentage}%`;
+            progressText.textContent = `${Math.round(percentage)}%`;
+        }
+
+        // Update status
+        const statusElement = document.getElementById('processing-status');
+        if (statusElement) {
+            if (currentMedia && currentCritic) {
+                statusElement.textContent = `Procesando: ${currentMedia} con ${currentCritic}`;
+            } else {
+                statusElement.textContent = `Procesando... ${completed}/${total} completadas`;
+            }
+        }
+
+        // Update current item
+        const currentElement = document.getElementById('processing-current');
+        if (currentElement) {
+            if (currentMedia && currentCritic) {
+                currentElement.textContent = `🎬 "${currentMedia}" por ${currentCritic}`;
+            } else {
+                currentElement.textContent = 'Preparando siguiente elemento...';
+            }
+        }
+
+        // Update statistics
+        document.getElementById('completed-count').textContent = completed;
+        document.getElementById('error-count').textContent = errors;
+        document.getElementById('remaining-count').textContent = remaining;
+    }
+
+    // Cancel batch processing
+    cancelBatchProcessing() {
+        if (this.batchProcessing.controller) {
+            this.batchProcessing.controller.abort();
+        }
+
+        this.batchProcessing.isProcessing = false;
+
+        // Update UI
+        const statusElement = document.getElementById('processing-status');
+        if (statusElement) {
+            statusElement.textContent = '❌ Procesamiento cancelado por el usuario';
+        }
+
+        const currentElement = document.getElementById('processing-current');
+        if (currentElement) {
+            currentElement.textContent = 'Operación cancelada';
+        }
+
+        this.updateProcessingControlsForCompletion();
+        this.showMessage('Procesamiento cancelado', 'warning');
+
+        console.log('🛑 Batch processing cancelled by user');
+    }
+
+    // Handle batch processing completion
+    handleBatchProcessingComplete(completed, errors, total) {
+        this.batchProcessing.isProcessing = false;
+
+        console.log(`🎉 Batch processing completed: ${completed} success, ${errors} errors of ${total} total`);
+
+        // Update final progress
+        const statusElement = document.getElementById('processing-status');
+        if (statusElement) {
+            statusElement.textContent = `✅ Procesamiento completado: ${completed}/${total} exitosas`;
+        }
+
+        const currentElement = document.getElementById('processing-current');
+        if (currentElement) {
+            currentElement.textContent = `¡Todas las operaciones han terminado!`;
+        }
+
+        // Show results
+        this.renderBatchResults();
+        this.showResultsSection();
+        this.updateProcessingControlsForCompletion();
+
+        // Show success message
+        this.showMessage(`🎉 Procesamiento completado: ${completed} críticas generadas${errors > 0 ? `, ${errors} errores` : ''}`, 'success');
+    }
+
+    // Handle batch processing error
+    handleBatchProcessingError(errorMessage) {
+        this.batchProcessing.isProcessing = false;
+
+        console.error(`❌ Batch processing failed: ${errorMessage}`);
+
+        // Update UI
+        const statusElement = document.getElementById('processing-status');
+        if (statusElement) {
+            statusElement.textContent = '❌ Procesamiento fallido';
+        }
+
+        const currentElement = document.getElementById('processing-current');
+        if (currentElement) {
+            currentElement.textContent = `Error: ${errorMessage}`;
+        }
+
+        this.updateProcessingControlsForCompletion();
+        this.showMessage(`Error en procesamiento: ${errorMessage}`, 'error');
+    }
+
+    // Render batch results
+    renderBatchResults() {
+        const resultsSummary = document.getElementById('results-summary');
+        const resultsList = document.getElementById('results-list');
+
+        if (!resultsSummary || !resultsList) return;
+
+        const successful = this.batchProcessing.results.filter(r => r.status === 'success').length;
+        const failed = this.batchProcessing.results.filter(r => r.status === 'error').length;
+        const total = this.batchProcessing.results.length;
+
+        // Summary
+        resultsSummary.innerHTML = `
+            <div class="results-stats">
+                <div class="result-stat success">
+                    <div class="stat-number">${successful}</div>
+                    <div class="stat-label">Exitosas</div>
+                </div>
+                <div class="result-stat error">
+                    <div class="stat-number">${failed}</div>
+                    <div class="stat-label">Errores</div>
+                </div>
+                <div class="result-stat total">
+                    <div class="stat-number">${total}</div>
+                    <div class="stat-label">Total</div>
+                </div>
+            </div>
+        `;
+
+        // Results list
+        let html = '';
+        this.batchProcessing.results.forEach(result => {
+            html += `
+                <div class="result-item ${result.status}">
+                    <div class="result-item-title">
+                        ${result.media.title} - ${result.critic}
+                    </div>
+                    <div class="result-item-status">
+                        ${result.status === 'success' ? '✅ Crítica generada exitosamente' : `❌ Error: ${result.error}`}
+                    </div>
+                </div>
+            `;
+        });
+
+        resultsList.innerHTML = html;
+    }
+
+    // Reset checkout
+    resetCheckout() {
+        // Clear cart
+        this.clearCart();
+
+        // Reset batch processing state
+        this.batchProcessing.selectedCritics.clear();
+        this.batchProcessing.results = [];
+        this.batchProcessing.isProcessing = false;
+
+        // Hide sections
+        this.hideProgressSection();
+        this.hideResultsSection();
+
+        // Go back to media view
+        this.showView('media');
+
+        this.showMessage('🔄 Nueva selección iniciada', 'info');
+        console.log('🔄 Checkout reset completed');
     }
 }
 
