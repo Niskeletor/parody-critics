@@ -112,6 +112,30 @@ class ParodyCriticsApp {
         } else {
             console.error('❌ Cart button not found during setup');
         }
+
+        // 🛒 Cart checkout button event listener
+        const checkoutButton = document.getElementById('cart-checkout-btn');
+        if (checkoutButton) {
+            checkoutButton.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('✨ Checkout button clicked');
+
+                if (!checkoutButton.disabled) {
+                    try {
+                        await this.proceedToCheckout();
+                    } catch (error) {
+                        console.error('❌ Checkout failed:', error);
+                        this.showMessage('Error en checkout: ' + error.message, 'error');
+                    }
+                } else {
+                    console.log('⚠️ Checkout button is disabled');
+                }
+            });
+            console.log('✨ Checkout button event listener added');
+        } else {
+            console.error('❌ Checkout button not found during setup');
+        }
     }
 
     showView(viewName) {
