@@ -32,8 +32,9 @@ from utils.sync_manager import SyncManager
 config = get_config()
 DB_PATH = config.get_absolute_db_path()
 
-# Setup logging for setup wizard
+# Setup logging
 setup_logger = get_logger('setup_wizard')
+search_logger = get_logger('search')
 
 class DatabaseManager:
     """Database connection manager"""
@@ -333,31 +334,62 @@ async def search_media(
 ):
     """Search media by title with flexible matching"""
 
-    # Fixed search query with correct table relationships
+    # Optimized search query with Full Text Search (FTS) for better performance
     search_query = """
         SELECT m.id, m.tmdb_id, m.jellyfin_id, m.title, m.original_title,
                m.year, m.type, m.genres, m.overview, m.poster_url, m.imdb_id,
                m.vote_average, m.created_at,
                CASE WHEN c.media_id IS NOT NULL THEN 1 ELSE 0 END as has_critics,
                COUNT(c.id) as critics_count
-        FROM media m
+        FROM media_fts
+        JOIN media m ON media_fts.rowid = m.id
         LEFT JOIN critics c ON m.id = c.media_id
-        WHERE UPPER(m.title) LIKE UPPER(?) OR UPPER(m.original_title) LIKE UPPER(?)
+        WHERE media_fts MATCH ?
         GROUP BY m.id
         ORDER BY m.vote_average DESC
         LIMIT ?
     """
 
-    # Create search patterns - simplified for now
-    search_pattern = f"%{query}%"
+    # Create FTS query pattern with proper escaping for special characters
+    fts_query = query.strip()
 
-    params = [
-        search_pattern,  # WHERE: LIKE title
-        search_pattern,  # WHERE: LIKE original_title
-        limit            # LIMIT clause
-    ]
+    # Escape FTS special characters to prevent syntax errors
+    fts_special_chars = '"*()[]{}~:'
+    for char in fts_special_chars:
+        fts_query = fts_query.replace(char, f'"{char}"')
 
-    rows = db_manager.execute_query(search_query, params)
+    # If FTS query is problematic, fallback to LIKE search
+    try_fts = True
+    if len(fts_query) < 2 or any(c in fts_query for c in ['<', '>', 'script']):
+        try_fts = False
+
+    # Try FTS first, fallback to LIKE if needed
+    if try_fts:
+        params = [fts_query, limit]
+        try:
+            rows = db_manager.execute_query(search_query, params)
+        except Exception as e:
+            search_logger.warning(f"FTS query failed, falling back to LIKE: {e}")
+            try_fts = False
+
+    if not try_fts:
+        # Fallback to secure LIKE query
+        fallback_query = """
+            SELECT m.id, m.tmdb_id, m.jellyfin_id, m.title, m.original_title,
+                   m.year, m.type, m.genres, m.overview, m.poster_url, m.imdb_id,
+                   m.vote_average, m.created_at,
+                   CASE WHEN c.media_id IS NOT NULL THEN 1 ELSE 0 END as has_critics,
+                   COUNT(c.id) as critics_count
+            FROM media m
+            LEFT JOIN critics c ON m.id = c.media_id
+            WHERE UPPER(m.title) LIKE UPPER(?) OR UPPER(m.original_title) LIKE UPPER(?)
+            GROUP BY m.id
+            ORDER BY m.vote_average DESC
+            LIMIT ?
+        """
+        safe_pattern = f"%{query.strip()[:100]}%"  # Limit pattern length
+        params = [safe_pattern, safe_pattern, limit]
+        rows = db_manager.execute_query(fallback_query, params)
 
     media_list = []
     for row in rows:
@@ -750,23 +782,31 @@ async def generate_cart_batch_critics(
         if not selected_critics:
             raise HTTPException(status_code=400, detail="No critics selected")
 
-        # Validate critic IDs exist
+        # Validate critic IDs exist - Secure parameterized query
+        if len(selected_critics) == 0:
+            raise HTTPException(status_code=400, detail="No critics selected")
+
+        # Build secure parameterized query with exact number of placeholders
         critics_placeholders = ",".join(["?" for _ in selected_critics])
-        critics_query = f"SELECT id, name FROM characters WHERE id IN ({critics_placeholders})"
-        valid_critics = db_manager.execute_query(critics_query, selected_critics)
+        critics_query = "SELECT id, name FROM characters WHERE id IN (" + critics_placeholders + ")"
+        valid_critics = db_manager.execute_query(critics_query, tuple(selected_critics))
 
         if len(valid_critics) != len(selected_critics):
             raise HTTPException(status_code=400, detail="Some selected critics are invalid")
 
-        # Validate media items exist
+        # Validate media items exist - Secure parameterized query
         media_tmdb_ids = [item.get("tmdb_id") for item in media_items]
+        if len(media_tmdb_ids) == 0:
+            raise HTTPException(status_code=400, detail="No media items provided")
+
+        # Build secure parameterized query with exact number of placeholders
         media_placeholders = ",".join(["?" for _ in media_tmdb_ids])
-        media_query = f"""
-            SELECT id, tmdb_id, title, year, type, genres, overview
-            FROM media
-            WHERE tmdb_id IN ({media_placeholders})
-        """
-        valid_media = db_manager.execute_query(media_query, [str(tmdb_id) for tmdb_id in media_tmdb_ids])
+        media_query = (
+            "SELECT id, tmdb_id, title, year, type, genres, overview "
+            "FROM media "
+            "WHERE tmdb_id IN (" + media_placeholders + ")"
+        )
+        valid_media = db_manager.execute_query(media_query, tuple(str(tmdb_id) for tmdb_id in media_tmdb_ids))
 
         if len(valid_media) != len(media_items):
             raise HTTPException(status_code=400, detail="Some media items are invalid")

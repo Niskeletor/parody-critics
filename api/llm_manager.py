@@ -7,7 +7,7 @@ import asyncio
 import time
 import json
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union
 from dataclasses import dataclass, asdict
 
 # Import our logging system
@@ -71,7 +71,7 @@ class CriticGenerationManager:
 
         logger.info(f"Configured {len(self.endpoints)} LLM endpoints: {list(self.endpoints.keys())}")
 
-    def _get_character_from_db(self, character_name: str) -> Dict[str, Any]:
+    def _get_character_from_db(self, character_name: str) -> Optional[Dict[str, Any]]:
         """Get character data from database"""
         import sqlite3
 
