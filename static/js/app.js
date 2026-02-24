@@ -162,6 +162,11 @@ class ParodyCriticsApp {
     }
 
     showView(viewName) {
+        // 🔄 RESET: Remove ultra-nuclear CSS from checkout when leaving it
+        if (this.currentView === 'checkout' && viewName !== 'checkout') {
+            this.resetCheckoutStyles();
+        }
+
         // Hide all views
         const views = document.querySelectorAll('.view');
         views.forEach(view => view.classList.remove('active'));
@@ -194,23 +199,67 @@ class ParodyCriticsApp {
     }
 
     // 🔥 NUCLEAR CSS FIX: Force checkout view to be visible
-    // This method applies aggressive CSS styling to make checkout view visible
+    // This method applies ULTRA-AGGRESSIVE CSS styling to make checkout view visible
     // Solves the positioning issue where checkout appears at top: 1753px
     forceCheckoutVisible(checkoutView) {
-        console.log('🔥 Applying NUCLEAR CSS fix to make checkout visible...');
+        console.log('🔥 Applying ULTRA-NUCLEAR CSS fix to make checkout visible...');
 
-        // Apply the nuclear CSS solution that we confirmed works
-        checkoutView.style.position = 'fixed';
-        checkoutView.style.top = '0';
-        checkoutView.style.left = '0';
-        checkoutView.style.width = '100%';
-        checkoutView.style.height = '100%';
-        checkoutView.style.zIndex = '9999';
-        checkoutView.style.backgroundColor = 'var(--bg-color, #121212)';
-        checkoutView.style.overflow = 'auto';
-        checkoutView.style.display = 'block';
+        // ULTRA-AGGRESSIVE CSS - Override EVERYTHING
+        checkoutView.style.setProperty('position', 'fixed', 'important');
+        checkoutView.style.setProperty('top', '0px', 'important');
+        checkoutView.style.setProperty('left', '0px', 'important');
+        checkoutView.style.setProperty('width', '100vw', 'important');
+        checkoutView.style.setProperty('height', '100vh', 'important');
+        checkoutView.style.setProperty('z-index', '999999', 'important');
+        checkoutView.style.setProperty('background-color', '#121212', 'important');
+        checkoutView.style.setProperty('overflow', 'auto', 'important');
+        checkoutView.style.setProperty('display', 'block', 'important');
+        checkoutView.style.setProperty('visibility', 'visible', 'important');
+        checkoutView.style.setProperty('opacity', '1', 'important');
+        checkoutView.style.setProperty('transform', 'none', 'important');
+        checkoutView.style.setProperty('max-width', 'none', 'important');
+        checkoutView.style.setProperty('max-height', 'none', 'important');
+        checkoutView.style.setProperty('margin', '0', 'important');
+        checkoutView.style.setProperty('padding', '20px', 'important');
 
-        console.log('✅ NUCLEAR CSS fix applied - checkout should now be visible');
+        // Remove any conflicting classes
+        checkoutView.classList.remove('hidden');
+
+        // Add a timeout to ensure DOM is ready
+        setTimeout(() => {
+            checkoutView.scrollIntoView({ behavior: 'instant', block: 'start' });
+            console.log('🚀 Scrolled checkout into view');
+        }, 100);
+
+        console.log('💥 ULTRA-NUCLEAR CSS fix applied - checkout MUST be visible now');
+    }
+
+    // 🔄 RESET: Remove ultra-nuclear CSS styles from checkout
+    resetCheckoutStyles() {
+        const checkoutView = document.getElementById('checkout-view');
+        if (checkoutView) {
+            console.log('🔄 Resetting ultra-nuclear CSS styles from checkout...');
+
+            // Remove all the ultra-nuclear styles
+            checkoutView.style.removeProperty('position');
+            checkoutView.style.removeProperty('top');
+            checkoutView.style.removeProperty('left');
+            checkoutView.style.removeProperty('width');
+            checkoutView.style.removeProperty('height');
+            checkoutView.style.removeProperty('z-index');
+            checkoutView.style.removeProperty('background-color');
+            checkoutView.style.removeProperty('overflow');
+            checkoutView.style.removeProperty('display');
+            checkoutView.style.removeProperty('visibility');
+            checkoutView.style.removeProperty('opacity');
+            checkoutView.style.removeProperty('transform');
+            checkoutView.style.removeProperty('max-width');
+            checkoutView.style.removeProperty('max-height');
+            checkoutView.style.removeProperty('margin');
+            checkoutView.style.removeProperty('padding');
+
+            console.log('✅ Checkout styles reset - back to normal CSS');
+        }
     }
 
     async loadViewData(viewName) {
