@@ -123,13 +123,36 @@ class ParodyCriticsApp {
 
                 if (!checkoutButton.disabled) {
                     try {
+                        // VISUAL DEBUG - Show user what's happening
+                        this.showMessage('🔄 Procesando checkout...', 'info');
+
                         await this.proceedToCheckout();
+
+                        // VISUAL CONFIRMATION - Check if checkout is actually visible
+                        const checkoutView = document.getElementById('checkout-view');
+                        const isVisible = checkoutView && checkoutView.classList.contains('active');
+
+                        if (isVisible) {
+                            this.showMessage('✅ Checkout cargado correctamente', 'success');
+                            console.log('✅ VISUAL DEBUG: Checkout view is active and should be visible');
+                        } else {
+                            console.error('❌ VISUAL DEBUG: Checkout view is NOT active after proceedToCheckout()');
+                            this.showMessage('⚠️ Problema cargando checkout - activando debug', 'warning');
+                            this.enableDebug(); // Auto-enable debug when there's a problem
+                            // Don't fallback immediately, let user see debug info
+                            setTimeout(() => {
+                                this.showView('media');
+                            }, 5000);
+                        }
+
                     } catch (error) {
                         console.error('❌ Checkout failed:', error);
                         this.showMessage('Error en checkout: ' + error.message, 'error');
+                        this.showView('media'); // Fallback to media view
                     }
                 } else {
                     console.log('⚠️ Checkout button is disabled');
+                    this.showMessage('⚠️ Carrito vacío - agrega contenido primero', 'warning');
                 }
             });
             console.log('✨ Checkout button event listener added');
@@ -2904,6 +2927,53 @@ class ParodyCriticsApp {
         } catch (error) {
             console.error('❌ Error exporting characters:', error);
             this.showError('Error exportando personajes: ' + error.message);
+        }
+    }
+
+    // ========================================
+    // 🔍 Debug Functions for Visual Troubleshooting
+    // ========================================
+
+    enableDebug() {
+        const debugInfo = document.getElementById('debug-info');
+        if (debugInfo) {
+            debugInfo.style.display = 'block';
+            this.debugEnabled = true;
+            this.updateDebugInfo();
+            console.log('🔍 Debug mode enabled - check top-right corner');
+
+            // Auto-update debug info every second
+            setInterval(() => {
+                if (this.debugEnabled) {
+                    this.updateDebugInfo();
+                }
+            }, 1000);
+        }
+    }
+
+    updateDebugInfo() {
+        if (!this.debugEnabled) return;
+
+        const currentViewEl = document.getElementById('debug-current-view');
+        const cartSizeEl = document.getElementById('debug-cart-size');
+        const checkoutActiveEl = document.getElementById('debug-checkout-active');
+        const cartOpenEl = document.getElementById('debug-cart-open');
+
+        if (currentViewEl) currentViewEl.textContent = this.currentView || 'undefined';
+        if (cartSizeEl) cartSizeEl.textContent = this.cart.size;
+
+        if (checkoutActiveEl) {
+            const checkoutView = document.getElementById('checkout-view');
+            const isActive = checkoutView && checkoutView.classList.contains('active');
+            checkoutActiveEl.textContent = isActive;
+            checkoutActiveEl.style.color = isActive ? 'lime' : 'red';
+        }
+
+        if (cartOpenEl) {
+            const cartPanel = document.getElementById('cart-panel');
+            const isOpen = cartPanel && cartPanel.classList.contains('open');
+            cartOpenEl.textContent = isOpen;
+            cartOpenEl.style.color = isOpen ? 'lime' : 'red';
         }
     }
 }
