@@ -1742,7 +1742,7 @@ class ParodyCriticsApp {
     }
 
     // Proceed to checkout
-    proceedToCheckout() {
+    async proceedToCheckout() {
         if (this.cart.size === 0) {
             this.showMessage('Carrito vacío. Selecciona contenido primero.', 'warning');
             return;
@@ -1751,7 +1751,18 @@ class ParodyCriticsApp {
         // Close cart and show checkout view
         this.closeCart();
         this.showView('checkout');
-        this.renderCheckoutView();
+
+        // Await the checkout view rendering with error handling
+        try {
+            await this.renderCheckoutView();
+            console.log('✅ Checkout view rendered successfully');
+        } catch (error) {
+            console.error('❌ Failed to render checkout view:', error);
+            this.showMessage('Error cargando vista de checkout', 'error');
+            // Fallback: go back to media view
+            this.showView('media');
+            return;
+        }
 
         console.log('🎭 Proceeding to checkout with items:', Array.from(this.cart.values()));
     }
@@ -1765,10 +1776,15 @@ class ParodyCriticsApp {
 
     // Render selected media in checkout
     renderCheckoutMediaList() {
+        console.log('🎬 Rendering checkout media list...');
         const mediaList = document.getElementById('checkout-media-list');
-        if (!mediaList) return;
+        if (!mediaList) {
+            console.error('❌ Checkout media list element not found!');
+            return;
+        }
 
         if (this.cart.size === 0) {
+            console.log('🛒 Cart is empty, showing empty message');
             mediaList.innerHTML = `
                 <div class="empty-cart">
                     <p>🎬 No hay contenido seleccionado</p>
@@ -1777,6 +1793,10 @@ class ParodyCriticsApp {
             `;
             return;
         }
+
+        console.log(`🎬 Rendering ${this.cart.size} items in checkout`);
+
+        try {
 
         let html = '';
         this.cart.forEach((item, tmdbId) => {
@@ -1801,6 +1821,18 @@ class ParodyCriticsApp {
         });
 
         mediaList.innerHTML = html;
+        console.log('✅ Checkout media list rendered successfully');
+
+        } catch (error) {
+            console.error('❌ Error rendering checkout media list:', error);
+            mediaList.innerHTML = `
+                <div class="error-message">
+                    <p>❌ Error cargando contenido del carrito</p>
+                    <p><a href="#" onclick="app.showView('media')">← Volver a películas</a></p>
+                </div>
+            `;
+            throw error; // Re-throw to be caught by parent
+        }
     }
 
     // Remove from cart in checkout view
@@ -1812,11 +1844,17 @@ class ParodyCriticsApp {
 
     // Render critics selection
     async renderCriticsSelection() {
+        console.log('🎭 Rendering critics selection...');
         const criticsSelection = document.getElementById('critics-selection');
-        if (!criticsSelection) return;
+        if (!criticsSelection) {
+            console.error('❌ Critics selection element not found!');
+            return;
+        }
 
         try {
+            console.log('🌐 Fetching characters from API...');
             const characters = await this.fetchAPI('/characters');
+            console.log(`✅ Received ${characters.length} characters from API`);
 
             let html = '';
             characters.forEach(character => {
@@ -1838,15 +1876,17 @@ class ParodyCriticsApp {
             });
 
             criticsSelection.innerHTML = html;
+            console.log('✅ Critics selection rendered successfully');
 
         } catch (error) {
-            console.error('Error loading critics:', error);
+            console.error('❌ Error loading critics:', error);
             criticsSelection.innerHTML = `
                 <div class="error-message">
                     <p>❌ Error cargando críticos</p>
                     <p>Por favor recarga la página</p>
                 </div>
             `;
+            throw error; // Re-throw to be caught by parent
         }
     }
 
