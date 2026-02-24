@@ -172,6 +172,12 @@ class ParodyCriticsApp {
             targetView.classList.add('active');
             this.currentView = viewName;
 
+            // 🔥 NUCLEAR CSS FIX: Force checkout view to be visible
+            // This solves the CSS positioning issue where checkout appears at top: 1753px
+            if (viewName === 'checkout') {
+                this.forceCheckoutVisible(targetView);
+            }
+
             // Update navigation buttons
             const navButtons = document.querySelectorAll('.nav-btn');
             navButtons.forEach(btn => {
@@ -185,6 +191,26 @@ class ParodyCriticsApp {
             // Load view-specific data
             this.loadViewData(viewName);
         }
+    }
+
+    // 🔥 NUCLEAR CSS FIX: Force checkout view to be visible
+    // This method applies aggressive CSS styling to make checkout view visible
+    // Solves the positioning issue where checkout appears at top: 1753px
+    forceCheckoutVisible(checkoutView) {
+        console.log('🔥 Applying NUCLEAR CSS fix to make checkout visible...');
+
+        // Apply the nuclear CSS solution that we confirmed works
+        checkoutView.style.position = 'fixed';
+        checkoutView.style.top = '0';
+        checkoutView.style.left = '0';
+        checkoutView.style.width = '100%';
+        checkoutView.style.height = '100%';
+        checkoutView.style.zIndex = '9999';
+        checkoutView.style.backgroundColor = 'var(--bg-color, #121212)';
+        checkoutView.style.overflow = 'auto';
+        checkoutView.style.display = 'block';
+
+        console.log('✅ NUCLEAR CSS fix applied - checkout should now be visible');
     }
 
     async loadViewData(viewName) {
