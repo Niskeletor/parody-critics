@@ -74,6 +74,8 @@ class CharacterInfo(BaseModel):
     catchphrases: Optional[List] = []
     avoid: Optional[List] = []
     red_flags: Optional[List] = []
+    loves: Optional[List] = []
+    hates: Optional[List] = []
 
 class StatsResponse(BaseModel):
     """API statistics response"""
@@ -166,3 +168,5 @@ class CharacterDB(BaseModel):
     catchphrases: Optional[str] = '[]'  # JSON array string
     avoid: Optional[str] = '[]'         # JSON array string
     red_flags: Optional[str] = '[]'     # JSON array string
+    loves: Optional[str] = '[]'         # JSON array string
+    hates: Optional[str] = '[]'         # JSON array string

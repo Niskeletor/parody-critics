@@ -3215,9 +3215,13 @@ class ParodyCriticsApp {
       document.getElementById('character-emoji').value = character.emoji || '🎭';
       document.getElementById('character-personality').value = character.personality || '';
       document.getElementById('character-description').value = character.description || '';
+      document.getElementById('char-loves').value = (character.loves || []).join(', ');
+      document.getElementById('char-hates').value = (character.hates || []).join(', ');
     } else {
       form.reset();
       document.getElementById('character-emoji').value = '🎭';
+      document.getElementById('char-loves').value = '';
+      document.getElementById('char-hates').value = '';
     }
 
     // Show modal
@@ -3246,11 +3250,22 @@ class ParodyCriticsApp {
     const form = event.target;
     const formData = new FormData(form);
 
+    const lovesRaw = document.getElementById('char-loves').value;
+    const hatesRaw = document.getElementById('char-hates').value;
+
     const characterData = {
       name: formData.get('name').trim(),
       emoji: formData.get('emoji').trim() || '🎭',
       personality: formData.get('personality').trim(),
       description: formData.get('description').trim(),
+      loves: lovesRaw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+      hates: hatesRaw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
     };
 
     // Basic validation

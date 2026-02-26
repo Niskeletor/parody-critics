@@ -1,7 +1,8 @@
 """
-Media Enricher — fetches TMDB + Brave Search context for a media item
+Media Enricher — fetches TMDB + FilmAffinity/Letterboxd context for a media item
 and caches the result in media.enriched_context (JSON).
 """
+import html
 import json
 import sqlite3
 import urllib.parse
@@ -17,7 +18,7 @@ logger = get_logger("media_enricher")
 
 class MediaEnricher:
 
-    def __init__(self, db_path: str, tmdb_token: str, brave_key: str):
+    def __init__(self, db_path: str, tmdb_token: str, brave_key: str = ""):
         self.db_path = db_path
         self.tmdb_token = tmdb_token
         self.brave_key = brave_key
@@ -32,7 +33,7 @@ class MediaEnricher:
         logger.info(f"Enriching: {title} ({year}) — tmdb_id={tmdb_id}")
 
         tmdb_data   = await self._fetch_tmdb(tmdb_id, media_type)
-        brave_snips = await self._fetch_brave(
+        brave_snips = await self._fetch_social_snippets(
             tmdb_data.get("title") or tmdb_data.get("name") or title, year
         )
 
@@ -109,39 +110,101 @@ class MediaEnricher:
             return resp.json()
 
     # ─────────────────────────────────────────────────────────────
-    # Brave Search fetch
+    # Social snippet fetch (FilmAffinity + Letterboxd)
     # ─────────────────────────────────────────────────────────────
 
-    async def _fetch_brave(self, title: str, year: Optional[int]) -> list:
-        if not self.brave_key:
-            return []
-        year_str = str(year) if year else ""
-        query = f'"{title}" {year_str} critica opinion controversia reseña'.strip()
-        url = (
-            "https://api.search.brave.com/res/v1/web/search?"
-            + urllib.parse.urlencode({"q": query, "count": 5})
+    async def _fetch_social_snippets(self, title: str, year: Optional[int]) -> list:
+        """Fetch from FilmAffinity (ES) + Letterboxd (EN). No API key needed."""
+        import asyncio
+        fa, lb = await asyncio.gather(
+            self._fetch_filmaffinity(title, year),
+            self._fetch_letterboxd(title, year),
+            return_exceptions=True
         )
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.get(
-                url,
-                headers={
-                    "Accept": "application/json",
-                    "X-Subscription-Token": self.brave_key,
-                },
-            )
-            if resp.status_code == 429:
-                logger.warning("Brave API quota exceeded — skipping snippets for this item")
-                return []
-            resp.raise_for_status()
-            data = resp.json()
-
         snippets = []
-        for r in data.get("web", {}).get("results", []):
-            desc = r.get("description", "")
-            desc = desc.replace("<strong>", "").replace("</strong>", "").strip()
-            if desc:
-                snippets.append(desc[:250])
-        return snippets
+        if isinstance(fa, list): snippets.extend(fa)
+        if isinstance(lb, list): snippets.extend(lb)
+        return snippets[:6]
+
+    async def _fetch_filmaffinity(self, title: str, year: Optional[int]) -> list:
+        import asyncio, re, html as _html
+        def _search():
+            from ddgs import DDGS
+            query = f'"{title}" {year or ""} site:filmaffinity.com/es/reviews'.strip()
+            with DDGS() as d:
+                return d.text(query, max_results=4)
+        try:
+            results = await asyncio.to_thread(_search)
+            film_id = None
+            for r in (results or []):
+                m = re.search(r'/(\d{5,7})\.html', r.get('href',''))
+                if m:
+                    film_id = m.group(1)
+                    break
+            if not film_id:
+                return []
+            resp = await asyncio.to_thread(
+                lambda: __import__('httpx').get(
+                    f'https://www.filmaffinity.com/es/reviews/1/{film_id}.html',
+                    headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120'},
+                    timeout=10, follow_redirects=True
+                )
+            )
+            if resp.status_code != 200:
+                return []
+            texts = re.findall(r'>([^<>{}\n]{80,})<', resp.text)
+            clean = []
+            for t in texts:
+                t = _html.unescape(t.strip())
+                if len(t) > 80 and 'filmaffinity' not in t.lower() and 'cookie' not in t.lower():
+                    clean.append('[FA] ' + t[:240])
+            return clean[:3]
+        except Exception as e:
+            logger.warning(f"FilmAffinity fetch failed for {title}: {e}")
+            return []
+
+    async def _fetch_letterboxd(self, title: str, year: Optional[int]) -> list:
+        import asyncio, re, html as _html
+        def _search():
+            from ddgs import DDGS
+            query = f'"{title}" {year or ""} site:letterboxd.com/film'.strip()
+            with DDGS() as d:
+                return d.text(query, max_results=3)
+        try:
+            results = await asyncio.to_thread(_search)
+            slug = None
+            for r in (results or []):
+                m = re.search(r'letterboxd\.com/film/([^/\s]+)/?', r.get('href',''))
+                if m:
+                    slug = m.group(1)
+                    break
+            if not slug:
+                return []
+            resp = await asyncio.to_thread(
+                lambda: __import__('httpx').get(
+                    f'https://letterboxd.com/film/{slug}/',
+                    headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120'},
+                    timeout=10, follow_redirects=True
+                )
+            )
+            if resp.status_code != 200:
+                return []
+            texts = re.findall(r'>([^<>{}\n]{60,})<', resp.text)
+            clean = []
+            skip = {'letterboxd', 'sign in', 'create account', 'system.import', 'log in', 'films', 'lists', 'members'}
+            for t in texts:
+                t = _html.unescape(t.strip())
+                tl = t.lower()
+                if len(t) > 60 and not any(s in tl for s in skip) and '•' not in t:
+                    clean.append('[LB] ' + t[:200])
+            return clean[:3]
+        except Exception as e:
+            logger.warning(f"Letterboxd fetch failed for {title}: {e}")
+            return []
+
+    async def _fetch_brave(self, title: str, year: Optional[int]) -> list:
+        """Kept for reference. No-op — replaced by _fetch_social_snippets."""
+        return []
 
     # ─────────────────────────────────────────────────────────────
     # Context pack builder
