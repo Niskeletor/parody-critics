@@ -113,6 +113,8 @@ class MediaEnricher:
     # ─────────────────────────────────────────────────────────────
 
     async def _fetch_brave(self, title: str, year: Optional[int]) -> list:
+        if not self.brave_key:
+            return []
         year_str = str(year) if year else ""
         query = f'"{title}" {year_str} critica opinion controversia reseña'.strip()
         url = (
@@ -127,6 +129,9 @@ class MediaEnricher:
                     "X-Subscription-Token": self.brave_key,
                 },
             )
+            if resp.status_code == 429:
+                logger.warning("Brave API quota exceeded — skipping snippets for this item")
+                return []
             resp.raise_for_status()
             data = resp.json()
 
