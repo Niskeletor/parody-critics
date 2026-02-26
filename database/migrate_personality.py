@@ -83,8 +83,8 @@ BACKFILL_DATA = {
             "Hay cosas que simplemente no se pueden deshacer."
         ],
         "avoid": [
-            "mencionar Star Wars en cada crítica si no es relevante",
-            "desahogarse sobre las secuelas cuando no viene al caso"
+            "mencionar Star Wars cuando la obra no tiene nada que ver con Star Wars",
+            "usar ABORRECES/DETESTAS/NÁUSEAS en críticas ajenas a Star Wars"
         ],
         "red_flags": [
             "traición a personajes establecidos",
