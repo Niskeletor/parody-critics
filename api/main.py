@@ -1846,6 +1846,73 @@ async def delete_character_critics(character_id: str):
         setup_logger.error(f"❌ Error deleting critics for character {character_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error deleting critics: {str(e)}")
 
+@app.get("/api/characters/{character_id}/critics")
+async def get_character_critics(character_id: str):
+    """Get all critics written by a specific character, with media info"""
+    try:
+        character = db_manager.execute_query(
+            "SELECT id, name, emoji FROM characters WHERE id = ?",
+            (character_id,), fetch_one=True
+        )
+        if not character:
+            raise HTTPException(status_code=404, detail=f"Character not found: {character_id}")
+
+        rows = db_manager.execute_query("""
+            SELECT c.id, c.rating, c.content, c.generated_at,
+                   m.tmdb_id, m.title, m.year, m.type
+            FROM critics c
+            JOIN media m ON c.media_id = m.id
+            WHERE c.character_id = ?
+            ORDER BY c.generated_at DESC
+        """, (character_id,))
+
+        critics = []
+        for row in (rows or []):
+            critics.append({
+                "critic_id": row[0],
+                "rating": row[1],
+                "content": row[2],
+                "generated_at": row[3],
+                "tmdb_id": row[4],
+                "media_title": row[5],
+                "media_year": row[6],
+                "media_type": row[7],
+            })
+
+        return {
+            "character_id": character[0],
+            "character_name": character[1],
+            "character_emoji": character[2],
+            "total": len(critics),
+            "critics": critics,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching character critics: {str(e)}")
+
+
+@app.delete("/api/critics/batch")
+async def delete_critics_batch(data: dict = Body(...)):
+    """Delete multiple critics by ID list"""
+    try:
+        critic_ids = data.get("critic_ids", [])
+        if not critic_ids:
+            raise HTTPException(status_code=400, detail="critic_ids list is required")
+
+        placeholders = ",".join("?" * len(critic_ids))
+        db_manager.execute_query(
+            f"DELETE FROM critics WHERE id IN ({placeholders})", tuple(critic_ids)
+        )
+        return {"success": True, "deleted_count": len(critic_ids)}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting critics: {str(e)}")
+
+
 @app.delete("/api/critics/{critic_id}")
 async def delete_critic(critic_id: int):
     """Delete a single critic review by its ID"""
