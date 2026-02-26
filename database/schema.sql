@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS media (
     runtime INTEGER, -- En minutos
     vote_average REAL,
     vote_count INTEGER,
+    enriched_context TEXT,              -- JSON: TMDB + Brave context cache
+    enriched_at DATETIME,               -- When context was last fetched
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

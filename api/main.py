@@ -77,6 +77,54 @@ media_enricher: Optional[MediaEnricher] = None
 cancelled_enrichments: set = set()
 active_enrichment_session: Optional[str] = None
 
+def _run_auto_migrations(db_path: str):
+    """Idempotent: add any missing columns/tables introduced after initial schema."""
+    conn = sqlite3.connect(db_path)
+    try:
+        existing_media_cols = {r[1] for r in conn.execute("PRAGMA table_info(media)").fetchall()}
+        existing_char_cols  = {r[1] for r in conn.execute("PRAGMA table_info(characters)").fetchall()}
+        tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
+
+        migrations = []
+
+        # Enrichment columns (migrate_enrichment.py)
+        if "enriched_context" not in existing_media_cols:
+            migrations.append("ALTER TABLE media ADD COLUMN enriched_context TEXT")
+        if "enriched_at" not in existing_media_cols:
+            migrations.append("ALTER TABLE media ADD COLUMN enriched_at DATETIME")
+
+        # Personality / variation-engine columns (migrate_personality.py)
+        for col, default in [("motifs", "[]"), ("catchphrases", "[]"), ("avoid", "[]"), ("red_flags", "[]")]:
+            if col not in existing_char_cols:
+                migrations.append(f"ALTER TABLE characters ADD COLUMN {col} TEXT DEFAULT '{default}'")
+
+        # Motif history table
+        if "character_motif_history" not in tables:
+            migrations.append("""
+                CREATE TABLE character_motif_history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    character_id TEXT NOT NULL,
+                    motif TEXT NOT NULL,
+                    used_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE
+                )
+            """)
+            migrations.append("CREATE INDEX IF NOT EXISTS idx_motif_history_character ON character_motif_history(character_id)")
+            migrations.append("CREATE INDEX IF NOT EXISTS idx_motif_history_used_at ON character_motif_history(used_at)")
+
+        for sql in migrations:
+            conn.execute(sql)
+            setup_logger.info(f"Migration applied: {sql.strip()[:80]}")
+
+        if migrations:
+            conn.commit()
+            setup_logger.info(f"✅ Auto-migration: {len(migrations)} statement(s) applied")
+        else:
+            setup_logger.info("✅ Auto-migration: schema up to date")
+    finally:
+        conn.close()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan events"""
@@ -91,6 +139,9 @@ async def lifespan(app: FastAPI):
         raise RuntimeError("Database not initialized")
 
     print(f"✅ Database connected: {DB_PATH}")
+
+    # Auto-migrate: ensure all columns exist (idempotent)
+    _run_auto_migrations(str(DB_PATH))
 
     # Initialize Jellyfin sync manager from configuration
     sync_manager = JellyfinSyncManager(
