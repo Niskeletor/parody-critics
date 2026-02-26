@@ -20,6 +20,7 @@ class SyncStatus(str, Enum):
 
 class CriticResponse(BaseModel):
     """Single critic review response"""
+    critic_id: Optional[int] = None
     character_id: str
     author: str
     emoji: str
@@ -68,6 +69,7 @@ class CharacterInfo(BaseModel):
     description: str
     active: bool
     total_reviews: Optional[int] = 0
+    avg_rating: Optional[float] = None
 
 class StatsResponse(BaseModel):
     """API statistics response"""

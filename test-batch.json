@@ -1,0 +1,6 @@
+{
+  "media_items": [
+    {"tmdb_id": "tmdb_breaking_bad", "title": "Breaking Bad", "year": 2008, "type": "series"}
+  ],
+  "selected_critics": ["rosario_costras"]
+}

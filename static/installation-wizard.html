@@ -1,640 +1,662 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🧙‍♂️ Installation Wizard - Parody Critics</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/styles.css" />
     <style>
-        /* Wizard-specific styles */
-        .wizard-container {
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: var(--surface-color);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
+      /* Wizard-specific styles */
+      .wizard-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: var(--surface-color);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
 
-        .wizard-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
+      .wizard-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
 
-        .wizard-title {
-            font-size: 2.5rem;
-            color: var(--accent-color);
-            margin-bottom: 0.5rem;
-        }
+      .wizard-title {
+        font-size: 2.5rem;
+        color: var(--accent-color);
+        margin-bottom: 0.5rem;
+      }
 
-        .wizard-subtitle {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
+      .wizard-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+      }
 
-        /* Step navigation */
-        .step-nav {
-            display: flex;
-            justify-content: center;
-            margin: 2rem 0;
-            padding: 0;
-            list-style: none;
-        }
+      /* Step navigation */
+      .step-nav {
+        display: flex;
+        justify-content: center;
+        margin: 2rem 0;
+        padding: 0;
+        list-style: none;
+      }
 
-        .step-nav-item {
-            display: flex;
-            align-items: center;
-            margin: 0 1rem;
-            position: relative;
-        }
+      .step-nav-item {
+        display: flex;
+        align-items: center;
+        margin: 0 1rem;
+        position: relative;
+      }
 
-        .step-nav-item:not(:last-child)::after {
-            content: '';
-            width: 40px;
-            height: 2px;
-            background: var(--border-color);
-            margin-left: 1rem;
-        }
+      .step-nav-item:not(:last-child)::after {
+        content: '';
+        width: 40px;
+        height: 2px;
+        background: var(--border-color);
+        margin-left: 1rem;
+      }
 
-        .step-nav-item.completed::after {
-            background: var(--success-color);
-        }
+      .step-nav-item.completed::after {
+        background: var(--success-color);
+      }
 
-        .step-number {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            background: var(--border-color);
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-right: 0.5rem;
-            transition: all 0.3s ease;
-        }
+      .step-number {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: var(--border-color);
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-right: 0.5rem;
+        transition: all 0.3s ease;
+      }
 
-        .step-nav-item.active .step-number {
-            background: var(--accent-color);
-            color: white;
-        }
+      .step-nav-item.active .step-number {
+        background: var(--accent-color);
+        color: white;
+      }
 
-        .step-nav-item.completed .step-number {
-            background: var(--success-color);
-            color: white;
-        }
+      .step-nav-item.completed .step-number {
+        background: var(--success-color);
+        color: white;
+      }
 
-        .step-nav-item.completed .step-number::before {
-            content: '✓';
-            font-size: 0.8rem;
-        }
+      .step-nav-item.completed .step-number::before {
+        content: '✓';
+        font-size: 0.8rem;
+      }
 
-        .step-label {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            white-space: nowrap;
-        }
+      .step-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+      }
 
-        .step-nav-item.active .step-label {
-            color: var(--text-primary);
-            font-weight: 500;
-        }
+      .step-nav-item.active .step-label {
+        color: var(--text-primary);
+        font-weight: 500;
+      }
 
-        /* Step content */
-        .step-content {
-            display: none;
-            min-height: 400px;
-            padding: 2rem 0;
-        }
+      /* Step content */
+      .step-content {
+        display: none;
+        min-height: 400px;
+        padding: 2rem 0;
+      }
 
-        .step-content.active {
-            display: block;
-        }
+      .step-content.active {
+        display: block;
+      }
 
-        .step-title {
-            font-size: 1.8rem;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-            text-align: center;
-        }
+      .step-title {
+        font-size: 1.8rem;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        text-align: center;
+      }
 
-        .step-description {
-            color: var(--text-secondary);
-            text-align: center;
-            margin-bottom: 2rem;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+      .step-description {
+        color: var(--text-secondary);
+        text-align: center;
+        margin-bottom: 2rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+      }
 
-        /* Form styles */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
+      /* Form styles */
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
 
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--text-primary);
-        }
+      .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
 
-        .form-input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
+      .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+      }
 
-        .form-input:focus {
-            outline: none;
-            border-color: var(--accent-color);
-        }
+      .form-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+      }
 
-        .form-help {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 0.25rem;
-        }
+      .form-help {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+      }
 
-        .test-button {
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            margin-left: 0.5rem;
-            transition: all 0.3s ease;
-        }
+      .test-button {
+        background: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        margin-left: 0.5rem;
+        transition: all 0.3s ease;
+      }
 
-        .test-button:hover {
-            background: var(--accent-dark);
-        }
+      .test-button:hover {
+        background: var(--accent-dark);
+      }
 
-        .test-button:disabled {
-            background: var(--text-secondary);
-            cursor: not-allowed;
-        }
+      .test-button:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+      }
 
-        /* Status indicators */
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            font-size: 0.9rem;
-        }
+      /* Status indicators */
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        font-size: 0.9rem;
+      }
 
-        .status-indicator.success {
-            background: rgba(34, 197, 94, 0.1);
-            color: var(--success-color);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-        }
+      .status-indicator.success {
+        background: rgba(34, 197, 94, 0.1);
+        color: var(--success-color);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+      }
 
-        .status-indicator.error {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--error-color);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
+      .status-indicator.error {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--error-color);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
 
-        .status-indicator.loading {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-color);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
+      .status-indicator.loading {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--accent-color);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+      }
 
-        .status-icon {
-            margin-right: 0.5rem;
-            font-size: 1.1rem;
-        }
+      .status-icon {
+        margin-right: 0.5rem;
+        font-size: 1.1rem;
+      }
 
-        /* Model selection */
-        .model-selection {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-            margin: 1rem 0;
-        }
+      /* Model selection */
+      .model-selection {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+      }
 
-        .model-card {
-            padding: 1rem;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+      .model-card {
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
 
-        .model-card:hover {
-            border-color: var(--accent-color);
-        }
+      .model-card:hover {
+        border-color: var(--accent-color);
+      }
 
-        .model-card.selected {
-            border-color: var(--accent-color);
-            background: rgba(59, 130, 246, 0.05);
-        }
+      .model-card.selected {
+        border-color: var(--accent-color);
+        background: rgba(59, 130, 246, 0.05);
+      }
 
-        .model-name {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
+      .model-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+      }
 
-        .model-info {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
+      .model-info {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
 
-        /* Configuration review */
-        .config-preview {
-            background: var(--background-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            border: 1px solid var(--border-color);
-        }
+      /* Configuration review */
+      .config-preview {
+        background: var(--background-color);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border: 1px solid var(--border-color);
+      }
 
-        .config-section {
-            margin-bottom: 1.5rem;
-        }
+      .config-section {
+        margin-bottom: 1.5rem;
+      }
 
-        .config-section:last-child {
-            margin-bottom: 0;
-        }
+      .config-section:last-child {
+        margin-bottom: 0;
+      }
 
-        .config-section-title {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-        }
+      .config-section-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+      }
 
-        .config-section-title::before {
-            content: '';
-            width: 4px;
-            height: 4px;
-            background: var(--accent-color);
-            border-radius: 50%;
-            margin-right: 0.5rem;
-        }
+      .config-section-title::before {
+        content: '';
+        width: 4px;
+        height: 4px;
+        background: var(--accent-color);
+        border-radius: 50%;
+        margin-right: 0.5rem;
+      }
 
-        .config-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-        }
+      .config-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      }
 
-        .config-item:last-child {
-            border-bottom: none;
-        }
+      .config-item:last-child {
+        border-bottom: none;
+      }
 
-        .config-key {
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
+      .config-key {
+        font-weight: 500;
+        color: var(--text-secondary);
+      }
 
-        .config-value {
-            color: var(--text-primary);
-            font-family: monospace;
-            font-size: 0.9rem;
-        }
+      .config-value {
+        color: var(--text-primary);
+        font-family: monospace;
+        font-size: 0.9rem;
+      }
 
-        /* Navigation buttons */
-        .step-navigation {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-color);
-        }
+      /* Navigation buttons */
+      .step-navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+      }
 
-        .nav-button {
-            padding: 0.75rem 2rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+      .nav-button {
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
 
-        .nav-button.primary {
-            background: var(--accent-color);
-            color: white;
-        }
+      .nav-button.primary {
+        background: var(--accent-color);
+        color: white;
+      }
 
-        .nav-button.primary:hover {
-            background: var(--accent-dark);
-            transform: translateY(-2px);
-        }
+      .nav-button.primary:hover {
+        background: var(--accent-dark);
+        transform: translateY(-2px);
+      }
 
-        .nav-button.secondary {
-            background: var(--border-color);
-            color: var(--text-secondary);
-        }
+      .nav-button.secondary {
+        background: var(--border-color);
+        color: var(--text-secondary);
+      }
 
-        .nav-button.secondary:hover {
-            background: var(--text-secondary);
-            color: white;
-        }
+      .nav-button.secondary:hover {
+        background: var(--text-secondary);
+        color: white;
+      }
 
-        .nav-button:disabled {
-            background: var(--border-color);
-            color: var(--text-muted);
-            cursor: not-allowed;
-            transform: none;
-        }
+      .nav-button:disabled {
+        background: var(--border-color);
+        color: var(--text-muted);
+        cursor: not-allowed;
+        transform: none;
+      }
 
-        /* Loading animation */
-        .loading-spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--border-color);
-            border-radius: 50%;
-            border-top-color: currentColor;
-            animation: spin 1s ease-in-out infinite;
-        }
+      /* Loading animation */
+      .loading-spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--border-color);
+        border-radius: 50%;
+        border-top-color: currentColor;
+        animation: spin 1s ease-in-out infinite;
+      }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
         }
+      }
 
-        .hidden {
-            display: none;
-        }
+      .hidden {
+        display: none;
+      }
 
-        /* Success completion */
-        .completion-celebration {
-            text-align: center;
-            padding: 2rem;
-        }
+      /* Success completion */
+      .completion-celebration {
+        text-align: center;
+        padding: 2rem;
+      }
 
-        .celebration-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
+      .celebration-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+      }
 
-        .celebration-title {
-            font-size: 2rem;
-            color: var(--success-color);
-            margin-bottom: 1rem;
-        }
+      .celebration-title {
+        font-size: 2rem;
+        color: var(--success-color);
+        margin-bottom: 1rem;
+      }
 
-        .celebration-subtitle {
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-        }
+      .celebration-subtitle {
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+      }
 
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            color: var(--accent-color);
-            text-decoration: none;
-            margin-bottom: 2rem;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: var(--accent-color);
+        text-decoration: none;
+        margin-bottom: 2rem;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
 
-        .back-link:hover {
-            color: var(--accent-dark);
-        }
+      .back-link:hover {
+        color: var(--accent-dark);
+      }
 
-        .back-link::before {
-            content: "←";
-            margin-right: 0.5rem;
-        }
+      .back-link::before {
+        content: '←';
+        margin-right: 0.5rem;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="wizard-container">
-        <a href="/" class="back-link">Volver al Dashboard</a>
+      <a href="/" class="back-link">Volver al Dashboard</a>
 
-        <div class="wizard-header">
-            <h1 class="wizard-title">🧙‍♂️ Installation Wizard</h1>
-            <p class="wizard-subtitle">
-                Te guiaremos paso a paso para configurar Parody Critics en tu sistema.
-                Este proceso tomará unos minutos y configurará automáticamente todo lo necesario.
-            </p>
+      <div class="wizard-header">
+        <h1 class="wizard-title">🧙‍♂️ Installation Wizard</h1>
+        <p class="wizard-subtitle">
+          Te guiaremos paso a paso para configurar Parody Critics en tu sistema. Este proceso tomará
+          unos minutos y configurará automáticamente todo lo necesario.
+        </p>
+      </div>
+
+      <!-- Step Navigation -->
+      <ul class="step-nav">
+        <li class="step-nav-item active" data-step="1">
+          <div class="step-number">1</div>
+          <div class="step-label">Verificación</div>
+        </li>
+        <li class="step-nav-item" data-step="2">
+          <div class="step-number">2</div>
+          <div class="step-label">Jellyfin</div>
+        </li>
+        <li class="step-nav-item" data-step="3">
+          <div class="step-number">3</div>
+          <div class="step-label">LLM</div>
+        </li>
+        <li class="step-nav-item" data-step="4">
+          <div class="step-number">4</div>
+          <div class="step-label">Configuración</div>
+        </li>
+        <li class="step-nav-item" data-step="5">
+          <div class="step-number">5</div>
+          <div class="step-label">Finalizar</div>
+        </li>
+      </ul>
+
+      <!-- Step 1: System Check -->
+      <div class="step-content active" id="step-1">
+        <h2 class="step-title">🔍 Verificación del Sistema</h2>
+        <p class="step-description">
+          Primero verificaremos que tu sistema esté listo para ejecutar Parody Critics.
+        </p>
+
+        <div id="system-check-results">
+          <div class="status-indicator loading">
+            <span class="status-icon"><span class="loading-spinner"></span></span>
+            <span>Verificando sistema...</span>
+          </div>
         </div>
 
-        <!-- Step Navigation -->
-        <ul class="step-nav">
-            <li class="step-nav-item active" data-step="1">
-                <div class="step-number">1</div>
-                <div class="step-label">Verificación</div>
-            </li>
-            <li class="step-nav-item" data-step="2">
-                <div class="step-number">2</div>
-                <div class="step-label">Jellyfin</div>
-            </li>
-            <li class="step-nav-item" data-step="3">
-                <div class="step-number">3</div>
-                <div class="step-label">LLM</div>
-            </li>
-            <li class="step-nav-item" data-step="4">
-                <div class="step-number">4</div>
-                <div class="step-label">Configuración</div>
-            </li>
-            <li class="step-nav-item" data-step="5">
-                <div class="step-number">5</div>
-                <div class="step-label">Finalizar</div>
-            </li>
-        </ul>
+        <div class="step-navigation">
+          <button class="nav-button secondary" disabled>Anterior</button>
+          <button class="nav-button primary" id="next-step-1" disabled>Siguiente</button>
+        </div>
+      </div>
 
-        <!-- Step 1: System Check -->
-        <div class="step-content active" id="step-1">
-            <h2 class="step-title">🔍 Verificación del Sistema</h2>
-            <p class="step-description">
-                Primero verificaremos que tu sistema esté listo para ejecutar Parody Critics.
-            </p>
+      <!-- Step 2: Jellyfin Configuration -->
+      <div class="step-content" id="step-2">
+        <h2 class="step-title">🎬 Configuración de Jellyfin</h2>
+        <p class="step-description">
+          Configura la conexión a tu servidor Jellyfin para sincronizar películas y series.
+        </p>
 
-            <div id="system-check-results">
-                <div class="status-indicator loading">
-                    <span class="status-icon"><span class="loading-spinner"></span></span>
-                    <span>Verificando sistema...</span>
-                </div>
-            </div>
-
-            <div class="step-navigation">
-                <button class="nav-button secondary" disabled>Anterior</button>
-                <button class="nav-button primary" id="next-step-1" disabled>Siguiente</button>
-            </div>
+        <div class="form-group">
+          <label class="form-label" for="jellyfin-url">URL del Servidor Jellyfin</label>
+          <div style="display: flex; align-items: center">
+            <input
+              type="url"
+              class="form-input"
+              id="jellyfin-url"
+              placeholder="http://192.168.1.100:8096"
+              value="http://192.168.45.181:8097"
+            />
+            <button class="test-button" id="test-jellyfin">Probar</button>
+          </div>
+          <div class="form-help">URL completa de tu servidor Jellyfin incluyendo puerto</div>
         </div>
 
-        <!-- Step 2: Jellyfin Configuration -->
-        <div class="step-content" id="step-2">
-            <h2 class="step-title">🎬 Configuración de Jellyfin</h2>
-            <p class="step-description">
-                Configura la conexión a tu servidor Jellyfin para sincronizar películas y series.
-            </p>
-
-            <div class="form-group">
-                <label class="form-label" for="jellyfin-url">URL del Servidor Jellyfin</label>
-                <div style="display: flex; align-items: center;">
-                    <input type="url" class="form-input" id="jellyfin-url"
-                           placeholder="http://192.168.1.100:8096"
-                           value="http://192.168.45.181:8097">
-                    <button class="test-button" id="test-jellyfin">Probar</button>
-                </div>
-                <div class="form-help">URL completa de tu servidor Jellyfin incluyendo puerto</div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="jellyfin-token">API Token (Opcional)</label>
-                <input type="password" class="form-input" id="jellyfin-token"
-                       placeholder="Token de API para acceso avanzado">
-                <div class="form-help">Opcional: Token para acceso a información de usuarios</div>
-            </div>
-
-            <div id="jellyfin-test-result"></div>
-
-            <div class="step-navigation">
-                <button class="nav-button secondary" id="prev-step-2">Anterior</button>
-                <button class="nav-button primary" id="next-step-2" disabled>Siguiente</button>
-            </div>
+        <div class="form-group">
+          <label class="form-label" for="jellyfin-token">API Token (Opcional)</label>
+          <input
+            type="password"
+            class="form-input"
+            id="jellyfin-token"
+            placeholder="Token de API para acceso avanzado"
+          />
+          <div class="form-help">Opcional: Token para acceso a información de usuarios</div>
         </div>
 
-        <!-- Step 3: LLM Configuration -->
-        <div class="step-content" id="step-3">
-            <h2 class="step-title">🤖 Configuración de LLM</h2>
-            <p class="step-description">
-                Configura la conexión a Ollama para generar las críticas con IA.
-            </p>
+        <div id="jellyfin-test-result"></div>
 
-            <div class="form-group">
-                <label class="form-label" for="ollama-url">URL del Servidor Ollama</label>
-                <div style="display: flex; align-items: center;">
-                    <input type="url" class="form-input" id="ollama-url"
-                           placeholder="http://192.168.1.100:11434"
-                           value="http://192.168.45.104:11434">
-                    <button class="test-button" id="test-ollama">Detectar Modelos</button>
-                </div>
-                <div class="form-help">URL de tu servidor Ollama</div>
-            </div>
+        <div class="step-navigation">
+          <button class="nav-button secondary" id="prev-step-2">Anterior</button>
+          <button class="nav-button primary" id="next-step-2" disabled>Siguiente</button>
+        </div>
+      </div>
 
-            <div id="ollama-test-result"></div>
+      <!-- Step 3: LLM Configuration -->
+      <div class="step-content" id="step-3">
+        <h2 class="step-title">🤖 Configuración de LLM</h2>
+        <p class="step-description">
+          Configura la conexión a Ollama para generar las críticas con IA.
+        </p>
 
-            <div id="model-selection" class="hidden">
-                <h3>Selección de Modelos</h3>
-                <div class="form-group">
-                    <label class="form-label">Modelo Primario</label>
-                    <div class="model-selection" id="primary-models"></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Modelo Secundario (Respaldo)</label>
-                    <div class="model-selection" id="secondary-models"></div>
-                </div>
-            </div>
-
-            <div class="step-navigation">
-                <button class="nav-button secondary" id="prev-step-3">Anterior</button>
-                <button class="nav-button primary" id="next-step-3" disabled>Siguiente</button>
-            </div>
+        <div class="form-group">
+          <label class="form-label" for="ollama-url">URL del Servidor Ollama</label>
+          <div style="display: flex; align-items: center">
+            <input
+              type="url"
+              class="form-input"
+              id="ollama-url"
+              placeholder="http://192.168.1.100:11434"
+              value="http://192.168.45.104:11434"
+            />
+            <button class="test-button" id="test-ollama">Detectar Modelos</button>
+          </div>
+          <div class="form-help">URL de tu servidor Ollama</div>
         </div>
 
-        <!-- Step 4: Configuration Review -->
-        <div class="step-content" id="step-4">
-            <h2 class="step-title">📋 Revisión de Configuración</h2>
-            <p class="step-description">
-                Revisa la configuración antes de guardarla. Puedes volver atrás para hacer cambios.
-            </p>
+        <div id="ollama-test-result"></div>
 
-            <div class="config-preview" id="config-preview">
-                <!-- Configuration will be populated here -->
-            </div>
-
-            <div class="step-navigation">
-                <button class="nav-button secondary" id="prev-step-4">Anterior</button>
-                <button class="nav-button primary" id="save-config">Guardar Configuración</button>
-            </div>
+        <div id="model-selection" class="hidden">
+          <h3>Selección de Modelos</h3>
+          <div class="form-group">
+            <label class="form-label">Modelo Primario</label>
+            <div class="model-selection" id="primary-models"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Modelo Secundario (Respaldo)</label>
+            <div class="model-selection" id="secondary-models"></div>
+          </div>
         </div>
 
-        <!-- Step 5: Completion -->
-        <div class="step-content" id="step-5">
-            <div class="completion-celebration">
-                <div class="celebration-icon">🎉</div>
-                <h2 class="celebration-title">¡Instalación Completada!</h2>
-                <p class="celebration-subtitle">
-                    Parody Critics ha sido configurado exitosamente en tu sistema.
-                </p>
-
-                <div id="completion-details">
-                    <!-- Completion details will be shown here -->
-                </div>
-
-                <div class="step-navigation" style="justify-content: center;">
-                    <a href="/" class="nav-button primary">Ir al Dashboard</a>
-                </div>
-            </div>
+        <div class="step-navigation">
+          <button class="nav-button secondary" id="prev-step-3">Anterior</button>
+          <button class="nav-button primary" id="next-step-3" disabled>Siguiente</button>
         </div>
+      </div>
+
+      <!-- Step 4: Configuration Review -->
+      <div class="step-content" id="step-4">
+        <h2 class="step-title">📋 Revisión de Configuración</h2>
+        <p class="step-description">
+          Revisa la configuración antes de guardarla. Puedes volver atrás para hacer cambios.
+        </p>
+
+        <div class="config-preview" id="config-preview">
+          <!-- Configuration will be populated here -->
+        </div>
+
+        <div class="step-navigation">
+          <button class="nav-button secondary" id="prev-step-4">Anterior</button>
+          <button class="nav-button primary" id="save-config">Guardar Configuración</button>
+        </div>
+      </div>
+
+      <!-- Step 5: Completion -->
+      <div class="step-content" id="step-5">
+        <div class="completion-celebration">
+          <div class="celebration-icon">🎉</div>
+          <h2 class="celebration-title">¡Instalación Completada!</h2>
+          <p class="celebration-subtitle">
+            Parody Critics ha sido configurado exitosamente en tu sistema.
+          </p>
+
+          <div id="completion-details">
+            <!-- Completion details will be shown here -->
+          </div>
+
+          <div class="step-navigation" style="justify-content: center">
+            <a href="/" class="nav-button primary">Ir al Dashboard</a>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        // Installation Wizard JavaScript
-        class InstallationWizard {
-            constructor() {
-                this.currentStep = 1;
-                this.totalSteps = 5;
-                this.config = {};
-                this.availableModels = [];
+      // Installation Wizard JavaScript
+      class InstallationWizard {
+        constructor() {
+          this.currentStep = 1;
+          this.totalSteps = 5;
+          this.config = {};
+          this.availableModels = [];
 
-                this.init();
-            }
+          this.init();
+        }
 
-            init() {
-                this.bindEvents();
-                this.startSystemCheck();
-            }
+        init() {
+          this.bindEvents();
+          this.startSystemCheck();
+        }
 
-            bindEvents() {
-                // Step navigation
-                document.getElementById('next-step-1').addEventListener('click', () => this.nextStep());
-                document.getElementById('prev-step-2').addEventListener('click', () => this.prevStep());
-                document.getElementById('next-step-2').addEventListener('click', () => this.nextStep());
-                document.getElementById('prev-step-3').addEventListener('click', () => this.prevStep());
-                document.getElementById('next-step-3').addEventListener('click', () => this.nextStep());
-                document.getElementById('prev-step-4').addEventListener('click', () => this.prevStep());
-                document.getElementById('save-config').addEventListener('click', () => this.saveConfiguration());
+        bindEvents() {
+          // Step navigation
+          document.getElementById('next-step-1').addEventListener('click', () => this.nextStep());
+          document.getElementById('prev-step-2').addEventListener('click', () => this.prevStep());
+          document.getElementById('next-step-2').addEventListener('click', () => this.nextStep());
+          document.getElementById('prev-step-3').addEventListener('click', () => this.prevStep());
+          document.getElementById('next-step-3').addEventListener('click', () => this.nextStep());
+          document.getElementById('prev-step-4').addEventListener('click', () => this.prevStep());
+          document
+            .getElementById('save-config')
+            .addEventListener('click', () => this.saveConfiguration());
 
-                // Test buttons
-                document.getElementById('test-jellyfin').addEventListener('click', () => this.testJellyfin());
-                document.getElementById('test-ollama').addEventListener('click', () => this.testOllama());
+          // Test buttons
+          document
+            .getElementById('test-jellyfin')
+            .addEventListener('click', () => this.testJellyfin());
+          document.getElementById('test-ollama').addEventListener('click', () => this.testOllama());
 
-                // Form inputs
-                document.getElementById('jellyfin-url').addEventListener('input', () => this.validateJellyfinStep());
-                document.getElementById('ollama-url').addEventListener('input', () => this.validateOllamaStep());
-            }
+          // Form inputs
+          document
+            .getElementById('jellyfin-url')
+            .addEventListener('input', () => this.validateJellyfinStep());
+          document
+            .getElementById('ollama-url')
+            .addEventListener('input', () => this.validateOllamaStep());
+        }
 
-            async startSystemCheck() {
-                try {
-                    const response = await fetch('/api/setup/check-requirements', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
+        async startSystemCheck() {
+          try {
+            const response = await fetch('/api/setup/check-requirements', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+            });
 
-                    const result = await response.json();
-                    this.displaySystemCheckResult(result);
-                } catch (error) {
-                    this.displaySystemCheckError(error);
-                }
-            }
+            const result = await response.json();
+            this.displaySystemCheckResult(result);
+          } catch (error) {
+            this.displaySystemCheckError(error);
+          }
+        }
 
-            displaySystemCheckResult(result) {
-                const container = document.getElementById('system-check-results');
+        displaySystemCheckResult(result) {
+          const container = document.getElementById('system-check-results');
 
-                if (result.overall_status === 'healthy') {
-                    container.innerHTML = `
+          if (result.overall_status === 'healthy') {
+            container.innerHTML = `
                         <div class="status-indicator success">
                             <span class="status-icon">✅</span>
                             <span>Sistema listo para la instalación</span>
@@ -646,348 +668,376 @@
                         </div>
                     `;
 
-                    document.getElementById('next-step-1').disabled = false;
-                } else {
-                    container.innerHTML = `
+            document.getElementById('next-step-1').disabled = false;
+          } else {
+            container.innerHTML = `
                         <div class="status-indicator error">
                             <span class="status-icon">❌</span>
                             <span>Sistema no está listo</span>
                         </div>
                     `;
-                }
-            }
+          }
+        }
 
-            displaySystemCheckError(error) {
-                const container = document.getElementById('system-check-results');
-                container.innerHTML = `
+        displaySystemCheckError(error) {
+          const container = document.getElementById('system-check-results');
+          container.innerHTML = `
                     <div class="status-indicator error">
                         <span class="status-icon">❌</span>
                         <span>Error verificando sistema: ${error.message}</span>
                     </div>
                 `;
-            }
+        }
 
-            async testJellyfin() {
-                const url = document.getElementById('jellyfin-url').value;
-                const token = document.getElementById('jellyfin-token').value;
-                const button = document.getElementById('test-jellyfin');
-                const resultDiv = document.getElementById('jellyfin-test-result');
+        async testJellyfin() {
+          const url = document.getElementById('jellyfin-url').value;
+          const token = document.getElementById('jellyfin-token').value;
+          const button = document.getElementById('test-jellyfin');
+          const resultDiv = document.getElementById('jellyfin-test-result');
 
-                if (!url) {
-                    resultDiv.innerHTML = `
+          if (!url) {
+            resultDiv.innerHTML = `
                         <div class="status-indicator error">
                             <span class="status-icon">❌</span>
                             <span>Por favor ingresa una URL</span>
                         </div>
                     `;
-                    return;
-                }
+            return;
+          }
 
-                button.disabled = true;
-                button.textContent = 'Probando...';
+          button.disabled = true;
+          button.textContent = 'Probando...';
 
-                resultDiv.innerHTML = `
+          resultDiv.innerHTML = `
                     <div class="status-indicator loading">
                         <span class="status-icon"><span class="loading-spinner"></span></span>
                         <span>Conectando a Jellyfin...</span>
                     </div>
                 `;
 
-                try {
-                    const response = await fetch('/api/setup/test-jellyfin', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ url, api_token: token })
-                    });
+          try {
+            const response = await fetch('/api/setup/test-jellyfin', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url, api_token: token }),
+            });
 
-                    const result = await response.json();
+            const result = await response.json();
 
-                    if (result.success) {
-                        this.config.jellyfin = { url, api_token: token, ...result };
+            if (result.success) {
+              this.config.jellyfin = { url, api_token: token, ...result };
 
-                        resultDiv.innerHTML = `
+              resultDiv.innerHTML = `
                             <div class="status-indicator success">
                                 <span class="status-icon">✅</span>
                                 <span>${result.message}</span>
                             </div>
                         `;
 
-                        document.getElementById('next-step-2').disabled = false;
-                    } else {
-                        resultDiv.innerHTML = `
+              document.getElementById('next-step-2').disabled = false;
+            } else {
+              resultDiv.innerHTML = `
                             <div class="status-indicator error">
                                 <span class="status-icon">❌</span>
                                 <span>${result.error}</span>
                             </div>
                             ${result.suggestion ? `<div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">💡 ${result.suggestion}</div>` : ''}
                         `;
-                    }
-                } catch (error) {
-                    resultDiv.innerHTML = `
+            }
+          } catch (error) {
+            resultDiv.innerHTML = `
                         <div class="status-indicator error">
                             <span class="status-icon">❌</span>
                             <span>Error de conexión: ${error.message}</span>
                         </div>
                     `;
-                } finally {
-                    button.disabled = false;
-                    button.textContent = 'Probar';
-                }
-            }
+          } finally {
+            button.disabled = false;
+            button.textContent = 'Probar';
+          }
+        }
 
-            async testOllama() {
-                const url = document.getElementById('ollama-url').value;
-                const button = document.getElementById('test-ollama');
-                const resultDiv = document.getElementById('ollama-test-result');
+        async testOllama() {
+          const url = document.getElementById('ollama-url').value;
+          const button = document.getElementById('test-ollama');
+          const resultDiv = document.getElementById('ollama-test-result');
 
-                if (!url) {
-                    resultDiv.innerHTML = `
+          if (!url) {
+            resultDiv.innerHTML = `
                         <div class="status-indicator error">
                             <span class="status-icon">❌</span>
                             <span>Por favor ingresa una URL</span>
                         </div>
                     `;
-                    return;
-                }
+            return;
+          }
 
-                button.disabled = true;
-                button.textContent = 'Detectando...';
+          button.disabled = true;
+          button.textContent = 'Detectando...';
 
-                resultDiv.innerHTML = `
+          resultDiv.innerHTML = `
                     <div class="status-indicator loading">
                         <span class="status-icon"><span class="loading-spinner"></span></span>
                         <span>Conectando a Ollama...</span>
                     </div>
                 `;
 
-                try {
-                    const response = await fetch('/api/setup/test-ollama', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ url })
-                    });
+          try {
+            const response = await fetch('/api/setup/test-ollama', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url }),
+            });
 
-                    const result = await response.json();
+            const result = await response.json();
 
-                    if (result.success) {
-                        this.config.ollama = { url, ...result };
-                        this.availableModels = result.models;
+            if (result.success) {
+              this.config.ollama = { url, ...result };
+              this.availableModels = result.models;
 
-                        resultDiv.innerHTML = `
+              resultDiv.innerHTML = `
                             <div class="status-indicator success">
                                 <span class="status-icon">✅</span>
                                 <span>${result.message}</span>
                             </div>
                         `;
 
-                        this.showModelSelection(result.models, result.suggested_primary, result.suggested_secondary);
-                    } else {
-                        resultDiv.innerHTML = `
+              this.showModelSelection(
+                result.models,
+                result.suggested_primary,
+                result.suggested_secondary
+              );
+            } else {
+              resultDiv.innerHTML = `
                             <div class="status-indicator error">
                                 <span class="status-icon">❌</span>
                                 <span>${result.error}</span>
                             </div>
                             ${result.suggestion ? `<div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">💡 ${result.suggestion}</div>` : ''}
                         `;
-                    }
-                } catch (error) {
-                    resultDiv.innerHTML = `
+            }
+          } catch (error) {
+            resultDiv.innerHTML = `
                         <div class="status-indicator error">
                             <span class="status-icon">❌</span>
                             <span>Error de conexión: ${error.message}</span>
                         </div>
                     `;
-                } finally {
-                    button.disabled = false;
-                    button.textContent = 'Detectar Modelos';
-                }
-            }
+          } finally {
+            button.disabled = false;
+            button.textContent = 'Detectar Modelos';
+          }
+        }
 
-            showModelSelection(models, suggestedPrimary, suggestedSecondary) {
-                const modelSelectionDiv = document.getElementById('model-selection');
-                const primaryDiv = document.getElementById('primary-models');
-                const secondaryDiv = document.getElementById('secondary-models');
+        showModelSelection(models, suggestedPrimary, suggestedSecondary) {
+          const modelSelectionDiv = document.getElementById('model-selection');
+          const primaryDiv = document.getElementById('primary-models');
+          const secondaryDiv = document.getElementById('secondary-models');
 
-                // Create model cards for primary
-                primaryDiv.innerHTML = models.map(model => `
+          // Create model cards for primary
+          primaryDiv.innerHTML = models
+            .map(
+              (model) => `
                     <div class="model-card ${model.name === suggestedPrimary ? 'selected' : ''}"
                          data-model="${model.name}" data-type="primary">
                         <div class="model-name">${model.name}</div>
                         <div class="model-info">${model.size_gb}</div>
                     </div>
-                `).join('');
+                `
+            )
+            .join('');
 
-                // Create model cards for secondary
-                secondaryDiv.innerHTML = models.map(model => `
+          // Create model cards for secondary
+          secondaryDiv.innerHTML = models
+            .map(
+              (model) => `
                     <div class="model-card ${model.name === suggestedSecondary ? 'selected' : ''}"
                          data-model="${model.name}" data-type="secondary">
                         <div class="model-name">${model.name}</div>
                         <div class="model-info">${model.size_gb}</div>
                     </div>
-                `).join('');
+                `
+            )
+            .join('');
 
-                // Set initial selection
-                this.config.llm_primary_model = suggestedPrimary;
-                this.config.llm_secondary_model = suggestedSecondary;
+          // Set initial selection
+          this.config.llm_primary_model = suggestedPrimary;
+          this.config.llm_secondary_model = suggestedSecondary;
 
-                // Bind click events
-                document.querySelectorAll('.model-card').forEach(card => {
-                    card.addEventListener('click', () => {
-                        const modelName = card.dataset.model;
-                        const type = card.dataset.type;
+          // Bind click events
+          document.querySelectorAll('.model-card').forEach((card) => {
+            card.addEventListener('click', () => {
+              const modelName = card.dataset.model;
+              const type = card.dataset.type;
 
-                        // Deselect other cards of the same type
-                        document.querySelectorAll(`[data-type="${type}"]`).forEach(c => c.classList.remove('selected'));
-                        card.classList.add('selected');
+              // Deselect other cards of the same type
+              document
+                .querySelectorAll(`[data-type="${type}"]`)
+                .forEach((c) => c.classList.remove('selected'));
+              card.classList.add('selected');
 
-                        // Update config
-                        if (type === 'primary') {
-                            this.config.llm_primary_model = modelName;
-                        } else {
-                            this.config.llm_secondary_model = modelName;
-                        }
+              // Update config
+              if (type === 'primary') {
+                this.config.llm_primary_model = modelName;
+              } else {
+                this.config.llm_secondary_model = modelName;
+              }
 
-                        this.validateOllamaStep();
-                    });
-                });
+              this.validateOllamaStep();
+            });
+          });
 
-                modelSelectionDiv.classList.remove('hidden');
-                this.validateOllamaStep();
-            }
+          modelSelectionDiv.classList.remove('hidden');
+          this.validateOllamaStep();
+        }
 
-            validateJellyfinStep() {
-                const hasConfig = this.config.jellyfin && this.config.jellyfin.success;
-                document.getElementById('next-step-2').disabled = !hasConfig;
-            }
+        validateJellyfinStep() {
+          const hasConfig = this.config.jellyfin && this.config.jellyfin.success;
+          document.getElementById('next-step-2').disabled = !hasConfig;
+        }
 
-            validateOllamaStep() {
-                const hasConfig = this.config.ollama && this.config.ollama.success;
-                const hasModels = this.config.llm_primary_model && this.config.llm_secondary_model;
-                document.getElementById('next-step-3').disabled = !(hasConfig && hasModels);
-            }
+        validateOllamaStep() {
+          const hasConfig = this.config.ollama && this.config.ollama.success;
+          const hasModels = this.config.llm_primary_model && this.config.llm_secondary_model;
+          document.getElementById('next-step-3').disabled = !(hasConfig && hasModels);
+        }
 
-            nextStep() {
-                if (this.currentStep < this.totalSteps) {
-                    this.goToStep(this.currentStep + 1);
-                }
-            }
+        nextStep() {
+          if (this.currentStep < this.totalSteps) {
+            this.goToStep(this.currentStep + 1);
+          }
+        }
 
-            prevStep() {
-                if (this.currentStep > 1) {
-                    this.goToStep(this.currentStep - 1);
-                }
-            }
+        prevStep() {
+          if (this.currentStep > 1) {
+            this.goToStep(this.currentStep - 1);
+          }
+        }
 
-            goToStep(step) {
-                // Hide current step
-                document.getElementById(`step-${this.currentStep}`).classList.remove('active');
-                document.querySelector(`[data-step="${this.currentStep}"]`).classList.remove('active');
+        goToStep(step) {
+          // Hide current step
+          document.getElementById(`step-${this.currentStep}`).classList.remove('active');
+          document.querySelector(`[data-step="${this.currentStep}"]`).classList.remove('active');
 
-                // Show new step
-                this.currentStep = step;
-                document.getElementById(`step-${this.currentStep}`).classList.add('active');
-                document.querySelector(`[data-step="${this.currentStep}"]`).classList.add('active');
+          // Show new step
+          this.currentStep = step;
+          document.getElementById(`step-${this.currentStep}`).classList.add('active');
+          document.querySelector(`[data-step="${this.currentStep}"]`).classList.add('active');
 
-                // Mark previous steps as completed
-                for (let i = 1; i < this.currentStep; i++) {
-                    document.querySelector(`[data-step="${i}"]`).classList.add('completed');
-                }
+          // Mark previous steps as completed
+          for (let i = 1; i < this.currentStep; i++) {
+            document.querySelector(`[data-step="${i}"]`).classList.add('completed');
+          }
 
-                // Special handling for step 4 (configuration review)
-                if (step === 4) {
-                    this.showConfigurationPreview();
-                }
-            }
+          // Special handling for step 4 (configuration review)
+          if (step === 4) {
+            this.showConfigurationPreview();
+          }
+        }
 
-            showConfigurationPreview() {
-                const preview = document.getElementById('config-preview');
+        showConfigurationPreview() {
+          const preview = document.getElementById('config-preview');
 
-                const configSections = [
-                    {
-                        title: '🎬 Jellyfin Configuration',
-                        items: [
-                            { key: 'URL', value: this.config.jellyfin.url },
-                            { key: 'Server', value: `${this.config.jellyfin.server_name} v${this.config.jellyfin.version}` },
-                            { key: 'API Token', value: this.config.jellyfin.api_token ? '***' : 'No configurado' }
-                        ]
-                    },
-                    {
-                        title: '🤖 LLM Configuration',
-                        items: [
-                            { key: 'URL', value: this.config.ollama.url },
-                            { key: 'Models Available', value: `${this.config.ollama.models_count} modelos` },
-                            { key: 'Primary Model', value: this.config.llm_primary_model },
-                            { key: 'Secondary Model', value: this.config.llm_secondary_model }
-                        ]
-                    }
-                ];
+          const configSections = [
+            {
+              title: '🎬 Jellyfin Configuration',
+              items: [
+                { key: 'URL', value: this.config.jellyfin.url },
+                {
+                  key: 'Server',
+                  value: `${this.config.jellyfin.server_name} v${this.config.jellyfin.version}`,
+                },
+                {
+                  key: 'API Token',
+                  value: this.config.jellyfin.api_token ? '***' : 'No configurado',
+                },
+              ],
+            },
+            {
+              title: '🤖 LLM Configuration',
+              items: [
+                { key: 'URL', value: this.config.ollama.url },
+                { key: 'Models Available', value: `${this.config.ollama.models_count} modelos` },
+                { key: 'Primary Model', value: this.config.llm_primary_model },
+                { key: 'Secondary Model', value: this.config.llm_secondary_model },
+              ],
+            },
+          ];
 
-                preview.innerHTML = configSections.map(section => `
+          preview.innerHTML = configSections
+            .map(
+              (section) => `
                     <div class="config-section">
                         <div class="config-section-title">${section.title}</div>
-                        ${section.items.map(item => `
+                        ${section.items
+                          .map(
+                            (item) => `
                             <div class="config-item">
                                 <span class="config-key">${item.key}</span>
                                 <span class="config-value">${item.value}</span>
                             </div>
-                        `).join('')}
+                        `
+                          )
+                          .join('')}
                     </div>
-                `).join('');
+                `
+            )
+            .join('');
+        }
+
+        async saveConfiguration() {
+          const saveButton = document.getElementById('save-config');
+          saveButton.disabled = true;
+          saveButton.textContent = 'Guardando...';
+
+          try {
+            // Prepare configuration object
+            const configToSave = {
+              JELLYFIN_URL: this.config.jellyfin.url,
+              JELLYFIN_API_TOKEN: this.config.jellyfin.api_token || '',
+              LLM_OLLAMA_URL: this.config.ollama.url,
+              LLM_PRIMARY_MODEL: this.config.llm_primary_model,
+              LLM_SECONDARY_MODEL: this.config.llm_secondary_model,
+              LLM_TIMEOUT: '180',
+              LLM_MAX_RETRIES: '2',
+              LLM_ENABLE_FALLBACK: 'true',
+            };
+
+            // Save configuration
+            const saveResponse = await fetch('/api/setup/save-configuration', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(configToSave),
+            });
+
+            const saveResult = await saveResponse.json();
+
+            if (saveResult.success) {
+              // Initialize database
+              const initResponse = await fetch('/api/setup/initialize-database', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+              });
+
+              const initResult = await initResponse.json();
+
+              // Show completion
+              this.showCompletion(saveResult, initResult);
+              this.goToStep(5);
+            } else {
+              alert('Error guardando configuración: ' + saveResult.detail);
             }
+          } catch (error) {
+            alert('Error: ' + error.message);
+          } finally {
+            saveButton.disabled = false;
+            saveButton.textContent = 'Guardar Configuración';
+          }
+        }
 
-            async saveConfiguration() {
-                const saveButton = document.getElementById('save-config');
-                saveButton.disabled = true;
-                saveButton.textContent = 'Guardando...';
-
-                try {
-                    // Prepare configuration object
-                    const configToSave = {
-                        JELLYFIN_URL: this.config.jellyfin.url,
-                        JELLYFIN_API_TOKEN: this.config.jellyfin.api_token || '',
-                        LLM_OLLAMA_URL: this.config.ollama.url,
-                        LLM_PRIMARY_MODEL: this.config.llm_primary_model,
-                        LLM_SECONDARY_MODEL: this.config.llm_secondary_model,
-                        LLM_TIMEOUT: '180',
-                        LLM_MAX_RETRIES: '2',
-                        LLM_ENABLE_FALLBACK: 'true'
-                    };
-
-                    // Save configuration
-                    const saveResponse = await fetch('/api/setup/save-configuration', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(configToSave)
-                    });
-
-                    const saveResult = await saveResponse.json();
-
-                    if (saveResult.success) {
-                        // Initialize database
-                        const initResponse = await fetch('/api/setup/initialize-database', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-
-                        const initResult = await initResponse.json();
-
-                        // Show completion
-                        this.showCompletion(saveResult, initResult);
-                        this.goToStep(5);
-                    } else {
-                        alert('Error guardando configuración: ' + saveResult.detail);
-                    }
-                } catch (error) {
-                    alert('Error: ' + error.message);
-                } finally {
-                    saveButton.disabled = false;
-                    saveButton.textContent = 'Guardar Configuración';
-                }
-            }
-
-            showCompletion(saveResult, initResult) {
-                const details = document.getElementById('completion-details');
-                details.innerHTML = `
+        showCompletion(saveResult, initResult) {
+          const details = document.getElementById('completion-details');
+          details.innerHTML = `
                     <div class="config-preview">
                         <div class="config-section">
                             <div class="config-section-title">📁 Archivos Creados</div>
@@ -1007,13 +1057,13 @@
                         </div>
                     </div>
                 `;
-            }
         }
+      }
 
-        // Initialize wizard when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            new InstallationWizard();
-        });
+      // Initialize wizard when page loads
+      document.addEventListener('DOMContentLoaded', () => {
+        new InstallationWizard();
+      });
     </script>
-</body>
+  </body>
 </html>

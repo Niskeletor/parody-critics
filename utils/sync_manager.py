@@ -205,12 +205,26 @@ class SyncManager:
             Tuple of (was_inserted, was_updated)
         """
         try:
-            # Check if item exists
+            # Skip items with no TMDB ID (personal content, unidentified files)
+            if not media_info.get('tmdb_id'):
+                return False, False
+
+            # Check if item exists by jellyfin_id
             cursor = self.db_connection.execute(
                 "SELECT id FROM media WHERE jellyfin_id = ?",
                 (media_info['jellyfin_id'],)
             )
             existing = cursor.fetchone()
+
+            # Also check for duplicate tmdb_id with a different jellyfin_id
+            # (same movie in multiple languages/editions in Jellyfin)
+            if not existing:
+                cursor = self.db_connection.execute(
+                    "SELECT id FROM media WHERE tmdb_id = ?",
+                    (media_info['tmdb_id'],)
+                )
+                if cursor.fetchone():
+                    return False, False  # Already imported under a different jellyfin_id
 
             if existing:
                 # Update existing item
@@ -261,7 +275,9 @@ class SyncManager:
         self,
         library_id: Optional[str] = None,
         item_types: Optional[List[str]] = None,
-        page_size: int = 100
+        page_size: int = 100,
+        ws_progress_callback=None,
+        ws_error_callback=None
     ) -> Dict[str, Any]:
         """
         Synchronize Jellyfin library with local database
@@ -336,16 +352,33 @@ class SyncManager:
                             items_unchanged += 1
                             progress.record_unchanged_item(item_title)
 
+                        # Report real-time progress via WebSocket callback
+                        if ws_progress_callback:
+                            try:
+                                estimated_total = max(total_pages * page_size, items_processed)
+                                await ws_progress_callback(
+                                    items_processed, estimated_total, item_title,
+                                    items_added, items_updated, items_unchanged, errors
+                                )
+                            except Exception:
+                                pass  # Don't let WebSocket errors break the sync
+
                         # Log progress periodically
                         if items_processed % 25 == 0:
                             logger.debug(f"Processed {items_processed} items")
 
                     except Exception as e:
                         errors += 1
+                        failed_item = item_data.get('Name', 'Unknown')
                         error_msg = f"Failed to process item: {str(e)}"
-                        logger.error(f"{error_msg} - Item: {item_data.get('Name', 'Unknown')}")
+                        logger.error(f"{error_msg} - Item: {failed_item}")
                         log_exception(logger, e, f"Processing item {item_data.get('Id', 'unknown')}")
-                        progress.record_error(error_msg, item_data.get('Name', 'Unknown'))
+                        progress.record_error(error_msg, failed_item)
+                        if ws_error_callback:
+                            try:
+                                await ws_error_callback(failed_item, str(e))
+                            except Exception:
+                                pass
 
                 # Update final totals in progress display
                 if items_processed > 0:

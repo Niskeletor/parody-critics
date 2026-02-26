@@ -1,412 +1,466 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🎭 Parody Critics - Críticas Cinematográficas Paródicas</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>">
-</head>
-<body>
+    <link rel="stylesheet" href="/static/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>"
+    />
+  </head>
+  <body>
     <!-- Header -->
     <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <h1 class="logo">
-                    <span class="logo-icon">🎭</span>
-                    Parody Critics
-                </h1>
-                <nav class="nav">
-                    <button class="nav-btn active" data-view="home">🏠 Inicio</button>
-                    <button class="nav-btn" data-view="media">🎬 Películas & Series</button>
-                    <button class="nav-btn" data-view="critics">📝 Críticas</button>
-                    <button class="nav-btn" data-view="characters">🎭 Personajes</button>
-                    <button class="nav-btn" data-view="status">📊 Sistema</button>
-                </nav>
-                <div class="cart-container">
-                    <button class="cart-btn" id="cart-btn">
-                        🛒 <span class="cart-count" id="cart-count">0</span>
-                    </button>
-                </div>
-            </div>
+      <div class="container">
+        <div class="header-content">
+          <h1 class="logo">
+            <span class="logo-icon">🎭</span>
+            Parody Critics
+          </h1>
+          <nav class="nav">
+            <button class="nav-btn active" data-view="home">🏠 Inicio</button>
+            <button class="nav-btn" data-view="media">🎬 Películas & Series</button>
+            <button class="nav-btn" data-view="critics">📝 Críticas</button>
+            <button class="nav-btn" data-view="characters">🎭 Personajes</button>
+            <button class="nav-btn" data-view="status">📊 Sistema</button>
+          </nav>
+          <div class="cart-container">
+            <button class="cart-btn" id="cart-btn">
+              🛒 <span class="cart-count" id="cart-count">0</span>
+            </button>
+          </div>
         </div>
+      </div>
     </header>
 
     <!-- Main Content -->
     <main class="main">
-        <div class="container">
-            <!-- Home View -->
-            <section class="view active" id="home-view">
-                <div class="hero">
-                    <h2 class="hero-title">Críticas Cinematográficas con IA</h2>
-                    <p class="hero-subtitle">
-                        Descubre cómo Marco Aurelio y Rosario Costras analizan tus películas y series favoritas
-                    </p>
-                    <div class="hero-stats">
-                        <div class="stat-card">
-                            <div class="stat-number" id="total-media">-</div>
-                            <div class="stat-label">Películas & Series</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="total-critics">-</div>
-                            <div class="stat-label">Críticas Generadas</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="system-status">-</div>
-                            <div class="stat-label">Estado del Sistema</div>
-                        </div>
-                    </div>
-                    <div class="cta-buttons">
-                        <button class="btn-primary" data-view="media">🎬 Explorar Películas</button>
-                    </div>
+      <div class="container">
+        <!-- Home View -->
+        <section class="view active" id="home-view">
+          <div class="hero">
+            <h2 class="hero-title">Críticas Cinematográficas con IA</h2>
+            <p class="hero-subtitle">
+              Descubre cómo Marco Aurelio y Rosario Costras analizan tus películas y series
+              favoritas
+            </p>
+            <div class="hero-stats">
+              <div class="stat-card">
+                <div class="stat-number" id="total-media">-</div>
+                <div class="stat-label">Películas & Series</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number" id="total-critics">-</div>
+                <div class="stat-label">Críticas Generadas</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number" id="system-status">-</div>
+                <div class="stat-label">Estado del Sistema</div>
+              </div>
+            </div>
+            <div class="cta-buttons">
+              <button class="btn-primary" data-view="media">🎬 Explorar Películas</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Media List View -->
+        <section class="view" id="media-view">
+          <div class="view-header">
+            <h2>🎬 Películas & Series</h2>
+            <div class="view-controls">
+              <select class="filter-select" id="type-filter">
+                <option value="">Todos los tipos</option>
+                <option value="movie">Películas</option>
+                <option value="series">Series</option>
+              </select>
+              <select class="filter-select" id="critics-filter">
+                <option value="">Todos</option>
+                <option value="true">Con críticas</option>
+                <option value="false">Sin críticas</option>
+              </select>
+              <button class="btn-view-toggle" id="group-toggle" onclick="app.toggleGroupView()">
+                📚 Vista Agrupada
+              </button>
+              <button class="btn-import" onclick="app.startMediaImport()">
+                📥 Importar Medios
+              </button>
+            </div>
+          </div>
+
+          <!-- Alphabet Navigation -->
+          <div id="alphabet-navigation" class="alphabet-navigation">
+            <!-- Alphabet buttons will be generated here -->
+          </div>
+
+          <div class="media-grid" id="media-grid">
+            <div class="loading">🎬 Cargando películas...</div>
+          </div>
+        </section>
+
+        <!-- Critics View -->
+        <section class="view" id="critics-view">
+          <div class="view-header">
+            <h2>📝 Críticas Recientes</h2>
+          </div>
+          <div class="critics-list" id="critics-list">
+            <div class="loading">📝 Cargando críticas...</div>
+          </div>
+        </section>
+
+        <!-- Characters Management View -->
+        <section class="view" id="characters-view">
+          <div class="view-header">
+            <h2>🎭 Gestión de Personajes</h2>
+            <div class="characters-actions">
+              <button class="btn-primary" id="add-character-btn">➕ Nuevo Personaje</button>
+              <button class="btn-secondary" id="import-characters-btn">
+                📁 Importar Personajes
+              </button>
+              <button class="btn-secondary" id="export-characters-btn">
+                💾 Exportar Personajes
+              </button>
+            </div>
+          </div>
+
+          <!-- Characters List -->
+          <div class="characters-container">
+            <div class="characters-grid" id="characters-grid">
+              <div class="loading">🎭 Cargando personajes...</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Generate View -->
+
+        <!-- Status View -->
+        <section class="view" id="status-view">
+          <div class="status-section">
+            <h2>📊 Estado del Sistema</h2>
+
+            <!-- System Health -->
+            <div class="status-grid">
+              <div class="status-card">
+                <h3>🏥 Salud del Sistema</h3>
+                <div class="health-status" id="health-status">
+                  <div class="loading">Verificando...</div>
                 </div>
-            </section>
+              </div>
 
-            <!-- Media List View -->
-            <section class="view" id="media-view">
-                <div class="view-header">
-                    <h2>🎬 Películas & Series</h2>
-                    <div class="view-controls">
-                        <select class="filter-select" id="type-filter">
-                            <option value="">Todos los tipos</option>
-                            <option value="movie">Películas</option>
-                            <option value="series">Series</option>
-                        </select>
-                        <select class="filter-select" id="critics-filter">
-                            <option value="">Todos</option>
-                            <option value="true">Con críticas</option>
-                            <option value="false">Sin críticas</option>
-                        </select>
-                        <button class="btn-view-toggle" id="group-toggle" onclick="app.toggleGroupView()">
-                            📚 Vista Agrupada
-                        </button>
-                        <button class="btn-import" onclick="app.startMediaImport()">
-                            📥 Importar Medios
-                        </button>
-                    </div>
+              <!-- LLM Status -->
+              <div class="status-card">
+                <h3>🤖 Estado de LLM</h3>
+                <div class="llm-status" id="llm-status">
+                  <div class="loading">Verificando modelos...</div>
                 </div>
+              </div>
 
-                <!-- Alphabet Navigation -->
-                <div id="alphabet-navigation" class="alphabet-navigation">
-                    <!-- Alphabet buttons will be generated here -->
+              <!-- Database Stats -->
+              <div class="status-card">
+                <h3>📊 Estadísticas de Base de Datos</h3>
+                <div class="db-stats" id="db-stats">
+                  <div class="loading">Cargando estadísticas...</div>
                 </div>
-
-                <div class="media-grid" id="media-grid">
-                    <div class="loading">🎬 Cargando películas...</div>
-                </div>
-            </section>
-
-            <!-- Critics View -->
-            <section class="view" id="critics-view">
-                <div class="view-header">
-                    <h2>📝 Críticas Recientes</h2>
-                </div>
-                <div class="critics-list" id="critics-list">
-                    <div class="loading">📝 Cargando críticas...</div>
-                </div>
-            </section>
-
-            <!-- Characters Management View -->
-            <section class="view" id="characters-view">
-                <div class="view-header">
-                    <h2>🎭 Gestión de Personajes</h2>
-                    <div class="characters-actions">
-                        <button class="btn-primary" id="add-character-btn">
-                            ➕ Nuevo Personaje
-                        </button>
-                        <button class="btn-secondary" id="import-characters-btn">
-                            📁 Importar Personajes
-                        </button>
-                        <button class="btn-secondary" id="export-characters-btn">
-                            💾 Exportar Personajes
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Characters List -->
-                <div class="characters-container">
-                    <div class="characters-grid" id="characters-grid">
-                        <div class="loading">🎭 Cargando personajes...</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Generate View -->
-
-            <!-- Status View -->
-            <section class="view" id="status-view">
-                <div class="status-section">
-                    <h2>📊 Estado del Sistema</h2>
-
-                    <!-- System Health -->
-                    <div class="status-grid">
-                        <div class="status-card">
-                            <h3>🏥 Salud del Sistema</h3>
-                            <div class="health-status" id="health-status">
-                                <div class="loading">Verificando...</div>
-                            </div>
-                        </div>
-
-                        <!-- LLM Status -->
-                        <div class="status-card">
-                            <h3>🤖 Estado de LLM</h3>
-                            <div class="llm-status" id="llm-status">
-                                <div class="loading">Verificando modelos...</div>
-                            </div>
-                        </div>
-
-                        <!-- Database Stats -->
-                        <div class="status-card">
-                            <h3>📊 Estadísticas de Base de Datos</h3>
-                            <div class="db-stats" id="db-stats">
-                                <div class="loading">Cargando estadísticas...</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
 
     <!-- DEBUG INFO -->
-    <div id="debug-info" style="position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 12px; z-index: 9999; display: none;">
-        <div>Current View: <span id="debug-current-view">-</span></div>
-        <div>Cart Size: <span id="debug-cart-size">0</span></div>
-        <div>Checkout Active: <span id="debug-checkout-active">false</span></div>
-        <div>Cart Open: <span id="debug-cart-open">false</span></div>
+    <div
+      id="debug-info"
+      style="
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        z-index: 9999;
+        display: none;
+      "
+    >
+      <div>Current View: <span id="debug-current-view">-</span></div>
+      <div>Cart Size: <span id="debug-cart-size">0</span></div>
+      <div>Checkout Active: <span id="debug-checkout-active">false</span></div>
+      <div>Cart Open: <span id="debug-cart-open">false</span></div>
     </div>
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <p>&copy; 2026 Parody Critics - Sistema de Críticas Paródicas con IA</p>
-            <p class="footer-tech">Powered by FastAPI + Qwen3:8b + GPT-OSS:20b</p>
-        </div>
+      <div class="container">
+        <p>&copy; 2026 Parody Critics - Sistema de Críticas Paródicas con IA</p>
+        <p class="footer-tech">Powered by FastAPI + Qwen3:8b + GPT-OSS:20b</p>
+      </div>
     </footer>
 
     <!-- Cart Side Panel with Overlay -->
     <div class="cart-overlay hidden" id="cart-overlay" onclick="app.closeCart()"></div>
     <div class="cart-panel hidden" id="cart-panel">
-        <div class="cart-panel-content">
-            <div class="cart-header">
-                <h3>🛒 Carrito de Críticas</h3>
-                <button class="cart-close" onclick="app.closeCart()">&times;</button>
-            </div>
-            <div class="cart-body">
-                <div class="cart-items" id="cart-items">
-                    <div class="empty-cart">
-                        <p>🎬 Tu carrito está vacío</p>
-                        <p>Selecciona películas y series para generar críticas</p>
-                    </div>
-                </div>
-                <div class="cart-footer">
-                    <div class="cart-total">
-                        Total: <span id="cart-total-count">0</span> elementos
-                    </div>
-                    <button class="btn-primary cart-checkout" id="cart-checkout-btn" disabled>
-                        ✨ Procesar Críticas
-                    </button>
-                </div>
-            </div>
+      <div class="cart-panel-content">
+        <div class="cart-header">
+          <h3>🛒 Carrito de Críticas</h3>
+          <button class="cart-close" onclick="app.closeCart()">&times;</button>
         </div>
+        <div class="cart-body">
+          <div class="cart-items" id="cart-items">
+            <div class="empty-cart">
+              <p>🎬 Tu carrito está vacío</p>
+              <p>Selecciona películas y series para generar críticas</p>
+            </div>
+          </div>
+          <div class="cart-footer">
+            <div class="cart-total">Total: <span id="cart-total-count">0</span> elementos</div>
+            <button class="btn-primary cart-checkout" id="cart-checkout-btn" disabled>
+              ✨ Procesar Críticas
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Checkout View -->
     <section class="view" id="checkout-view">
-        <div class="checkout-container">
-            <div class="checkout-header">
-                <h2>🎭 Checkout - Generar Críticas por Lotes</h2>
-                <button class="btn-back" onclick="app.showView('media')">← Volver a Películas</button>
-            </div>
-
-            <!-- Selected Media Summary -->
-            <div class="checkout-section">
-                <h3>📽️ Contenido Seleccionado</h3>
-                <div class="selected-media-list" id="checkout-media-list">
-                    <!-- Selected media items will be shown here -->
-                </div>
-            </div>
-
-            <!-- Critic Selection -->
-            <div class="checkout-section">
-                <h3>👥 Selecciona los Críticos</h3>
-                <div class="critics-selection" id="critics-selection">
-                    <!-- Critic checkboxes will be shown here -->
-                </div>
-            </div>
-
-            <!-- Processing Controls -->
-            <div class="checkout-section">
-                <div class="processing-controls">
-                    <button class="btn-primary" id="start-processing-btn" onclick="app.startBatchProcessing()" disabled>
-                        🚀 Iniciar Procesamiento
-                    </button>
-                    <button class="btn-secondary hidden" id="cancel-processing-btn" onclick="app.cancelBatchProcessing()">
-                        ⏹️ Cancelar
-                    </button>
-                </div>
-
-                <!-- Progress Section -->
-                <div class="progress-section hidden" id="progress-section">
-                    <h4>📊 Progreso del Procesamiento</h4>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill"></div>
-                        <div class="progress-text" id="progress-text">0%</div>
-                    </div>
-                    <div class="processing-details">
-                        <div class="processing-status" id="processing-status">Preparando...</div>
-                        <div class="processing-current" id="processing-current"></div>
-                        <div class="processing-stats">
-                            <span class="stat">✅ Completadas: <span id="completed-count">0</span></span>
-                            <span class="stat">❌ Errores: <span id="error-count">0</span></span>
-                            <span class="stat">⏳ Restantes: <span id="remaining-count">0</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Results Section -->
-                <div class="results-section hidden" id="results-section">
-                    <h4>🎉 Resultados del Procesamiento</h4>
-                    <div class="results-summary" id="results-summary"></div>
-                    <div class="results-list" id="results-list"></div>
-                    <div class="results-actions">
-                        <button class="btn-primary" onclick="app.resetCheckout()">🔄 Nueva Selección</button>
-                        <button class="btn-secondary" onclick="app.showView('critics')">📝 Ver Todas las Críticas</button>
-                    </div>
-                </div>
-            </div>
+      <div class="checkout-container">
+        <div class="checkout-header">
+          <h2>🎭 Checkout - Generar Críticas por Lotes</h2>
+          <button class="btn-back" onclick="app.showView('media')">← Volver a Películas</button>
         </div>
+
+        <!-- Selected Media Summary -->
+        <div class="checkout-section">
+          <h3>📽️ Contenido Seleccionado</h3>
+          <div class="selected-media-list" id="checkout-media-list">
+            <!-- Selected media items will be shown here -->
+          </div>
+        </div>
+
+        <!-- Critic Selection -->
+        <div class="checkout-section">
+          <h3>👥 Selecciona los Críticos</h3>
+          <div class="critics-selection" id="critics-selection">
+            <!-- Critic checkboxes will be shown here -->
+          </div>
+        </div>
+
+        <!-- Processing Controls -->
+        <div class="checkout-section">
+          <div class="processing-controls">
+            <button
+              class="btn-primary"
+              id="start-processing-btn"
+              onclick="app.startBatchProcessing()"
+              disabled
+            >
+              🚀 Iniciar Procesamiento
+            </button>
+            <button
+              class="btn-secondary hidden"
+              id="cancel-processing-btn"
+              onclick="app.cancelBatchProcessing()"
+            >
+              ⏹️ Cancelar
+            </button>
+          </div>
+
+          <!-- Progress Section -->
+          <div class="progress-section hidden" id="progress-section">
+            <h4>📊 Progreso del Procesamiento</h4>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+              <div class="progress-text" id="progress-text">0%</div>
+            </div>
+            <div class="processing-details">
+              <div class="processing-status" id="processing-status">Preparando...</div>
+              <div class="processing-current" id="processing-current"></div>
+              <div class="processing-stats">
+                <span class="stat">✅ Completadas: <span id="completed-count">0</span></span>
+                <span class="stat">❌ Errores: <span id="error-count">0</span></span>
+                <span class="stat">⏳ Restantes: <span id="remaining-count">0</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Results Section -->
+          <div class="results-section hidden" id="results-section">
+            <h4>🎉 Resultados del Procesamiento</h4>
+            <div class="results-summary" id="results-summary"></div>
+            <div class="results-list" id="results-list"></div>
+            <div class="results-actions">
+              <button class="btn-primary" onclick="app.resetCheckout()">🔄 Nueva Selección</button>
+              <button class="btn-secondary" onclick="app.showView('critics')">
+                📝 Ver Todas las Críticas
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Modal for displaying critics -->
     <div class="modal hidden" id="critic-modal">
-        <div class="modal-content">
-            <button class="modal-close" id="modal-close">&times;</button>
-            <div class="modal-body" id="modal-body">
-                <!-- Critic content will be inserted here -->
-            </div>
+      <div class="modal-content">
+        <button class="modal-close" id="modal-close">&times;</button>
+        <div class="modal-body" id="modal-body">
+          <!-- Critic content will be inserted here -->
         </div>
+      </div>
     </div>
 
     <!-- Character Edit/Create Modal -->
     <div class="modal hidden" id="character-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="character-modal-title">🎭 Nuevo Personaje</h3>
-                <button class="modal-close" id="character-modal-close">&times;</button>
-            </div>
-            <div class="modal-body" id="character-modal-body">
-                <form id="character-form" class="character-form">
-                    <input type="hidden" id="character-id" name="id">
-
-                    <div class="form-group">
-                        <label for="character-name">Nombre del Personaje *</label>
-                        <input type="text" id="character-name" name="name" required
-                               placeholder="Ej: Marco Aurelio">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="character-emoji">Emoji</label>
-                            <input type="text" id="character-emoji" name="emoji" maxlength="2"
-                                   placeholder="👑">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="character-personality">Personalidad *</label>
-                            <select id="character-personality" name="personality" required>
-                                <option value="">Seleccionar...</option>
-                                <option value="stoic">Estoico</option>
-                                <option value="woke">Woke</option>
-                                <option value="snob">Snob</option>
-                                <option value="karen">Karen</option>
-                                <option value="millennial">Millennial</option>
-                                <option value="boomer">Boomer</option>
-                                <option value="nihilist">Nihilista</option>
-                                <option value="optimist">Optimista</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="character-description">Descripción *</label>
-                        <textarea id="character-description" name="description" required rows="3"
-                                  placeholder="Breve descripción del personaje y su estilo crítico..."></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="character-prompt">Prompt Template</label>
-                        <textarea id="character-prompt" name="prompt_template" rows="4"
-                                  placeholder="Template para el LLM (opcional, se generará automáticamente si se deja vacío)"></textarea>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="character-color">Color Principal</label>
-                            <input type="color" id="character-color" name="color" value="#D4AF37">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="character-border">Color Borde</label>
-                            <input type="color" id="character-border" name="border_color" value="#B8860B">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="character-accent">Color Acento</label>
-                            <input type="color" id="character-accent" name="accent_color" value="#FFD700">
-                        </div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="btn-secondary" id="character-cancel-btn">Cancelar</button>
-                        <button type="submit" class="btn-primary" id="character-save-btn">💾 Guardar Personaje</button>
-                    </div>
-                </form>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="character-modal-title">🎭 Nuevo Personaje</h3>
+          <button class="modal-close" id="character-modal-close">&times;</button>
         </div>
+        <div class="modal-body" id="character-modal-body">
+          <form id="character-form" class="character-form">
+            <input type="hidden" id="character-id" name="id" />
+
+            <div class="form-group">
+              <label for="character-name">Nombre del Personaje *</label>
+              <input
+                type="text"
+                id="character-name"
+                name="name"
+                required
+                placeholder="Ej: Marco Aurelio"
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="character-emoji">Emoji</label>
+                <input
+                  type="text"
+                  id="character-emoji"
+                  name="emoji"
+                  maxlength="2"
+                  placeholder="👑"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="character-personality">Personalidad *</label>
+                <select id="character-personality" name="personality" required>
+                  <option value="">Seleccionar...</option>
+                  <option value="stoic">Estoico</option>
+                  <option value="woke">Woke</option>
+                  <option value="snob">Snob</option>
+                  <option value="karen">Karen</option>
+                  <option value="millennial">Millennial</option>
+                  <option value="boomer">Boomer</option>
+                  <option value="nihilist">Nihilista</option>
+                  <option value="optimist">Optimista</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="character-description">Descripción *</label>
+              <textarea
+                id="character-description"
+                name="description"
+                required
+                rows="3"
+                placeholder="Breve descripción del personaje y su estilo crítico..."
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="character-prompt">Prompt Template</label>
+              <textarea
+                id="character-prompt"
+                name="prompt_template"
+                rows="4"
+                placeholder="Template para el LLM (opcional, se generará automáticamente si se deja vacío)"
+              ></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="character-color">Color Principal</label>
+                <input type="color" id="character-color" name="color" value="#D4AF37" />
+              </div>
+
+              <div class="form-group">
+                <label for="character-border">Color Borde</label>
+                <input type="color" id="character-border" name="border_color" value="#B8860B" />
+              </div>
+
+              <div class="form-group">
+                <label for="character-accent">Color Acento</label>
+                <input type="color" id="character-accent" name="accent_color" value="#FFD700" />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" id="character-cancel-btn">
+                Cancelar
+              </button>
+              <button type="submit" class="btn-primary" id="character-save-btn">
+                💾 Guardar Personaje
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
     <!-- Import Characters Modal -->
     <div class="modal hidden" id="import-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>📁 Importar Personajes</h3>
-                <button class="modal-close" id="import-modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="import-options">
-                    <h4>Opciones de importación:</h4>
-
-                    <div class="import-method">
-                        <h5>📄 Desde archivo Markdown</h5>
-                        <p>Sube un archivo .md con la definición de personajes</p>
-                        <input type="file" id="import-file" accept=".md,.txt" multiple>
-                        <button class="btn-primary" id="import-file-btn">📁 Cargar Archivo(s)</button>
-                    </div>
-
-                    <div class="import-method">
-                        <h5>✍️ Pegar texto directo</h5>
-                        <textarea id="import-text" rows="8"
-                                  placeholder="Pega aquí el contenido Markdown con definiciones de personajes..."></textarea>
-                        <button class="btn-primary" id="import-text-btn">📝 Procesar Texto</button>
-                    </div>
-                </div>
-
-                <div class="import-preview hidden" id="import-preview">
-                    <h4>👀 Vista previa de personajes a importar:</h4>
-                    <div class="preview-list" id="preview-list"></div>
-                    <div class="import-actions">
-                        <button class="btn-secondary" id="import-cancel-btn">Cancelar</button>
-                        <button class="btn-primary" id="import-confirm-btn">✅ Confirmar Importación</button>
-                    </div>
-                </div>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>📁 Importar Personajes</h3>
+          <button class="modal-close" id="import-modal-close">&times;</button>
         </div>
+        <div class="modal-body">
+          <div class="import-options">
+            <h4>Opciones de importación:</h4>
+
+            <div class="import-method">
+              <h5>📄 Desde archivo Markdown</h5>
+              <p>Sube un archivo .md con la definición de personajes</p>
+              <input type="file" id="import-file" accept=".md,.txt" multiple />
+              <button class="btn-primary" id="import-file-btn">📁 Cargar Archivo(s)</button>
+            </div>
+
+            <div class="import-method">
+              <h5>✍️ Pegar texto directo</h5>
+              <textarea
+                id="import-text"
+                rows="8"
+                placeholder="Pega aquí el contenido Markdown con definiciones de personajes..."
+              ></textarea>
+              <button class="btn-primary" id="import-text-btn">📝 Procesar Texto</button>
+            </div>
+          </div>
+
+          <div class="import-preview hidden" id="import-preview">
+            <h4>👀 Vista previa de personajes a importar:</h4>
+            <div class="preview-list" id="preview-list"></div>
+            <div class="import-actions">
+              <button class="btn-secondary" id="import-cancel-btn">Cancelar</button>
+              <button class="btn-primary" id="import-confirm-btn">✅ Confirmar Importación</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="/static/js/app.js"></script>
-</body>
+  </body>
 </html>

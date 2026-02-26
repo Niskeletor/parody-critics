@@ -3,174 +3,180 @@
  * Integrates with FastAPI backend for dynamic critic reviews
  */
 
-(function() {
-    'use strict';
+(function () {
+  'use strict';
 
-    const logPrefix = '🎭 Parody Critics API:';
+  const logPrefix = '🎭 Parody Critics API:';
 
-    // Configuration - Auto-detect API URL
-    const getApiBaseUrl = () => {
-        // Try to detect if we're in Jellyfin context
-        const currentHost = window.location.hostname;
-        const currentPort = window.location.port;
+  // Configuration - Auto-detect API URL
+  const getApiBaseUrl = () => {
+    // Try to detect if we're in Jellyfin context
+    const currentHost = window.location.hostname;
+    const currentPort = window.location.port;
 
-        // If running on a specific server, use same host for API
-        if (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-            return `http://${currentHost}:8000/api`;
-        }
-
-        // Default to localhost for development
-        return 'http://localhost:8000/api';
-    };
-
-    const CONFIG = {
-        API_BASE_URL: getApiBaseUrl(),
-        RETRY_ATTEMPTS: 3,
-        RETRY_DELAY: 1000,
-        CACHE_DURATION: 300000, // 5 minutes
-        BUTTON_ID: 'parody-critics-api-btn',
-        SECTION_CLASS: 'parody-critics-section'
-    };
-
-    // Simple in-memory cache
-    const cache = new Map();
-
-    // Fetch critics from API
-    async function fetchCritics(tmdbId) {
-        const cacheKey = `critics_${tmdbId}`;
-
-        // Check cache first
-        if (cache.has(cacheKey)) {
-            const cached = cache.get(cacheKey);
-            if (Date.now() - cached.timestamp < CONFIG.CACHE_DURATION) {
-                console.log(`${logPrefix} Using cached data for ${tmdbId}`);
-                return cached.data;
-            }
-        }
-
-        console.log(`${logPrefix} Fetching critics for TMDB ID: ${tmdbId}`);
-
-        for (let attempt = 1; attempt <= CONFIG.RETRY_ATTEMPTS; attempt++) {
-            try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/critics/${tmdbId}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-
-                    // Cache the result
-                    cache.set(cacheKey, {
-                        data: data,
-                        timestamp: Date.now()
-                    });
-
-                    console.log(`${logPrefix} Successfully fetched ${data.total_critics} critics`);
-                    return data;
-                } else if (response.status === 404) {
-                    console.log(`${logPrefix} No critics found for TMDB ID: ${tmdbId}`);
-                    return null;
-                } else {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-            } catch (error) {
-                console.warn(`${logPrefix} Attempt ${attempt} failed:`, error);
-
-                if (attempt === CONFIG.RETRY_ATTEMPTS) {
-                    console.error(`${logPrefix} All retry attempts failed for ${tmdbId}`);
-                    return null;
-                }
-
-                // Wait before retry
-                await new Promise(resolve => setTimeout(resolve, CONFIG.RETRY_DELAY * attempt));
-            }
-        }
-
-        return null;
+    // If running on a specific server, use same host for API
+    if (currentHost && currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+      return `http://${currentHost}:8000/api`;
     }
 
-    // Get TMDB ID from current media
-    function getCurrentTmdbId() {
-        try {
-            // Method 1: From URL (details page)
-            const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
-            const itemId = urlParams.get('id');
+    // Default to localhost for development
+    return 'http://localhost:8000/api';
+  };
 
-            if (itemId && window.ApiClient) {
-                return window.ApiClient.getItem(window.ApiClient.getCurrentUserId(), itemId)
-                    .then(item => item?.ProviderIds?.Tmdb)
-                    .catch(() => null);
-            }
+  const CONFIG = {
+    API_BASE_URL: getApiBaseUrl(),
+    RETRY_ATTEMPTS: 3,
+    RETRY_DELAY: 1000,
+    CACHE_DURATION: 300000, // 5 minutes
+    BUTTON_ID: 'parody-critics-api-btn',
+    SECTION_CLASS: 'parody-critics-section',
+  };
 
-            // Method 2: From video poster (player page)
-            const video = document.querySelector('video');
-            if (video) {
-                const posterUrl = video.getAttribute('poster');
-                if (posterUrl) {
-                    const itemIdMatch = posterUrl.match(/\/Items\/([a-f0-9]+)\//);
-                    if (itemIdMatch && window.ApiClient) {
-                        return window.ApiClient.getItem(window.ApiClient.getCurrentUserId(), itemIdMatch[1])
-                            .then(item => item?.ProviderIds?.Tmdb)
-                            .catch(() => null);
-                    }
-                }
-            }
+  // Simple in-memory cache
+  const cache = new Map();
 
-            return Promise.resolve(null);
-        } catch (error) {
-            console.error(`${logPrefix} Error getting TMDB ID:`, error);
-            return Promise.resolve(null);
+  // Fetch critics from API
+  async function fetchCritics(tmdbId) {
+    const cacheKey = `critics_${tmdbId}`;
+
+    // Check cache first
+    if (cache.has(cacheKey)) {
+      const cached = cache.get(cacheKey);
+      if (Date.now() - cached.timestamp < CONFIG.CACHE_DURATION) {
+        console.log(`${logPrefix} Using cached data for ${tmdbId}`);
+        return cached.data;
+      }
+    }
+
+    console.log(`${logPrefix} Fetching critics for TMDB ID: ${tmdbId}`);
+
+    for (let attempt = 1; attempt <= CONFIG.RETRY_ATTEMPTS; attempt++) {
+      try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/critics/${tmdbId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+
+          // Cache the result
+          cache.set(cacheKey, {
+            data: data,
+            timestamp: Date.now(),
+          });
+
+          console.log(`${logPrefix} Successfully fetched ${data.total_critics} critics`);
+          return data;
+        } else if (response.status === 404) {
+          console.log(`${logPrefix} No critics found for TMDB ID: ${tmdbId}`);
+          return null;
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
+      } catch (error) {
+        console.warn(`${logPrefix} Attempt ${attempt} failed:`, error);
+
+        if (attempt === CONFIG.RETRY_ATTEMPTS) {
+          console.error(`${logPrefix} All retry attempts failed for ${tmdbId}`);
+          return null;
+        }
+
+        // Wait before retry
+        await new Promise((resolve) => setTimeout(resolve, CONFIG.RETRY_DELAY * attempt));
+      }
     }
 
-    // Escape HTML (security)
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+    return null;
+  }
+
+  // Get TMDB ID from current media
+  function getCurrentTmdbId() {
+    try {
+      // Method 1: From URL (details page)
+      const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+      const itemId = urlParams.get('id');
+
+      if (itemId && window.ApiClient) {
+        return window.ApiClient.getItem(window.ApiClient.getCurrentUserId(), itemId)
+          .then((item) => item?.ProviderIds?.Tmdb)
+          .catch(() => null);
+      }
+
+      // Method 2: From video poster (player page)
+      const video = document.querySelector('video');
+      if (video) {
+        const posterUrl = video.getAttribute('poster');
+        if (posterUrl) {
+          const itemIdMatch = posterUrl.match(/\/Items\/([a-f0-9]+)\//);
+          if (itemIdMatch && window.ApiClient) {
+            return window.ApiClient.getItem(window.ApiClient.getCurrentUserId(), itemIdMatch[1])
+              .then((item) => item?.ProviderIds?.Tmdb)
+              .catch(() => null);
+          }
+        }
+      }
+
+      return Promise.resolve(null);
+    } catch (error) {
+      console.error(`${logPrefix} Error getting TMDB ID:`, error);
+      return Promise.resolve(null);
     }
+  }
 
-    // Simple Markdown parser
-    function parseMarkdown(text) {
-        if (!text) return '';
+  // Escape HTML (security)
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
 
-        let html = escapeHtml(text);
+  // Simple Markdown parser
+  function parseMarkdown(text) {
+    if (!text) return '';
 
-        // Basic markdown parsing
-        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-        html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-        html = html.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
-        html = '<p>' + html + '</p>';
+    let html = escapeHtml(text);
 
-        return html;
-    }
+    // Basic markdown parsing
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+    html = html.replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+    );
+    html = html.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+    html = '<p>' + html + '</p>';
 
-    // Create critic card element
-    function createCriticCard(criticData) {
-        const card = document.createElement('div');
-        card.className = 'parody-critic-card';
-        card.setAttribute('data-character', criticData.character_id);
+    return html;
+  }
 
-        const content = criticData.content || 'Sin contenido disponible';
-        const PREVIEW_LENGTH = 300;
-        const isLongReview = content.length > PREVIEW_LENGTH;
-        const previewContent = isLongReview ? content.substring(0, PREVIEW_LENGTH) : content;
+  // Create critic card element
+  function createCriticCard(criticData) {
+    const card = document.createElement('div');
+    card.className = 'parody-critic-card';
+    card.setAttribute('data-character', criticData.character_id);
 
-        const reviewDate = criticData.generated_at ?
-            new Date(criticData.generated_at).toLocaleDateString('es-ES', {
-                year: 'numeric', month: 'short', day: 'numeric'
-            }) : '';
+    const content = criticData.content || 'Sin contenido disponible';
+    const PREVIEW_LENGTH = 300;
+    const isLongReview = content.length > PREVIEW_LENGTH;
+    const previewContent = isLongReview ? content.substring(0, PREVIEW_LENGTH) : content;
 
-        const ratingDisplay = criticData.rating ?
-            `<span class="parody-critic-rating" style="color: ${criticData.color}; background: ${criticData.accent_color};">⭐ ${criticData.rating}/10</span>` : '';
+    const reviewDate = criticData.generated_at
+      ? new Date(criticData.generated_at).toLocaleDateString('es-ES', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
+      : '';
 
-        card.innerHTML = `
+    const ratingDisplay = criticData.rating
+      ? `<span class="parody-critic-rating" style="color: ${criticData.color}; background: ${criticData.accent_color};">⭐ ${criticData.rating}/10</span>`
+      : '';
+
+    card.innerHTML = `
             <div class="parody-critic-header">
                 <div class="parody-critic-author-info">
                     <strong class="parody-critic-author" style="color: ${criticData.color};">
@@ -185,66 +191,71 @@
             </div>
         `;
 
-        // Apply border color
-        card.style.borderLeft = `4px solid ${criticData.border_color}`;
+    // Apply border color
+    card.style.borderLeft = `4px solid ${criticData.border_color}`;
 
-        const textElement = card.querySelector('.parody-critic-text');
-        textElement.innerHTML = parseMarkdown(previewContent) +
-            (isLongReview ? `<span class="parody-critic-toggle" style="color: ${criticData.color};"> ...leer más</span>` : '');
+    const textElement = card.querySelector('.parody-critic-text');
+    textElement.innerHTML =
+      parseMarkdown(previewContent) +
+      (isLongReview
+        ? `<span class="parody-critic-toggle" style="color: ${criticData.color};"> ...leer más</span>`
+        : '');
 
-        // Toggle expand/collapse
-        if (isLongReview) {
-            textElement.addEventListener('click', function(e) {
-                if (e.target.classList.contains('parody-critic-toggle')) {
-                    const isExpanded = textElement.classList.contains('expanded');
+    // Toggle expand/collapse
+    if (isLongReview) {
+      textElement.addEventListener('click', function (e) {
+        if (e.target.classList.contains('parody-critic-toggle')) {
+          const isExpanded = textElement.classList.contains('expanded');
 
-                    if (!isExpanded) {
-                        textElement.innerHTML = parseMarkdown(content) +
-                            `<span class="parody-critic-toggle" style="color: ${criticData.color};"> ...leer menos</span>`;
-                        textElement.classList.add('expanded');
-                    } else {
-                        textElement.innerHTML = parseMarkdown(previewContent) +
-                            `<span class="parody-critic-toggle" style="color: ${criticData.color};"> ...leer más</span>`;
-                        textElement.classList.remove('expanded');
-                    }
-                }
-            });
+          if (!isExpanded) {
+            textElement.innerHTML =
+              parseMarkdown(content) +
+              `<span class="parody-critic-toggle" style="color: ${criticData.color};"> ...leer menos</span>`;
+            textElement.classList.add('expanded');
+          } else {
+            textElement.innerHTML =
+              parseMarkdown(previewContent) +
+              `<span class="parody-critic-toggle" style="color: ${criticData.color};"> ...leer más</span>`;
+            textElement.classList.remove('expanded');
+          }
         }
-
-        return card;
+      });
     }
 
-    // Create critics section
-    function createCriticsSection(criticsData) {
-        const section = document.createElement('details');
-        section.className = `detailSection ${CONFIG.SECTION_CLASS}`;
-        section.setAttribute('open', '');
+    return card;
+  }
 
-        const summary = document.createElement('summary');
-        summary.className = 'sectionTitle';
-        summary.innerHTML = `🎭 Críticos de la Casa (${criticsData.total_critics}) <i class="material-icons expand-icon">expand_more</i>`;
-        section.appendChild(summary);
+  // Create critics section
+  function createCriticsSection(criticsData) {
+    const section = document.createElement('details');
+    section.className = `detailSection ${CONFIG.SECTION_CLASS}`;
+    section.setAttribute('open', '');
 
-        const container = document.createElement('div');
-        container.className = 'parody-critics-container';
+    const summary = document.createElement('summary');
+    summary.className = 'sectionTitle';
+    summary.innerHTML = `🎭 Críticos de la Casa (${criticsData.total_critics}) <i class="material-icons expand-icon">expand_more</i>`;
+    section.appendChild(summary);
 
-        // Create cards for each critic
-        Object.values(criticsData.critics).forEach(critic => {
-            container.appendChild(createCriticCard(critic));
-        });
+    const container = document.createElement('div');
+    container.className = 'parody-critics-container';
 
-        section.appendChild(container);
-        return section;
-    }
+    // Create cards for each critic
+    Object.values(criticsData.critics).forEach((critic) => {
+      container.appendChild(createCriticCard(critic));
+    });
 
-    // Inject CSS styles
-    function injectStyles() {
-        const styleId = 'parody-critics-api-styles';
-        if (document.getElementById(styleId)) return;
+    section.appendChild(container);
+    return section;
+  }
 
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
+  // Inject CSS styles
+  function injectStyles() {
+    const styleId = 'parody-critics-api-styles';
+    if (document.getElementById(styleId)) return;
+
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
             .${CONFIG.SECTION_CLASS} {
                 margin: 2em 0 1em 0;
                 display: flex !important;
@@ -349,143 +360,143 @@
                 opacity: 0.8;
             }
         `;
-        document.head.appendChild(style);
+    document.head.appendChild(style);
+  }
+
+  // Process and inject critics
+  async function processCritics() {
+    // Check if already exists
+    if (document.querySelector(`.${CONFIG.SECTION_CLASS}`)) {
+      console.log(`${logPrefix} Section already exists, skipping`);
+      return;
     }
 
-    // Process and inject critics
-    async function processCritics() {
-        // Check if already exists
-        if (document.querySelector(`.${CONFIG.SECTION_CLASS}`)) {
-            console.log(`${logPrefix} Section already exists, skipping`);
-            return;
+    try {
+      // Get TMDB ID
+      const tmdbId = await getCurrentTmdbId();
+
+      if (!tmdbId) {
+        console.log(`${logPrefix} No TMDB ID found, skipping`);
+        return;
+      }
+
+      console.log(`${logPrefix} Processing TMDB ID: ${tmdbId}`);
+
+      // Fetch critics from API
+      const criticsData = await fetchCritics(tmdbId);
+
+      if (!criticsData || !criticsData.critics || Object.keys(criticsData.critics).length === 0) {
+        console.log(`${logPrefix} No critics found for TMDB ID: ${tmdbId}`);
+        return;
+      }
+
+      // Create and inject section
+      const criticsSection = createCriticsSection(criticsData);
+
+      // Find insertion point
+      const enhancedReviews = document.querySelector('.tmdb-reviews-section');
+      const insertionPoint =
+        enhancedReviews ||
+        document.querySelector('.streaming-lookup-container') ||
+        document.querySelector('.itemExternalLinks') ||
+        document.querySelector('.tagline');
+
+      if (insertionPoint && insertionPoint.parentNode) {
+        // Double check before inserting
+        if (!document.querySelector(`.${CONFIG.SECTION_CLASS}`)) {
+          if (enhancedReviews) {
+            enhancedReviews.after(criticsSection);
+          } else {
+            insertionPoint.parentNode.insertBefore(criticsSection, insertionPoint.nextSibling);
+          }
+          console.log(`${logPrefix} Critics section injected successfully! 🎭`);
         }
-
-        try {
-            // Get TMDB ID
-            const tmdbId = await getCurrentTmdbId();
-
-            if (!tmdbId) {
-                console.log(`${logPrefix} No TMDB ID found, skipping`);
-                return;
-            }
-
-            console.log(`${logPrefix} Processing TMDB ID: ${tmdbId}`);
-
-            // Fetch critics from API
-            const criticsData = await fetchCritics(tmdbId);
-
-            if (!criticsData || !criticsData.critics || Object.keys(criticsData.critics).length === 0) {
-                console.log(`${logPrefix} No critics found for TMDB ID: ${tmdbId}`);
-                return;
-            }
-
-            // Create and inject section
-            const criticsSection = createCriticsSection(criticsData);
-
-            // Find insertion point
-            const enhancedReviews = document.querySelector('.tmdb-reviews-section');
-            const insertionPoint = enhancedReviews ||
-                                 document.querySelector('.streaming-lookup-container') ||
-                                 document.querySelector('.itemExternalLinks') ||
-                                 document.querySelector('.tagline');
-
-            if (insertionPoint && insertionPoint.parentNode) {
-                // Double check before inserting
-                if (!document.querySelector(`.${CONFIG.SECTION_CLASS}`)) {
-                    if (enhancedReviews) {
-                        enhancedReviews.after(criticsSection);
-                    } else {
-                        insertionPoint.parentNode.insertBefore(criticsSection, insertionPoint.nextSibling);
-                    }
-                    console.log(`${logPrefix} Critics section injected successfully! 🎭`);
-                }
-            } else {
-                console.warn(`${logPrefix} Could not find insertion point`);
-            }
-
-        } catch (error) {
-            console.error(`${logPrefix} Error processing critics:`, error);
-        }
+      } else {
+        console.warn(`${logPrefix} Could not find insertion point`);
+      }
+    } catch (error) {
+      console.error(`${logPrefix} Error processing critics:`, error);
     }
+  }
 
-    // Page monitoring system
-    function startMonitoring() {
-        injectStyles();
+  // Page monitoring system
+  function startMonitoring() {
+    injectStyles();
 
-        let processedPages = new Set();
-        let isProcessing = false;
+    let processedPages = new Set();
+    let isProcessing = false;
 
-        const processPageSafely = async () => {
-            if (isProcessing) return;
+    const processPageSafely = async () => {
+      if (isProcessing) return;
 
-            const currentUrl = window.location.hash;
-            const isDetailsPage = currentUrl.includes('details') || currentUrl.includes('id=');
+      const currentUrl = window.location.hash;
+      const isDetailsPage = currentUrl.includes('details') || currentUrl.includes('id=');
 
-            if (!isDetailsPage) return;
-            if (processedPages.has(currentUrl)) return;
+      if (!isDetailsPage) return;
+      if (processedPages.has(currentUrl)) return;
 
-            isProcessing = true;
-            processedPages.add(currentUrl);
+      isProcessing = true;
+      processedPages.add(currentUrl);
 
-            // Wait for page to load
-            setTimeout(async () => {
-                await processCritics();
-                isProcessing = false;
-            }, 1500);
-        };
+      // Wait for page to load
+      setTimeout(async () => {
+        await processCritics();
+        isProcessing = false;
+      }, 1500);
+    };
 
-        // Monitor URL changes
-        let currentHash = window.location.hash;
-        setInterval(() => {
-            if (window.location.hash !== currentHash) {
-                currentHash = window.location.hash;
-                processedPages.clear();
-                processPageSafely();
-            }
-        }, 500);
-
-        // Initial processing
+    // Monitor URL changes
+    let currentHash = window.location.hash;
+    setInterval(() => {
+      if (window.location.hash !== currentHash) {
+        currentHash = window.location.hash;
+        processedPages.clear();
         processPageSafely();
+      }
+    }, 500);
 
-        console.log(`${logPrefix} Monitoring started (API version) 🎭`);
+    // Initial processing
+    processPageSafely();
+
+    console.log(`${logPrefix} Monitoring started (API version) 🎭`);
+  }
+
+  // Check API health on startup
+  async function checkAPIHealth() {
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/health`);
+      if (response.ok) {
+        console.log(`${logPrefix} API health check passed ✅`);
+        return true;
+      } else {
+        console.warn(`${logPrefix} API health check failed: ${response.status}`);
+        return false;
+      }
+    } catch (error) {
+      console.warn(`${logPrefix} API not available:`, error);
+      return false;
+    }
+  }
+
+  // Initialize
+  async function initialize() {
+    console.log(`${logPrefix} Initializing API client...`);
+
+    const apiHealthy = await checkAPIHealth();
+    if (!apiHealthy) {
+      console.warn(`${logPrefix} API not available, critics will not be loaded`);
+      return;
     }
 
-    // Check API health on startup
-    async function checkAPIHealth() {
-        try {
-            const response = await fetch(`${CONFIG.API_BASE_URL}/health`);
-            if (response.ok) {
-                console.log(`${logPrefix} API health check passed ✅`);
-                return true;
-            } else {
-                console.warn(`${logPrefix} API health check failed: ${response.status}`);
-                return false;
-            }
-        } catch (error) {
-            console.warn(`${logPrefix} API not available:`, error);
-            return false;
-        }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startMonitoring);
+    } else {
+      setTimeout(startMonitoring, 1000);
     }
 
-    // Initialize
-    async function initialize() {
-        console.log(`${logPrefix} Initializing API client...`);
+    console.log(`${logPrefix} API client loaded successfully! 🎭`);
+  }
 
-        const apiHealthy = await checkAPIHealth();
-        if (!apiHealthy) {
-            console.warn(`${logPrefix} API not available, critics will not be loaded`);
-            return;
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', startMonitoring);
-        } else {
-            setTimeout(startMonitoring, 1000);
-        }
-
-        console.log(`${logPrefix} API client loaded successfully! 🎭`);
-    }
-
-    // Start the show!
-    initialize();
+  // Start the show!
+  initialize();
 })();

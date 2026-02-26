@@ -53,3 +53,9 @@ build/
 config/secrets.json
 *.key
 *.pem
+# Node
+node_modules/
+npm-debug.log*
+
+# Coverage
+coverage/

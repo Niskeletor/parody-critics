@@ -1,0 +1,14 @@
+node_modules/
+venv/
+coverage/
+.git/
+*.db
+*.log
+*.py
+*.sh
+*.yml
+*.yaml
+*.md
+*.txt
+*.json
+package-lock.json
