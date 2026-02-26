@@ -3074,15 +3074,168 @@ class ParodyCriticsApp {
   // View character critics
   async viewCharacterCritics(characterId) {
     try {
-      console.log('📝 Loading critics for character:', characterId);
-
-      // For now, we'll show a message. Later this could open a modal or navigate to a filtered critics view
-      this.showMessage('Funcionalidad en desarrollo: Ver críticas del personaje', 'info');
-
-      // TODO: Implement character-specific critics view
+      const data = await this.fetchAPI(`/characters/${characterId}/critics`);
+      this._showCharacterCriticsModal(data);
     } catch (error) {
-      console.error('❌ Error loading character critics:', error);
       this.showError('Error cargando críticas: ' + error.message);
+    }
+  }
+
+  _showCharacterCriticsModal(data) {
+    const existing = document.getElementById('character-critics-modal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'character-critics-modal';
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width:860px;">
+        <button class="modal-close" id="char-modal-close">&times;</button>
+        <div style="padding:1.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:gap;">
+            <h2 style="margin:0;">${data.character_emoji} Críticas de ${data.character_name} <span style="font-size:0.85rem; color:var(--text-secondary);">(${data.total})</span></h2>
+            <button id="char-delete-selected" class="btn-danger" style="font-size:0.85rem; padding:0.4rem 0.9rem; display:none;">
+              🗑️ Eliminar seleccionadas (<span id="char-selected-count">0</span>)
+            </button>
+          </div>
+
+          ${
+            data.total === 0
+              ? `
+            <div style="text-align:center; padding:2rem; color:var(--text-secondary);">
+              <p>📝 Este personaje aún no tiene críticas generadas.</p>
+            </div>
+          `
+              : `
+            <div style="margin-bottom:1rem; display:flex; align-items:center; gap:0.6rem;">
+              <input type="checkbox" id="char-select-all" style="width:16px; height:16px; cursor:pointer;">
+              <label for="char-select-all" style="cursor:pointer; color:var(--text-secondary); font-size:0.9rem;">Seleccionar todas</label>
+            </div>
+            <div id="char-critics-list">
+              ${data.critics.map((c) => this._renderCharacterCriticCard(c, data.character_name)).join('')}
+            </div>
+          `
+          }
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Clear inline styles so CSS takes over
+    modal.style.display = '';
+
+    // Close button
+    modal.querySelector('#char-modal-close').addEventListener('click', () => modal.remove());
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.remove();
+    });
+
+    // Select all
+    const selectAll = modal.querySelector('#char-select-all');
+    if (selectAll) {
+      selectAll.addEventListener('change', () => {
+        modal
+          .querySelectorAll('.char-critic-check')
+          .forEach((cb) => (cb.checked = selectAll.checked));
+        this._updateCharacterModalSelection(modal);
+      });
+    }
+
+    // Checkbox delegation
+    const list = modal.querySelector('#char-critics-list');
+    if (list) {
+      list.addEventListener('change', (e) => {
+        if (e.target.classList.contains('char-critic-check')) {
+          this._updateCharacterModalSelection(modal);
+        }
+      });
+    }
+
+    // Delete selected
+    modal.querySelector('#char-delete-selected').addEventListener('click', () => {
+      this._deleteSelectedCharacterCritics(modal, data.character_name);
+    });
+  }
+
+  _renderCharacterCriticCard(critic, characterName) {
+    const date = critic.generated_at
+      ? new Date(critic.generated_at).toLocaleDateString('es-ES', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        })
+      : '';
+    const preview =
+      critic.content.length > 280 ? critic.content.slice(0, 280) + '…' : critic.content;
+    return `
+      <div class="critic-card" id="char-critic-card-${critic.critic_id}" style="margin-bottom:0.8rem; position:relative;">
+        <div style="display:flex; align-items:flex-start; gap:0.8rem;">
+          <input type="checkbox" class="char-critic-check" data-id="${critic.critic_id}"
+            style="width:16px; height:16px; margin-top:0.3rem; cursor:pointer; flex-shrink:0;">
+          <div style="flex:1; min-width:0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+              <span style="font-weight:600; font-size:0.95rem;">🎬 ${critic.media_title} <span style="color:var(--text-secondary); font-weight:400;">(${critic.media_year || '?'})</span></span>
+              <div style="display:flex; align-items:center; gap:0.5rem; flex-shrink:0;">
+                <span style="color:var(--accent-gold); font-weight:700;">${critic.rating}/10</span>
+                <button class="btn-icon btn-danger" style="font-size:0.8rem; padding:0.3rem 0.5rem;"
+                  onclick="app.deleteSingleCritic(${critic.critic_id}, '${critic.tmdb_id}', '${characterName.replace(/'/g, "\\'")}')">🗑️</button>
+              </div>
+            </div>
+            <p style="margin:0 0 0.4rem; font-size:0.85rem; line-height:1.5; color:var(--text-secondary);">${preview}</p>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Generado: ${date}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  _updateCharacterModalSelection(modal) {
+    const checked = modal.querySelectorAll('.char-critic-check:checked');
+    const deleteBtn = modal.querySelector('#char-delete-selected');
+    const countEl = modal.querySelector('#char-selected-count');
+    countEl.textContent = checked.length;
+    deleteBtn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+
+    const all = modal.querySelectorAll('.char-critic-check');
+    const selectAll = modal.querySelector('#char-select-all');
+    if (selectAll) selectAll.checked = all.length > 0 && checked.length === all.length;
+  }
+
+  async _deleteSelectedCharacterCritics(modal, characterName) {
+    const checked = [...modal.querySelectorAll('.char-critic-check:checked')];
+    const ids = checked.map((cb) => parseInt(cb.dataset.id));
+    if (ids.length === 0) return;
+
+    if (
+      !confirm(`¿Eliminar ${ids.length} crítica${ids.length > 1 ? 's' : ''} de "${characterName}"?`)
+    )
+      return;
+
+    try {
+      const result = await this.fetchAPI('/critics/batch', 'DELETE', { critic_ids: ids });
+      if (result.success) {
+        ids.forEach((id) => {
+          const card = document.getElementById(`char-critic-card-${id}`);
+          if (card) card.remove();
+        });
+        this._updateCharacterModalSelection(modal);
+
+        // Update total count in header
+        const remaining = modal.querySelectorAll('.char-critic-check').length;
+        const header = modal.querySelector('h2 span');
+        if (header) header.textContent = `(${remaining})`;
+
+        // Update character card stats
+        this.loadCharactersData();
+
+        this.showMessage(
+          `${ids.length} crítica${ids.length > 1 ? 's' : ''} eliminada${ids.length > 1 ? 's' : ''}`,
+          'success'
+        );
+      }
+    } catch (error) {
+      this.showError('Error eliminando críticas: ' + error.message);
     }
   }
 
