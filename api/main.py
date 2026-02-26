@@ -75,6 +75,7 @@ sync_manager: Optional[JellyfinSyncManager] = None
 llm_manager: Optional[CriticGenerationManager] = None
 media_enricher: Optional[MediaEnricher] = None
 cancelled_enrichments: set = set()
+active_enrichment_session: Optional[str] = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -291,14 +292,26 @@ async def enrich_single(tmdb_id: str):
 @app.post("/api/enrich/all")
 async def enrich_all_media(background_tasks: BackgroundTasks):
     """Enrich all pending media items with WebSocket progress tracking"""
+    global active_enrichment_session
+
     if not media_enricher:
         raise HTTPException(status_code=503, detail="Enricher not available")
+
+    # Return existing session if already running
+    if active_enrichment_session and active_enrichment_session in websocket_manager.active_imports:
+        return {
+            "success": True,
+            "session_id": active_enrichment_session,
+            "message": "Enrichment already in progress",
+            "websocket_url": f"/ws/import-progress/{active_enrichment_session}",
+        }
 
     status = media_enricher.get_status()
     if status["pending"] == 0:
         return {"success": True, "message": "All media already enriched", "pending": 0, "session_id": None}
 
     session_id = str(uuid.uuid4())
+    active_enrichment_session = session_id
     websocket_manager.start_import_session(session_id, "Media Context Enrichment")
     background_tasks.add_task(perform_enrichment_background, session_id)
 
@@ -313,11 +326,15 @@ async def enrich_all_media(background_tasks: BackgroundTasks):
 @app.post("/api/enrich/cancel/{session_id}")
 async def cancel_enrichment(session_id: str):
     """Cancel ongoing enrichment session"""
+    global active_enrichment_session
     cancelled_enrichments.add(session_id)
+    if active_enrichment_session == session_id:
+        active_enrichment_session = None
     await websocket_manager.cancel_import_session(session_id)
     return {"success": True, "session_id": session_id, "status": "cancelled"}
 
 async def perform_enrichment_background(session_id: str):
+    global active_enrichment_session
     try:
         await websocket_manager.update_import_progress(session_id,
             current_item="Preparing enrichment batch...",
@@ -333,12 +350,14 @@ async def perform_enrichment_background(session_id: str):
             )
 
         result = await media_enricher.enrich_all(
+            limit=100_000,
             session_id=session_id,
             progress_callback=progress_cb,
             cancelled_sessions=cancelled_enrichments,
         )
 
         cancelled_enrichments.discard(session_id)
+        active_enrichment_session = None
 
         session = websocket_manager.import_sessions.get(session_id)
         if session and session.status != "cancelled":
@@ -354,6 +373,7 @@ async def perform_enrichment_background(session_id: str):
         )
     except Exception as e:
         cancelled_enrichments.discard(session_id)
+        active_enrichment_session = None
         setup_logger.error(f"Enrichment failed for session {session_id}: {e}")
         await websocket_manager.complete_import_session(session_id, success=False, error_message=str(e))
 
