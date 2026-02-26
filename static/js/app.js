@@ -1213,6 +1213,62 @@ class ParodyCriticsApp {
     }
   }
 
+  async startEnrichAll() {
+    const btn = document.getElementById('enrich-btn');
+    const originalText = btn.innerHTML;
+
+    try {
+      // Check status first
+      const status = await this.fetchAPI('/enrich/status');
+      if (status.pending === 0) {
+        this.showMessage(
+          `✅ Todo el catálogo ya está enriquecido (${status.enriched} items)`,
+          'success'
+        );
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Enriqueciendo...';
+
+      const result = await this.fetchAPI('/enrich/all', { method: 'POST' });
+
+      if (result.success) {
+        this.showMessage(`🔍 ${result.message} — el proceso corre en segundo plano`, 'success');
+        // Poll status every 5s to update button when done
+        this._pollEnrichStatus(btn, originalText);
+      }
+    } catch (error) {
+      console.error('Enrich failed:', error);
+      this.showError('Error al iniciar el enriquecimiento');
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+
+  async _pollEnrichStatus(btn, originalText) {
+    const poll = async () => {
+      try {
+        const status = await this.fetchAPI('/enrich/status');
+        if (status.pending === 0) {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+          this.showMessage(
+            `✅ Enriquecimiento completo — ${status.enriched} items con contexto`,
+            'success'
+          );
+        } else {
+          btn.innerHTML = `⏳ Enriqueciendo (${status.pending} pendientes)`;
+          setTimeout(poll, 5000);
+        }
+      } catch {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    };
+    setTimeout(poll, 5000);
+  }
+
   showImportProgress(sessionId) {
     // Create or show import progress modal/panel
     let progressModal = document.getElementById('import-progress-modal');

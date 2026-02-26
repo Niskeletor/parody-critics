@@ -430,6 +430,31 @@ class CriticGenerationManager:
             lens_lines.append(f"Lo que detestas (menciónalo si aparece en la obra): {'; '.join(red_flags)}.")
         lens_block = "\n".join(lens_lines)
 
+        # Enriched context block (TMDB + Brave, cached in DB)
+        enriched_block = ""
+        raw_enriched = media_info.get("enriched_context")
+        if raw_enriched:
+            try:
+                ec = json.loads(raw_enriched) if isinstance(raw_enriched, str) else raw_enriched
+                parts = []
+                if ec.get("director"):
+                    parts.append(f"Director: {ec['director']}")
+                if ec.get("cast"):
+                    parts.append(f"Reparto: {', '.join(ec['cast'])}")
+                if ec.get("tagline"):
+                    parts.append(f"Tagline: \"{ec['tagline']}\"")
+                if ec.get("overview_full") and len(ec["overview_full"]) > len(synopsis):
+                    parts.append(f"Sinopsis completa: {ec['overview_full'][:500]}")
+                if ec.get("keywords"):
+                    parts.append(f"Keywords temáticas: {', '.join(ec['keywords'][:12])}")
+                if ec.get("social_snippets"):
+                    snips = "\n".join(f"- {s}" for s in ec["social_snippets"][:4])
+                    parts.append(f"Contexto crítico y social:\n{snips}")
+                if parts:
+                    enriched_block = "\n\nCONTEXTO ENRIQUECIDO:\n" + "\n".join(parts)
+            except Exception as e:
+                logger.warning(f"Could not parse enriched_context: {e}")
+
         prompt = f"""{identity}
 
 {variation_block}
@@ -440,11 +465,13 @@ OBRA A CRITICAR:
 Título: "{title}" ({year})
 Tipo: {type_label.capitalize()}
 Géneros: {genres}
-Sinopsis: {synopsis}
+Sinopsis: {synopsis}{enriched_block}
 
 INSTRUCCIONES:
 Escribe una crítica de máximo 150 palabras como {character} {emoji}.
 Empieza siempre con la puntuación: X/10
+Basa tu análisis en los datos reales de la obra que te hemos dado arriba.
+No inventes tramas, personajes ni elementos que no aparezcan en la sinopsis.
 Después analiza desde tu perspectiva y con tu tono auténtico.
 Sé directo y personal."""
 
