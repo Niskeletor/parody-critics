@@ -94,7 +94,7 @@ def _run_auto_migrations(db_path: str):
             migrations.append("ALTER TABLE media ADD COLUMN enriched_at DATETIME")
 
         # Personality / variation-engine columns (migrate_personality.py)
-        for col, default in [("motifs", "[]"), ("catchphrases", "[]"), ("avoid", "[]"), ("red_flags", "[]")]:
+        for col, default in [("motifs", "[]"), ("catchphrases", "[]"), ("avoid", "[]"), ("red_flags", "[]"), ("loves", "[]"), ("hates", "[]")]:
             if col not in existing_char_cols:
                 migrations.append(f"ALTER TABLE characters ADD COLUMN {col} TEXT DEFAULT '{default}'")
 
@@ -452,7 +452,7 @@ async def get_characters(active_only: bool = Query(True, description="Only retur
     for row in rows:
         row_dict = dict(row)
         # Parse JSON array fields into actual lists
-        for field in ('motifs', 'catchphrases', 'avoid', 'red_flags'):
+        for field in ('motifs', 'catchphrases', 'avoid', 'red_flags', 'loves', 'hates'):
             raw = row_dict.get(field)
             try:
                 row_dict[field] = _json.loads(raw) if raw else []
@@ -1899,9 +1899,9 @@ async def create_character(character_data: dict = Body(...)):
             INSERT INTO characters (
                 id, name, emoji, personality, description,
                 color, border_color, accent_color,
-                motifs, catchphrases, avoid, red_flags, active
+                motifs, catchphrases, avoid, red_flags, loves, hates, active
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE)
         """
         db_manager.execute_insert(insert_query, (
             character_id,
@@ -1916,6 +1916,8 @@ async def create_character(character_data: dict = Body(...)):
             _to_json(character_data.get('catchphrases', [])),
             _to_json(character_data.get('avoid', [])),
             _to_json(character_data.get('red_flags', [])),
+            _to_json(character_data.get('loves', [])),
+            _to_json(character_data.get('hates', [])),
         ))
 
         return {
@@ -1971,7 +1973,8 @@ async def update_character(character_id: str, character_data: dict = Body(...)):
             UPDATE characters
             SET name = ?, emoji = ?, personality = ?, description = ?,
                 color = ?, border_color = ?, accent_color = ?,
-                motifs = ?, catchphrases = ?, avoid = ?, red_flags = ?
+                motifs = ?, catchphrases = ?, avoid = ?, red_flags = ?,
+                loves = ?, hates = ?
             WHERE id = ?
         """
         db_manager.execute_query(update_query, (
@@ -1986,6 +1989,8 @@ async def update_character(character_id: str, character_data: dict = Body(...)):
             _to_json(character_data.get('catchphrases', [])),
             _to_json(character_data.get('avoid', [])),
             _to_json(character_data.get('red_flags', [])),
+            _to_json(character_data.get('loves', [])),
+            _to_json(character_data.get('hates', [])),
             character_id
         ))
 

@@ -82,7 +82,7 @@ class CriticGenerationManager:
 
             cursor.execute("""
                 SELECT id, name, emoji, personality, description,
-                       motifs, catchphrases, avoid, red_flags
+                       motifs, catchphrases, avoid, red_flags, loves, hates
                 FROM characters
                 WHERE name = ? AND active = TRUE
             """, (character_name,))
@@ -455,11 +455,24 @@ class CriticGenerationManager:
             except Exception as e:
                 logger.warning(f"Could not parse enriched_context: {e}")
 
+        # Soul: loves and hates
+        loves = json.loads(character_data.get("loves") or "[]")
+        hates = json.loads(character_data.get("hates") or "[]")
+        soul_lines = []
+        if loves:
+            soul_lines.append(f"\nAMAS en el cine: {', '.join(loves[:8])}")
+        if hates:
+            soul_lines.append(f"DETESTAS en el cine: {', '.join(hates[:8])}")
+            soul_lines.append(f"Cuando detectas lo que odias, reacciona con intensidad genuina.")
+        soul_block = "\n".join(soul_lines)
+
         prompt = f"""{identity}
 
 {variation_block}
 
 {lens_block}
+
+{soul_block}
 
 OBRA A CRITICAR:
 Título: "{title}" ({year})

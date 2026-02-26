@@ -38,6 +38,8 @@ CREATE TABLE IF NOT EXISTS characters (
     catchphrases TEXT DEFAULT '[]', -- JSON array: signature phrases (used sparingly)
     avoid TEXT DEFAULT '[]',        -- JSON array: patterns to avoid repeating
     red_flags TEXT DEFAULT '[]',    -- JSON array: things the character hates (call out if present)
+    loves TEXT DEFAULT '[]',        -- JSON array: themes/genres the character loves
+    hates TEXT DEFAULT '[]',        -- JSON array: themes/genres the character hates
     prompt_template TEXT, -- Reserved for future use
     active BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
