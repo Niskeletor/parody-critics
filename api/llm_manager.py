@@ -81,7 +81,8 @@ class CriticGenerationManager:
             cursor = conn.cursor()
 
             cursor.execute("""
-                SELECT id, name, emoji, personality, description
+                SELECT id, name, emoji, personality, description,
+                       motifs, catchphrases, avoid, red_flags
                 FROM characters
                 WHERE name = ? AND active = TRUE
             """, (character_name,))
@@ -97,6 +98,76 @@ class CriticGenerationManager:
         except Exception as e:
             logger.error(f"Error getting character from database: {e}")
             return None
+
+    def _get_recent_motifs(self, character_id: str, limit: int = 15) -> List[str]:
+        """Get recently used motifs for a character (for anti-repetition)"""
+        import sqlite3
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT motif FROM character_motif_history
+                WHERE character_id = ?
+                ORDER BY used_at DESC
+                LIMIT ?
+            """, (character_id, limit))
+            result = [row[0] for row in cursor.fetchall()]
+            conn.close()
+            return result
+        except Exception as e:
+            logger.warning(f"Could not get recent motifs for {character_id}: {e}")
+            return []
+
+    def _record_motif_usage(self, character_id: str, motifs: List[str]):
+        """Record used motifs and prune history to last 100 per character"""
+        import sqlite3
+        if not motifs:
+            return
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            for motif in motifs:
+                cursor.execute(
+                    "INSERT INTO character_motif_history (character_id, motif) VALUES (?, ?)",
+                    (character_id, motif)
+                )
+            # Keep history lean — last 100 per character
+            cursor.execute("""
+                DELETE FROM character_motif_history
+                WHERE character_id = ? AND id NOT IN (
+                    SELECT id FROM character_motif_history
+                    WHERE character_id = ?
+                    ORDER BY used_at DESC
+                    LIMIT 100
+                )
+            """, (character_id, character_id))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.warning(f"Could not record motif usage for {character_id}: {e}")
+
+    def _select_variation_pack(
+        self, character_id: str, motifs: List[str], catchphrases: List[str]
+    ) -> Dict[str, Any]:
+        """Pick 2-3 motifs (avoiding recent) and optionally 1 catchphrase"""
+        import random
+        if not motifs:
+            return {"motifs": [], "catchphrase": None}
+
+        recent = set(self._get_recent_motifs(character_id, limit=15))
+        available = [m for m in motifs if m not in recent]
+
+        # If all motifs have been used recently, reset and use all
+        if len(available) < 2:
+            available = motifs
+
+        count = min(3, len(available))
+        selected = random.sample(available, count)
+        catchphrase = random.choice(catchphrases) if catchphrases and random.random() > 0.4 else None
+
+        self._record_motif_usage(character_id, selected)
+        logger.debug(f"Variation pack for {character_id}: motifs={selected}, catchphrase={'yes' if catchphrase else 'no'}")
+        return {"motifs": selected, "catchphrase": catchphrase}
 
     async def health_check_endpoint(self, endpoint_name: str) -> Dict[str, Any]:
         """Check if an endpoint is healthy and responsive"""
@@ -305,113 +376,79 @@ class CriticGenerationManager:
         raise NotImplementedError("OpenAI integration not yet implemented")
 
     def _build_character_prompt(self, character: str, media_info: Dict[str, Any]) -> str:
-        """Build character-specific prompt for critic generation"""
+        """Build character-specific prompt using structured personality fields + variation engine"""
+        import json
 
-        # Base media information
-        title = media_info.get("title", "Película sin título")
+        title = media_info.get("title", "Obra sin título")
         year = media_info.get("year", "Año desconocido")
         media_type = media_info.get("type", "movie")
         genres = media_info.get("genres", "Géneros desconocidos")
         synopsis = media_info.get("synopsis", "Sin sinopsis disponible")
+        type_label = "película" if media_type == "movie" else "serie"
 
-        # Get character from database first
         character_data = self._get_character_from_db(character)
+        if not character_data:
+            logger.warning(f"Character '{character}' not found in DB, using fallback prompt")
+            return f'Escribe una crítica de la {type_label} "{title}" ({year}) en máximo 150 palabras. Incluye una puntuación del 1 al 10 al inicio.'
 
-        if character_data:
-            # Build dynamic prompt from character data
-            character_personality = character_data.get('personality', '')
-            character_description = character_data.get('description', '')
-            character_emoji = character_data.get('emoji', '🎭')
+        character_id = character_data.get('id', '')
+        emoji = character_data.get('emoji', '🎭')
+        description = character_data.get('description', '')
+        personality = character_data.get('personality', '')
 
-            # If description contains detailed instructions, use it as the main personality prompt
-            if len(character_description) > 50:  # Assume detailed description
-                character_prompt = f"""{character_description}
+        # Parse structured personality fields
+        motifs = json.loads(character_data.get('motifs') or '[]')
+        catchphrases = json.loads(character_data.get('catchphrases') or '[]')
+        avoid = json.loads(character_data.get('avoid') or '[]')
+        red_flags = json.loads(character_data.get('red_flags') or '[]')
 
-INFORMACIÓN DE LA OBRA:
+        # Identity block — who the character is and how they speak
+        if description:
+            identity = description
+        else:
+            identity = f"Eres {character} {emoji}. Arquetipo: {personality}."
+
+        # Variation pack — makes each critique feel different
+        variation = self._select_variation_pack(character_id, motifs, catchphrases)
+
+        variation_lines = []
+        if variation['motifs']:
+            variation_lines.append(
+                f"Para esta crítica, enfoca tu análisis usando estos conceptos: {', '.join(variation['motifs'])}."
+            )
+        if variation['catchphrase']:
+            variation_lines.append(
+                f"Puedes usar esta frase si encaja: \"{variation['catchphrase']}\""
+            )
+        variation_block = "\n".join(variation_lines)
+
+        # Critic lens — what to avoid and what to call out
+        lens_lines = []
+        if avoid:
+            lens_lines.append(f"Evita: {'; '.join(avoid)}.")
+        if red_flags:
+            lens_lines.append(f"Lo que detestas (menciónalo si aparece en la obra): {'; '.join(red_flags)}.")
+        lens_block = "\n".join(lens_lines)
+
+        prompt = f"""{identity}
+
+{variation_block}
+
+{lens_block}
+
+OBRA A CRITICAR:
 Título: "{title}" ({year})
-Tipo: {media_type.title()}
+Tipo: {type_label.capitalize()}
 Géneros: {genres}
 Sinopsis: {synopsis}
 
 INSTRUCCIONES:
-Escribe una crítica de máximo 150 palabras como {character} que incluya:
-1. **Puntuación**: Califica del 1 al 10 la obra
-2. **Análisis personal**: Analiza desde tu perspectiva única y personalidad
-3. **Tono auténtico**: Mantén tu personalidad y manera de expresarte
-4. **Reacción genuina**: Expresa tu verdadera reacción a la obra
+Escribe una crítica de máximo 150 palabras como {character} {emoji}.
+Empieza siempre con la puntuación: X/10
+Después analiza desde tu perspectiva y con tu tono auténtico.
+Sé directo y personal."""
 
-Estructura tu respuesta claramente con la puntuación al inicio."""
-                return character_prompt
-            else:
-                # Use personality-based prompt for simpler characters
-                character_prompt = f"""Eres {character} {character_emoji}. Tu personalidad es: {character_personality}.
-
-{character_description}
-
-Debes escribir una crítica de {'película' if media_type == 'movie' else 'serie'} desde tu perspectiva única.
-
-INFORMACIÓN DE LA OBRA:
-Título: "{title}" ({year})
-Tipo: {media_type.title()}
-Géneros: {genres}
-Sinopsis: {synopsis}
-
-INSTRUCCIONES:
-Escribe una crítica de máximo 150 palabras que incluya:
-1. **Puntuación**: Califica del 1 al 10 la obra
-2. **Análisis desde tu personalidad**: Analiza según tu forma de ser
-3. **Tono auténtico**: Mantén tu personalidad característica
-4. **Perspectiva única**: Aplica tu punto de vista personal
-
-Estructura tu respuesta claramente con la puntuación al inicio."""
-                return character_prompt
-
-        # Fallback to hardcoded prompts for legacy characters
-        character_prompts = {
-            "Marco Aurelio": f"""Eres Marco Aurelio, el emperador filósofo romano (121-180 d.C.). Debes escribir una crítica de {'película' if media_type == 'movie' else 'serie'} desde tu perspectiva estoica y filosófica.
-
-INFORMACIÓN DE LA OBRA:
-Título: "{title}" ({year})
-Tipo: {media_type.title()}
-Géneros: {genres}
-Sinopsis: {synopsis}
-
-INSTRUCCIONES:
-Escribe una crítica de máximo 150 palabras que incluya:
-
-1. **Puntuación**: Califica del 1 al 10 la obra
-2. **Reflexión estoica**: Analiza la obra desde los principios del estoicismo
-3. **Enseñanzas**: Conecta con tus conceptos de virtud, sabiduría, aceptación del destino y control de las emociones
-4. **Perspectiva imperial**: Reflexiona desde tu experiencia como emperador y filósofo
-
-TONO: Sabio, reflexivo, sereno. Usa un lenguaje elevado pero accesible. Menciona conceptos estoicos como la ataraxia, el logos universal, la memento mori, etc.
-
-Estructura tu respuesta claramente con la puntuación al inicio.""",
-
-            "Rosario Costras": f"""Eres Rosario Costras, una activista progresista del siglo XXI muy crítica con los problemas sociales y estructuras de poder. Debes escribir una crítica de {'película' if media_type == 'movie' else 'serie'} desde tu perspectiva de justicia social.
-
-INFORMACIÓN DE LA OBRA:
-Título: "{title}" ({year})
-Tipo: {media_type.title()}
-Géneros: {genres}
-Sinopsis: {synopsis}
-
-INSTRUCCIONES:
-Escribe una crítica de máximo 150 palabras que incluya:
-
-1. **Puntuación**: Califica del 1 al 10 la obra (con perspectiva crítica social)
-2. **Representación**: Analiza diversidad racial, de género, orientación sexual y clase social
-3. **Estructuras de poder**: Critica las dinámicas de poder y privilegio mostradas
-4. **Impacto social**: Evalúa si refuerza o desafía estereotipos y normas problemáticas
-
-TONO: Combativo, directo, comprometido con la justicia social. Usa lenguaje actual y términos de activismo social. No tengas miedo de ser crítica cuando sea necesario.
-
-Estructura tu respuesta claramente con la puntuación al inicio."""
-        }
-
-        default_prompt = f"""Escribe una crítica breve de la obra "{title}" ({year}) de máximo 150 palabras incluyendo una puntuación del 1 al 10."""
-
-        return character_prompts.get(character, default_prompt)
+        return prompt
 
     def parse_critic_response(self, raw_response: str, character: str, media_info: Dict[str, Any]) -> Dict[str, Any]:
         """Parse LLM response to extract structured critic data"""

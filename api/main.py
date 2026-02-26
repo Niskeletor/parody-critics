@@ -261,9 +261,17 @@ async def get_characters(active_only: bool = Query(True, description="Only retur
 
     rows = db_manager.execute_query(query)
 
+    import json as _json
     characters = []
     for row in rows:
         row_dict = dict(row)
+        # Parse JSON array fields into actual lists
+        for field in ('motifs', 'catchphrases', 'avoid', 'red_flags'):
+            raw = row_dict.get(field)
+            try:
+                row_dict[field] = _json.loads(raw) if raw else []
+            except (ValueError, TypeError):
+                row_dict[field] = []
         characters.append(CharacterInfo(**row_dict))
 
     return characters
@@ -1692,10 +1700,21 @@ async def create_character(character_data: dict = Body(...)):
             character_id = f"{base_id}_{counter}"
             counter += 1
 
+        import json as _json
+
+        def _to_json(val):
+            if isinstance(val, list):
+                return _json.dumps(val, ensure_ascii=False)
+            return val or '[]'
+
         # Insert new character
         insert_query = """
-            INSERT INTO characters (id, name, emoji, personality, description, color, border_color, accent_color, active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, TRUE)
+            INSERT INTO characters (
+                id, name, emoji, personality, description,
+                color, border_color, accent_color,
+                motifs, catchphrases, avoid, red_flags, active
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE)
         """
         db_manager.execute_insert(insert_query, (
             character_id,
@@ -1703,9 +1722,13 @@ async def create_character(character_data: dict = Body(...)):
             character_data.get('emoji', '🎭'),
             character_data.get('personality', ''),
             character_data.get('description', ''),
-            character_data.get('color', '#6366f1'),  # Default indigo color
-            character_data.get('border_color', '#4f46e5'),  # Default indigo border
-            character_data.get('accent_color', '#8b5cf6')   # Default purple accent
+            character_data.get('color', '#6366f1'),
+            character_data.get('border_color', '#4f46e5'),
+            character_data.get('accent_color', '#8b5cf6'),
+            _to_json(character_data.get('motifs', [])),
+            _to_json(character_data.get('catchphrases', [])),
+            _to_json(character_data.get('avoid', [])),
+            _to_json(character_data.get('red_flags', [])),
         ))
 
         return {
@@ -1749,10 +1772,19 @@ async def update_character(character_id: str, character_data: dict = Body(...)):
                 detail=f"Character name '{character_data['name']}' is already taken"
             )
 
+        import json as _json
+
+        def _to_json(val):
+            if isinstance(val, list):
+                return _json.dumps(val, ensure_ascii=False)
+            return val or '[]'
+
         # Update character
         update_query = """
             UPDATE characters
-            SET name = ?, emoji = ?, personality = ?, description = ?, color = ?, border_color = ?, accent_color = ?
+            SET name = ?, emoji = ?, personality = ?, description = ?,
+                color = ?, border_color = ?, accent_color = ?,
+                motifs = ?, catchphrases = ?, avoid = ?, red_flags = ?
             WHERE id = ?
         """
         db_manager.execute_query(update_query, (
@@ -1760,9 +1792,13 @@ async def update_character(character_id: str, character_data: dict = Body(...)):
             character_data.get('emoji', '🎭'),
             character_data.get('personality', ''),
             character_data.get('description', ''),
-            character_data.get('color', '#6366f1'),  # Default indigo color
-            character_data.get('border_color', '#4f46e5'),  # Default indigo border
-            character_data.get('accent_color', '#8b5cf6'),   # Default purple accent
+            character_data.get('color', '#6366f1'),
+            character_data.get('border_color', '#4f46e5'),
+            character_data.get('accent_color', '#8b5cf6'),
+            _to_json(character_data.get('motifs', [])),
+            _to_json(character_data.get('catchphrases', [])),
+            _to_json(character_data.get('avoid', [])),
+            _to_json(character_data.get('red_flags', [])),
             character_id
         ))
 
