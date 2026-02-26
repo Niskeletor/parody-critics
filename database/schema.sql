@@ -30,9 +30,13 @@ CREATE TABLE IF NOT EXISTS characters (
     color TEXT, -- Hex color code
     border_color TEXT,
     accent_color TEXT,
-    personality TEXT, -- 'stoic', 'woke', 'snob', 'karen'
-    description TEXT,
-    prompt_template TEXT, -- Template para el LLM
+    personality TEXT, -- Archetype label: 'stoic', 'woke', 'nihilist', 'boomer'...
+    description TEXT,  -- Identity + voice: who the character is and how they speak
+    motifs TEXT DEFAULT '[]',       -- JSON array: concepts to rotate per critique
+    catchphrases TEXT DEFAULT '[]', -- JSON array: signature phrases (used sparingly)
+    avoid TEXT DEFAULT '[]',        -- JSON array: patterns to avoid repeating
+    red_flags TEXT DEFAULT '[]',    -- JSON array: things the character hates (call out if present)
+    prompt_template TEXT, -- Reserved for future use
     active BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -68,7 +72,18 @@ CREATE TABLE IF NOT EXISTS sync_log (
     metadata TEXT -- JSON con info adicional
 );
 
+-- Tabla de historial de motifs por personaje (variation engine)
+CREATE TABLE IF NOT EXISTS character_motif_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    character_id TEXT NOT NULL,
+    motif TEXT NOT NULL,
+    used_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (character_id) REFERENCES characters(id) ON DELETE CASCADE
+);
+
 -- Índices para optimización
+CREATE INDEX IF NOT EXISTS idx_motif_history_character ON character_motif_history(character_id);
+CREATE INDEX IF NOT EXISTS idx_motif_history_used_at ON character_motif_history(used_at);
 CREATE INDEX IF NOT EXISTS idx_media_tmdb ON media(tmdb_id);
 CREATE INDEX IF NOT EXISTS idx_media_jellyfin ON media(jellyfin_id);
 CREATE INDEX IF NOT EXISTS idx_media_type ON media(type);

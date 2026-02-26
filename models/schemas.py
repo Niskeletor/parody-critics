@@ -70,6 +70,10 @@ class CharacterInfo(BaseModel):
     active: bool
     total_reviews: Optional[int] = 0
     avg_rating: Optional[float] = None
+    motifs: Optional[List] = []
+    catchphrases: Optional[List] = []
+    avoid: Optional[List] = []
+    red_flags: Optional[List] = []
 
 class StatsResponse(BaseModel):
     """API statistics response"""
@@ -158,3 +162,7 @@ class CharacterDB(BaseModel):
     prompt_template: Optional[str] = None
     active: bool = True
     created_at: Optional[datetime] = None
+    motifs: Optional[str] = '[]'        # JSON array string
+    catchphrases: Optional[str] = '[]'  # JSON array string
+    avoid: Optional[str] = '[]'         # JSON array string
+    red_flags: Optional[str] = '[]'     # JSON array string
