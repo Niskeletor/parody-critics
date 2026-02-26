@@ -1,311 +1,314 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🧙‍♂️ Setup Wizard - Parody Critics</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/styles.css" />
     <style>
-        .wizard-container {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: var(--surface-color);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
+      .wizard-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: var(--surface-color);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
 
-        .wizard-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
+      .wizard-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
 
-        .wizard-title {
-            font-size: 2.5rem;
-            color: var(--accent-color);
-            margin-bottom: 0.5rem;
-        }
+      .wizard-title {
+        font-size: 2.5rem;
+        color: var(--accent-color);
+        margin-bottom: 0.5rem;
+      }
 
-        .wizard-subtitle {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-        }
+      .wizard-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+      }
 
-        .check-section {
-            margin: 2rem 0;
-        }
+      .check-section {
+        margin: 2rem 0;
+      }
 
-        .check-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
+      .check-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
 
-        .check-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
+      .check-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
 
-        .btn-check {
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
+      .btn-check {
+        background: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
 
-        .btn-check:hover {
-            background: var(--accent-dark);
-            transform: translateY(-2px);
-        }
+      .btn-check:hover {
+        background: var(--accent-dark);
+        transform: translateY(-2px);
+      }
 
-        .btn-check:disabled {
-            background: var(--text-secondary);
-            cursor: not-allowed;
-            transform: none;
-        }
+      .btn-check:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+      }
 
-        .results-container {
-            background: var(--background-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 1rem;
-            border: 2px solid var(--border-color);
-        }
+      .results-container {
+        background: var(--background-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        border: 2px solid var(--border-color);
+      }
 
-        .result-item {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            background: white;
-            border-radius: 8px;
-            border-left: 4px solid var(--border-color);
-        }
+      .result-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background: white;
+        border-radius: 8px;
+        border-left: 4px solid var(--border-color);
+      }
 
-        .result-item.healthy {
-            border-left-color: var(--success-color);
-        }
+      .result-item.healthy {
+        border-left-color: var(--success-color);
+      }
 
-        .result-item.warning {
-            border-left-color: var(--warning-color);
-        }
+      .result-item.warning {
+        border-left-color: var(--warning-color);
+      }
 
-        .result-item.error {
-            border-left-color: var(--error-color);
-        }
+      .result-item.error {
+        border-left-color: var(--error-color);
+      }
 
-        .result-icon {
-            font-size: 1.5rem;
-            margin-right: 1rem;
-        }
+      .result-icon {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+      }
 
-        .result-content {
-            flex: 1;
-        }
+      .result-content {
+        flex: 1;
+      }
 
-        .result-title {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
+      .result-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+      }
 
-        .result-message {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
+      .result-message {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
 
-        .result-details {
-            margin-top: 0.5rem;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
+      .result-details {
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
 
-        .overall-status {
-            text-align: center;
-            padding: 1.5rem;
-            margin-top: 2rem;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
+      .overall-status {
+        text-align: center;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
 
-        .overall-status.healthy {
-            background: rgba(34, 197, 94, 0.1);
-            color: var(--success-color);
-            border: 2px solid rgba(34, 197, 94, 0.3);
-        }
+      .overall-status.healthy {
+        background: rgba(34, 197, 94, 0.1);
+        color: var(--success-color);
+        border: 2px solid rgba(34, 197, 94, 0.3);
+      }
 
-        .overall-status.warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning-color);
-            border: 2px solid rgba(245, 158, 11, 0.3);
-        }
+      .overall-status.warning {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-color);
+        border: 2px solid rgba(245, 158, 11, 0.3);
+      }
 
-        .overall-status.error {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--error-color);
-            border: 2px solid rgba(239, 68, 68, 0.3);
-        }
+      .overall-status.error {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--error-color);
+        border: 2px solid rgba(239, 68, 68, 0.3);
+      }
 
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-secondary);
-        }
+      .loading {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+      }
 
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid var(--border-color);
-            border-radius: 50%;
-            border-top-color: var(--accent-color);
-            animation: spin 1s ease-in-out infinite;
-        }
+      .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid var(--border-color);
+        border-radius: 50%;
+        border-top-color: var(--accent-color);
+        animation: spin 1s ease-in-out infinite;
+      }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
         }
+      }
 
-        .hidden {
-            display: none;
-        }
+      .hidden {
+        display: none;
+      }
 
-        .debug-section {
-            margin-top: 2rem;
-            padding: 1rem;
-            background: var(--background-color);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
+      .debug-section {
+        margin-top: 2rem;
+        padding: 1rem;
+        background: var(--background-color);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+      }
 
-        .debug-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-secondary);
-        }
+      .debug-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+      }
 
-        .debug-content {
-            font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
-            background: #1f1f1f;
-            color: #e5e5e5;
-            padding: 1rem;
-            border-radius: 6px;
-            overflow-x: auto;
-            white-space: pre-wrap;
-        }
+      .debug-content {
+        font-family: 'Courier New', monospace;
+        font-size: 0.8rem;
+        background: #1f1f1f;
+        color: #e5e5e5;
+        padding: 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+      }
 
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            color: var(--accent-color);
-            text-decoration: none;
-            margin-bottom: 2rem;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: var(--accent-color);
+        text-decoration: none;
+        margin-bottom: 2rem;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
 
-        .back-link:hover {
-            color: var(--accent-dark);
-        }
+      .back-link:hover {
+        color: var(--accent-dark);
+      }
 
-        .back-link::before {
-            content: "←";
-            margin-right: 0.5rem;
-        }
+      .back-link::before {
+        content: '←';
+        margin-right: 0.5rem;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="wizard-container">
-        <a href="/" class="back-link">Volver al Dashboard</a>
+      <a href="/" class="back-link">Volver al Dashboard</a>
 
-        <div class="wizard-header">
-            <h1 class="wizard-title">🧙‍♂️ Setup Wizard</h1>
-            <p class="wizard-subtitle">Verificación del sistema para Parody Critics</p>
+      <div class="wizard-header">
+        <h1 class="wizard-title">🧙‍♂️ Setup Wizard</h1>
+        <p class="wizard-subtitle">Verificación del sistema para Parody Critics</p>
+      </div>
+
+      <div class="check-section">
+        <div class="check-header">
+          <h2 class="check-title">🔍 Verificación de Requisitos del Sistema</h2>
+          <button class="btn-check" id="check-btn" onclick="checkRequirements()">
+            <span id="check-text">Verificar Sistema</span>
+            <span id="check-loading" class="hidden"
+              ><span class="loading-spinner"></span> Verificando...</span
+            >
+          </button>
         </div>
 
-        <div class="check-section">
-            <div class="check-header">
-                <h2 class="check-title">🔍 Verificación de Requisitos del Sistema</h2>
-                <button class="btn-check" id="check-btn" onclick="checkRequirements()">
-                    <span id="check-text">Verificar Sistema</span>
-                    <span id="check-loading" class="hidden"><span class="loading-spinner"></span> Verificando...</span>
-                </button>
-            </div>
-
-            <div id="results-container" class="results-container hidden">
-                <div id="results-content"></div>
-                <div id="overall-status" class="overall-status hidden"></div>
-            </div>
-
-            <div id="debug-section" class="debug-section hidden">
-                <div class="debug-title">🐛 Debug Information</div>
-                <div id="debug-content" class="debug-content"></div>
-            </div>
+        <div id="results-container" class="results-container hidden">
+          <div id="results-content"></div>
+          <div id="overall-status" class="overall-status hidden"></div>
         </div>
+
+        <div id="debug-section" class="debug-section hidden">
+          <div class="debug-title">🐛 Debug Information</div>
+          <div id="debug-content" class="debug-content"></div>
+        </div>
+      </div>
     </div>
 
     <script>
-        let debugMode = new URLSearchParams(window.location.search).has('debug');
+      let debugMode = new URLSearchParams(window.location.search).has('debug');
 
-        if (debugMode) {
-            document.getElementById('debug-section').classList.remove('hidden');
-        }
+      if (debugMode) {
+        document.getElementById('debug-section').classList.remove('hidden');
+      }
 
-        async function checkRequirements() {
-            const btn = document.getElementById('check-btn');
-            const checkText = document.getElementById('check-text');
-            const checkLoading = document.getElementById('check-loading');
-            const resultsContainer = document.getElementById('results-container');
-            const resultsContent = document.getElementById('results-content');
-            const overallStatus = document.getElementById('overall-status');
-            const debugContent = document.getElementById('debug-content');
+      async function checkRequirements() {
+        const btn = document.getElementById('check-btn');
+        const checkText = document.getElementById('check-text');
+        const checkLoading = document.getElementById('check-loading');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsContent = document.getElementById('results-content');
+        const overallStatus = document.getElementById('overall-status');
+        const debugContent = document.getElementById('debug-content');
 
-            // Show loading state
-            btn.disabled = true;
-            checkText.classList.add('hidden');
-            checkLoading.classList.remove('hidden');
-            resultsContainer.classList.add('hidden');
+        // Show loading state
+        btn.disabled = true;
+        checkText.classList.add('hidden');
+        checkLoading.classList.remove('hidden');
+        resultsContainer.classList.add('hidden');
 
-            try {
-                console.log('🔍 Starting system requirements check...');
+        try {
+          console.log('🔍 Starting system requirements check...');
 
-                const response = await fetch('/api/setup/check-requirements', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
+          const response = await fetch('/api/setup/check-requirements', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
 
-                const data = await response.json();
-                console.log('✅ Check completed successfully:', data);
+          const data = await response.json();
+          console.log('✅ Check completed successfully:', data);
 
-                // Display results
-                displayResults(data);
-                resultsContainer.classList.remove('hidden');
+          // Display results
+          displayResults(data);
+          resultsContainer.classList.remove('hidden');
 
-                // Debug info
-                if (debugMode) {
-                    debugContent.textContent = JSON.stringify(data, null, 2);
-                }
+          // Debug info
+          if (debugMode) {
+            debugContent.textContent = JSON.stringify(data, null, 2);
+          }
+        } catch (error) {
+          console.error('❌ Error checking requirements:', error);
 
-            } catch (error) {
-                console.error('❌ Error checking requirements:', error);
-
-                // Display error
-                resultsContent.innerHTML = `
+          // Display error
+          resultsContent.innerHTML = `
                     <div class="result-item error">
                         <div class="result-icon">❌</div>
                         <div class="result-content">
@@ -316,99 +319,99 @@
                     </div>
                 `;
 
-                overallStatus.textContent = '❌ Error de Sistema';
-                overallStatus.className = 'overall-status error';
-                overallStatus.classList.remove('hidden');
-                resultsContainer.classList.remove('hidden');
+          overallStatus.textContent = '❌ Error de Sistema';
+          overallStatus.className = 'overall-status error';
+          overallStatus.classList.remove('hidden');
+          resultsContainer.classList.remove('hidden');
 
-                if (debugMode) {
-                    debugContent.textContent = `Error: ${error.message}\nStack: ${error.stack}`;
-                }
-            } finally {
-                // Reset button
-                btn.disabled = false;
-                checkText.classList.remove('hidden');
-                checkLoading.classList.add('hidden');
-            }
+          if (debugMode) {
+            debugContent.textContent = `Error: ${error.message}\nStack: ${error.stack}`;
+          }
+        } finally {
+          // Reset button
+          btn.disabled = false;
+          checkText.classList.remove('hidden');
+          checkLoading.classList.add('hidden');
+        }
+      }
+
+      function displayResults(data) {
+        const resultsContent = document.getElementById('results-content');
+        const overallStatus = document.getElementById('overall-status');
+
+        let html = '';
+
+        // Database check
+        if (data.checks.database) {
+          const db = data.checks.database;
+          html += createResultItem(
+            db.status === 'healthy' ? '✅' : '❌',
+            '🗄️ Base de Datos',
+            db.message,
+            `Ruta: ${db.path || 'No especificada'}`,
+            db.status
+          );
         }
 
-        function displayResults(data) {
-            const resultsContent = document.getElementById('results-content');
-            const overallStatus = document.getElementById('overall-status');
-
-            let html = '';
-
-            // Database check
-            if (data.checks.database) {
-                const db = data.checks.database;
-                html += createResultItem(
-                    db.status === 'healthy' ? '✅' : '❌',
-                    '🗄️ Base de Datos',
-                    db.message,
-                    `Ruta: ${db.path || 'No especificada'}`,
-                    db.status
-                );
-            }
-
-            // LLM check
-            if (data.checks.llm) {
-                const llm = data.checks.llm;
-                let details = '';
-                if (llm.endpoints) {
-                    details = Object.entries(llm.endpoints)
-                        .map(([name, info]) => `${name}: ${info.model} (${info.status})`)
-                        .join(', ');
-                }
-                html += createResultItem(
-                    llm.status === 'healthy' ? '✅' : '❌',
-                    '🤖 Modelos LLM',
-                    llm.message,
-                    details,
-                    llm.status
-                );
-            }
-
-            // Port check
-            if (data.checks.port) {
-                const port = data.checks.port;
-                html += createResultItem(
-                    port.status === 'healthy' ? '✅' : '❌',
-                    '🌐 Puerto API',
-                    port.message,
-                    `Puerto: ${port.port || 'No especificado'}`,
-                    port.status
-                );
-            }
-
-            resultsContent.innerHTML = html;
-
-            // Overall status
-            const statusMap = {
-                'healthy': {
-                    icon: '✅',
-                    text: 'Sistema Listo',
-                    class: 'healthy'
-                },
-                'warning': {
-                    icon: '⚠️',
-                    text: 'Advertencias Detectadas',
-                    class: 'warning'
-                },
-                'error': {
-                    icon: '❌',
-                    text: 'Errores del Sistema',
-                    class: 'error'
-                }
-            };
-
-            const status = statusMap[data.overall_status] || statusMap['error'];
-            overallStatus.textContent = `${status.icon} ${status.text}`;
-            overallStatus.className = `overall-status ${status.class}`;
-            overallStatus.classList.remove('hidden');
+        // LLM check
+        if (data.checks.llm) {
+          const llm = data.checks.llm;
+          let details = '';
+          if (llm.endpoints) {
+            details = Object.entries(llm.endpoints)
+              .map(([name, info]) => `${name}: ${info.model} (${info.status})`)
+              .join(', ');
+          }
+          html += createResultItem(
+            llm.status === 'healthy' ? '✅' : '❌',
+            '🤖 Modelos LLM',
+            llm.message,
+            details,
+            llm.status
+          );
         }
 
-        function createResultItem(icon, title, message, details, status) {
-            return `
+        // Port check
+        if (data.checks.port) {
+          const port = data.checks.port;
+          html += createResultItem(
+            port.status === 'healthy' ? '✅' : '❌',
+            '🌐 Puerto API',
+            port.message,
+            `Puerto: ${port.port || 'No especificado'}`,
+            port.status
+          );
+        }
+
+        resultsContent.innerHTML = html;
+
+        // Overall status
+        const statusMap = {
+          healthy: {
+            icon: '✅',
+            text: 'Sistema Listo',
+            class: 'healthy',
+          },
+          warning: {
+            icon: '⚠️',
+            text: 'Advertencias Detectadas',
+            class: 'warning',
+          },
+          error: {
+            icon: '❌',
+            text: 'Errores del Sistema',
+            class: 'error',
+          },
+        };
+
+        const status = statusMap[data.overall_status] || statusMap['error'];
+        overallStatus.textContent = `${status.icon} ${status.text}`;
+        overallStatus.className = `overall-status ${status.class}`;
+        overallStatus.classList.remove('hidden');
+      }
+
+      function createResultItem(icon, title, message, details, status) {
+        return `
                 <div class="result-item ${status}">
                     <div class="result-icon">${icon}</div>
                     <div class="result-content">
@@ -418,15 +421,15 @@
                     </div>
                 </div>
             `;
-        }
+      }
 
-        // Auto-check on page load if in debug mode
-        if (debugMode) {
-            window.addEventListener('load', () => {
-                console.log('🧙‍♂️ Debug mode: Auto-checking requirements...');
-                setTimeout(checkRequirements, 1000);
-            });
-        }
+      // Auto-check on page load if in debug mode
+      if (debugMode) {
+        window.addEventListener('load', () => {
+          console.log('🧙‍♂️ Debug mode: Auto-checking requirements...');
+          setTimeout(checkRequirements, 1000);
+        });
+      }
     </script>
-</body>
+  </body>
 </html>

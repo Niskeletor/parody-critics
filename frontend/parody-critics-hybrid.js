@@ -4,52 +4,52 @@
  * Marco Aurelio (Estoico) y Rosario Costras (Woke)
  */
 
-(function() {
-    'use strict';
+(function () {
+  'use strict';
 
-    const logPrefix = '🎭 Parody Critics:';
+  const logPrefix = '🎭 Parody Critics:';
 
-    // Sistema de temas por personaje (TU DISEÑO ORIGINAL)
-    const CHARACTER_THEMES = {
-        'marco_aurelio': {
-            color: '#8B4513',      // Marrón emperador/estoico
-            emoji: '🏛️',
-            name: 'Marco Aurelio',
-            borderColor: '#8B4513',
-            accentColor: 'rgba(139, 69, 19, 0.2)'
-        },
-        'rosario_costras': {
-            color: '#FF69B4',      // Rosa woke/progre
-            emoji: '🏳️‍⚧️',
-            name: 'Rosario Costras',
-            borderColor: '#FF69B4',
-            accentColor: 'rgba(255, 105, 180, 0.2)'
-        }
-    };
+  // Sistema de temas por personaje (TU DISEÑO ORIGINAL)
+  const CHARACTER_THEMES = {
+    marco_aurelio: {
+      color: '#8B4513', // Marrón emperador/estoico
+      emoji: '🏛️',
+      name: 'Marco Aurelio',
+      borderColor: '#8B4513',
+      accentColor: 'rgba(139, 69, 19, 0.2)',
+    },
+    rosario_costras: {
+      color: '#FF69B4', // Rosa woke/progre
+      emoji: '🏳️‍⚧️',
+      name: 'Rosario Costras',
+      borderColor: '#FF69B4',
+      accentColor: 'rgba(255, 105, 180, 0.2)',
+    },
+  };
 
-    // Auto-Discovery Configuration (AGNÓSTICO)
-    const API_DISCOVERY_CONFIG = {
-        URLS_TO_TEST: [
-            'http://192.168.45.181:8888/api',      // ← Stilgar remoto (LLM critics)
-            'http://localhost:9999/api',           // Test local
-            'http://127.0.0.1:9999/api',          // Loopback
-            'http://localhost:8888/api',           // Docker local
-            'http://192.168.45.181:8000/api',      // Stilgar backup
-            'http://parody-critics-api:8000/api'   // Docker interno
-        ],
-        TIMEOUT: 3000,
-        MAX_CONCURRENT: 2
-    };
+  // Auto-Discovery Configuration (AGNÓSTICO)
+  const API_DISCOVERY_CONFIG = {
+    URLS_TO_TEST: [
+      'http://192.168.45.181:8888/api', // ← Stilgar remoto (LLM critics)
+      'http://localhost:9999/api', // Test local
+      'http://127.0.0.1:9999/api', // Loopback
+      'http://localhost:8888/api', // Docker local
+      'http://192.168.45.181:8000/api', // Stilgar backup
+      'http://parody-critics-api:8000/api', // Docker interno
+    ],
+    TIMEOUT: 3000,
+    MAX_CONCURRENT: 2,
+  };
 
-    let WORKING_API_URL = null;
+  let WORKING_API_URL = null;
 
-    // Fallback data (si API falla)
-    const PARODY_CRITICS_FALLBACK = {
-        "338969": {
-            "marco_aurelio": {
-                author: "Marco Aurelio",
-                rating: 8,
-                content: `Como emperador y filósofo, he contemplado muchas transformaciones. Esta obra cinematográfica presenta una metamorfosis singular: un hombre común que abraza su destino adverso para convertirse en instrumento de justicia.
+  // Fallback data (si API falla)
+  const PARODY_CRITICS_FALLBACK = {
+    338969: {
+      marco_aurelio: {
+        author: 'Marco Aurelio',
+        rating: 8,
+        content: `Como emperador y filósofo, he contemplado muchas transformaciones. Esta obra cinematográfica presenta una metamorfosis singular: un hombre común que abraza su destino adverso para convertirse en instrumento de justicia.
 
 La **virtud surge del sufrimiento**, principio fundamental del estoicismo que aquí se manifiesta de forma... particular. El protagonista no lamenta su deformidad; la acepta y la utiliza. *"Acepta lo que no puedes cambiar, cambia lo que puedes, y ten sabiduría para distinguir la diferencia".*
 
@@ -58,14 +58,14 @@ La **virtud surge del sufrimiento**, principio fundamental del estoicismo que aq
 > "La felicidad de tu vida depende de la calidad de tus pensamientos."
 
 Y estos pensamientos, aunque grotescos, poseen cierta pureza de propósito.`,
-                personality: "stoic",
-                created_at: "2024-01-15T10:30:00Z",
-                author_details: { rating: 8 }
-            },
-            "rosario_costras": {
-                author: "Rosario Costras",
-                rating: 2,
-                content: `Como **persona racializada, de género fluido y neurodivergente**, me siento profundamente **triggereada** por esta película que perpetúa múltiples violencias sistémicas.
+        personality: 'stoic',
+        created_at: '2024-01-15T10:30:00Z',
+        author_details: { rating: 8 },
+      },
+      rosario_costras: {
+        author: 'Rosario Costras',
+        rating: 2,
+        content: `Como **persona racializada, de género fluido y neurodivergente**, me siento profundamente **triggereada** por esta película que perpetúa múltiples violencias sistémicas.
 
 ❌ **Problemas identificados**:
 - Glorificación de la **masculinidad tóxica** a través de la venganza
@@ -81,167 +81,176 @@ La transformación del protagonista es una **metáfora del capitalismo tardío**
 Esta película debería venir con **avisos de contenido** por sus múltiples violencias. Es **hora de deconstruir** estos productos culturales problemáticos.
 
 *#DecolonizeHollywood #RepresentationMatters #ToxicMasculinityKills*`,
-                personality: "woke",
-                created_at: "2024-01-16T14:45:00Z",
-                author_details: { rating: 2 }
-            }
+        personality: 'woke',
+        created_at: '2024-01-16T14:45:00Z',
+        author_details: { rating: 2 },
+      },
+    },
+  };
+
+  // Auto-Discovery: Encuentra API disponible
+  async function discoverWorkingAPI() {
+    if (WORKING_API_URL) return WORKING_API_URL;
+
+    console.log(`${logPrefix} 🔍 Starting API auto-discovery...`);
+
+    for (const url of API_DISCOVERY_CONFIG.URLS_TO_TEST) {
+      try {
+        console.log(`${logPrefix} Testing: ${url}`);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), API_DISCOVERY_CONFIG.TIMEOUT);
+
+        const response = await fetch(`${url}/health`, {
+          method: 'GET',
+          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`${logPrefix} ✅ SUCCESS: ${url} - ${data.status}`);
+          WORKING_API_URL = url;
+          return url;
         }
-    };
+      } catch (error) {
+        console.log(`${logPrefix} ❌ FAILED: ${url} - ${error.message}`);
+      }
+    }
 
-    // Auto-Discovery: Encuentra API disponible
-    async function discoverWorkingAPI() {
-        if (WORKING_API_URL) return WORKING_API_URL;
+    console.warn(`${logPrefix} 🚨 No API endpoints responded - using fallback`);
+    return null;
+  }
 
-        console.log(`${logPrefix} 🔍 Starting API auto-discovery...`);
-
-        for (const url of API_DISCOVERY_CONFIG.URLS_TO_TEST) {
-            try {
-                console.log(`${logPrefix} Testing: ${url}`);
-
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), API_DISCOVERY_CONFIG.TIMEOUT);
-
-                const response = await fetch(`${url}/health`, {
-                    method: 'GET',
-                    signal: controller.signal,
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                clearTimeout(timeoutId);
-
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log(`${logPrefix} ✅ SUCCESS: ${url} - ${data.status}`);
-                    WORKING_API_URL = url;
-                    return url;
-                }
-            } catch (error) {
-                console.log(`${logPrefix} ❌ FAILED: ${url} - ${error.message}`);
-            }
-        }
-
-        console.warn(`${logPrefix} 🚨 No API endpoints responded - using fallback`);
+  // NUEVA: Función para obtener críticas desde API
+  async function fetchCriticsFromAPI(tmdbId) {
+    try {
+      // Auto-descubre la API si no la tenemos
+      const apiUrl = await discoverWorkingAPI();
+      if (!apiUrl) {
+        console.log(`${logPrefix} Using fallback data`);
         return null;
+      }
+
+      console.log(`${logPrefix} Fetching from API: ${apiUrl}/critics/${tmdbId}`);
+
+      const response = await fetch(`${apiUrl}/critics/${tmdbId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(3000),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(
+          `${logPrefix} ✅ API Success - ${data.total_critics} critics for "${data.title}"`
+        );
+
+        // Convertir formato API a formato interno
+        const convertedCritics = {};
+        Object.entries(data.critics).forEach(([key, critic]) => {
+          convertedCritics[key] = {
+            author: critic.author,
+            rating: critic.rating,
+            content: critic.content,
+            personality: critic.personality,
+            created_at: critic.generated_at,
+            author_details: { rating: critic.rating },
+          };
+        });
+
+        return convertedCritics;
+      } else {
+        throw new Error(`API responded with ${response.status}`);
+      }
+    } catch (error) {
+      console.warn(`${logPrefix} API failed: ${error.message} - using fallback`);
+      return null;
     }
+  }
 
-    // NUEVA: Función para obtener críticas desde API
-    async function fetchCriticsFromAPI(tmdbId) {
-        try {
-            // Auto-descubre la API si no la tenemos
-            const apiUrl = await discoverWorkingAPI();
-            if (!apiUrl) {
-                console.log(`${logPrefix} Using fallback data`);
-                return null;
-            }
+  // Función para obtener TMDB ID actual (TU CÓDIGO ORIGINAL)
+  function getCurrentTmdbId() {
+    try {
+      const video = document.querySelector('video');
+      if (!video) return null;
 
-            console.log(`${logPrefix} Fetching from API: ${apiUrl}/critics/${tmdbId}`);
+      const posterUrl = video.getAttribute('poster');
+      if (!posterUrl) return null;
 
-            const response = await fetch(`${apiUrl}/critics/${tmdbId}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                signal: AbortSignal.timeout(3000)
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log(`${logPrefix} ✅ API Success - ${data.total_critics} critics for "${data.title}"`);
-
-                // Convertir formato API a formato interno
-                const convertedCritics = {};
-                Object.entries(data.critics).forEach(([key, critic]) => {
-                    convertedCritics[key] = {
-                        author: critic.author,
-                        rating: critic.rating,
-                        content: critic.content,
-                        personality: critic.personality,
-                        created_at: critic.generated_at,
-                        author_details: { rating: critic.rating }
-                    };
-                });
-
-                return convertedCritics;
-            } else {
-                throw new Error(`API responded with ${response.status}`);
-            }
-        } catch (error) {
-            console.warn(`${logPrefix} API failed: ${error.message} - using fallback`);
-            return null;
-        }
+      const itemIdMatch = posterUrl.match(/\/Items\/([a-f0-9]+)\//);
+      return itemIdMatch ? itemIdMatch[1] : null;
+    } catch (error) {
+      console.error(`${logPrefix} Error getting TMDB ID:`, error);
+      return null;
     }
+  }
 
-    // Función para obtener TMDB ID actual (TU CÓDIGO ORIGINAL)
-    function getCurrentTmdbId() {
-        try {
-            const video = document.querySelector('video');
-            if (!video) return null;
-
-            const posterUrl = video.getAttribute('poster');
-            if (!posterUrl) return null;
-
-            const itemIdMatch = posterUrl.match(/\/Items\/([a-f0-9]+)\//);
-            return itemIdMatch ? itemIdMatch[1] : null;
-        } catch (error) {
-            console.error(`${logPrefix} Error getting TMDB ID:`, error);
-            return null;
-        }
+  // Función para obtener TMDB ID desde URL de página de detalles (TU CÓDIGO ORIGINAL)
+  function getTmdbIdFromDetailsPage() {
+    try {
+      const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+      return urlParams.get('id');
+    } catch (error) {
+      console.error(`${logPrefix} Error getting ID from URL:`, error);
+      return null;
     }
+  }
 
-    // Función para obtener TMDB ID desde URL de página de detalles (TU CÓDIGO ORIGINAL)
-    function getTmdbIdFromDetailsPage() {
-        try {
-            const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
-            return urlParams.get('id');
-        } catch (error) {
-            console.error(`${logPrefix} Error getting ID from URL:`, error);
-            return null;
-        }
-    }
+  // Escape HTML (TU CÓDIGO ORIGINAL)
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
 
-    // Escape HTML (TU CÓDIGO ORIGINAL)
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
+  // Parser Markdown simplificado (TU CÓDIGO ORIGINAL)
+  function parseMarkdown(text) {
+    if (!text) return '';
 
-    // Parser Markdown simplificado (TU CÓDIGO ORIGINAL)
-    function parseMarkdown(text) {
-        if (!text) return '';
+    let html = escapeHtml(text);
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+    html = html.replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+    );
+    html = html.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+    html = '<p>' + html + '</p>';
 
-        let html = escapeHtml(text);
-        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-        html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-        html = html.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
-        html = '<p>' + html + '</p>';
+    return html;
+  }
 
-        return html;
-    }
+  // Crear elemento de crítica parodia con temas personalizados (TU CÓDIGO ORIGINAL)
+  function createParodyCriticCard(critic, criticId) {
+    const criticCard = document.createElement('div');
+    const theme = CHARACTER_THEMES[criticId] || CHARACTER_THEMES['marco_aurelio'];
 
-    // Crear elemento de crítica parodia con temas personalizados (TU CÓDIGO ORIGINAL)
-    function createParodyCriticCard(critic, criticId) {
-        const criticCard = document.createElement('div');
-        const theme = CHARACTER_THEMES[criticId] || CHARACTER_THEMES['marco_aurelio'];
+    criticCard.className = 'parody-critic-card';
+    criticCard.setAttribute('data-character', criticId);
 
-        criticCard.className = 'parody-critic-card';
-        criticCard.setAttribute('data-character', criticId);
+    const content = critic.content || 'Sin contenido disponible';
+    const PREVIEW_LENGTH = 300;
+    const isLongReview = content.length > PREVIEW_LENGTH;
+    const previewContent = isLongReview ? content.substring(0, PREVIEW_LENGTH) : content;
 
-        const content = critic.content || 'Sin contenido disponible';
-        const PREVIEW_LENGTH = 300;
-        const isLongReview = content.length > PREVIEW_LENGTH;
-        const previewContent = isLongReview ? content.substring(0, PREVIEW_LENGTH) : content;
+    const reviewDate = critic.created_at
+      ? new Date(critic.created_at).toLocaleDateString('es-ES', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
+      : '';
 
-        const reviewDate = critic.created_at ?
-            new Date(critic.created_at).toLocaleDateString('es-ES', {
-                year: 'numeric', month: 'short', day: 'numeric'
-            }) : '';
+    const rating = critic.author_details?.rating;
+    const ratingDisplay = rating
+      ? `<span class="parody-critic-rating" style="color: ${theme.color}; background: ${theme.accentColor};">⭐ ${rating}/10</span>`
+      : '';
 
-        const rating = critic.author_details?.rating;
-        const ratingDisplay = rating ?
-            `<span class="parody-critic-rating" style="color: ${theme.color}; background: ${theme.accentColor};">⭐ ${rating}/10</span>` : '';
-
-        criticCard.innerHTML = `
+    criticCard.innerHTML = `
             <div class="parody-critic-header">
                 <div class="parody-critic-author-info">
                     <strong class="parody-critic-author" style="color: ${theme.color};">
@@ -256,68 +265,73 @@ Esta película debería venir con **avisos de contenido** por sus múltiples vio
             </div>
         `;
 
-        criticCard.style.borderLeft = `4px solid ${theme.borderColor}`;
+    criticCard.style.borderLeft = `4px solid ${theme.borderColor}`;
 
-        const textElement = criticCard.querySelector('.parody-critic-text');
-        textElement.innerHTML = parseMarkdown(previewContent) +
-            (isLongReview ? `<span class="parody-critic-toggle" style="color: ${theme.color};"> ...leer más</span>` : '');
+    const textElement = criticCard.querySelector('.parody-critic-text');
+    textElement.innerHTML =
+      parseMarkdown(previewContent) +
+      (isLongReview
+        ? `<span class="parody-critic-toggle" style="color: ${theme.color};"> ...leer más</span>`
+        : '');
 
-        if (isLongReview) {
-            textElement.addEventListener('click', function(e) {
-                if (e.target.classList.contains('parody-critic-toggle')) {
-                    const isExpanded = textElement.classList.contains('expanded');
+    if (isLongReview) {
+      textElement.addEventListener('click', function (e) {
+        if (e.target.classList.contains('parody-critic-toggle')) {
+          const isExpanded = textElement.classList.contains('expanded');
 
-                    if (!isExpanded) {
-                        textElement.innerHTML = parseMarkdown(content) +
-                            `<span class="parody-critic-toggle" style="color: ${theme.color};"> ...leer menos</span>`;
-                        textElement.classList.add('expanded');
-                    } else {
-                        textElement.innerHTML = parseMarkdown(previewContent) +
-                            `<span class="parody-critic-toggle" style="color: ${theme.color};"> ...leer más</span>`;
-                        textElement.classList.remove('expanded');
-                    }
-                }
-            });
+          if (!isExpanded) {
+            textElement.innerHTML =
+              parseMarkdown(content) +
+              `<span class="parody-critic-toggle" style="color: ${theme.color};"> ...leer menos</span>`;
+            textElement.classList.add('expanded');
+          } else {
+            textElement.innerHTML =
+              parseMarkdown(previewContent) +
+              `<span class="parody-critic-toggle" style="color: ${theme.color};"> ...leer más</span>`;
+            textElement.classList.remove('expanded');
+          }
         }
-
-        return criticCard;
+      });
     }
 
-    // Crear sección completa de críticos parodia (TU CÓDIGO ORIGINAL)
-    function createParodyCriticsSection(critics, dataSource = 'unknown') {
-        const section = document.createElement('details');
-        section.className = 'detailSection parody-critics-section';
-        section.setAttribute('open', '');
+    return criticCard;
+  }
 
-        const summary = document.createElement('summary');
-        summary.className = 'sectionTitle';
+  // Crear sección completa de críticos parodia (TU CÓDIGO ORIGINAL)
+  function createParodyCriticsSection(critics, dataSource = 'unknown') {
+    const section = document.createElement('details');
+    section.className = 'detailSection parody-critics-section';
+    section.setAttribute('open', '');
 
-        // Mostrar badge de estado de conexión
-        const statusBadge = dataSource === 'api' ? '🌐' : '📦';
-        const statusText = dataSource === 'api' ? 'API' : 'Demo';
+    const summary = document.createElement('summary');
+    summary.className = 'sectionTitle';
 
-        summary.innerHTML = `🎭 Críticos de la Casa (${Object.keys(critics).length}) ${statusBadge} ${statusText} <i class="material-icons expand-icon">expand_more</i>`;
-        section.appendChild(summary);
+    // Mostrar badge de estado de conexión
+    const statusBadge = dataSource === 'api' ? '🌐' : '📦';
+    const statusText = dataSource === 'api' ? 'API' : 'Demo';
 
-        const container = document.createElement('div');
-        container.className = 'parody-critics-container';
+    summary.innerHTML = `🎭 Críticos de la Casa (${Object.keys(critics).length}) ${statusBadge} ${statusText} <i class="material-icons expand-icon">expand_more</i>`;
+    section.appendChild(summary);
 
-        Object.entries(critics).forEach(([criticId, critic]) => {
-            container.appendChild(createParodyCriticCard(critic, criticId));
-        });
+    const container = document.createElement('div');
+    container.className = 'parody-critics-container';
 
-        section.appendChild(container);
-        return section;
-    }
+    Object.entries(critics).forEach(([criticId, critic]) => {
+      container.appendChild(createParodyCriticCard(critic, criticId));
+    });
 
-    // Inyectar CSS personalizado (TU DISEÑO ORIGINAL HERMOSO)
-    function injectParodyCss() {
-        const styleId = 'parody-critics-styles';
-        if (document.getElementById(styleId)) return;
+    section.appendChild(container);
+    return section;
+  }
 
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
+  // Inyectar CSS personalizado (TU DISEÑO ORIGINAL HERMOSO)
+  function injectParodyCss() {
+    const styleId = 'parody-critics-styles';
+    if (document.getElementById(styleId)) return;
+
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
             .parody-critics-section {
                 margin: 2em 0 1em 0;
                 display: flex !important;
@@ -430,141 +444,142 @@ Esta película debería venir con **avisos de contenido** por sus múltiples vio
                 color: #ffed4e;
             }
         `;
-        document.head.appendChild(style);
+    document.head.appendChild(style);
+  }
+
+  // Procesar e inyectar críticos (HÍBRIDO: API + Fallback)
+  async function processCritics(critics, dataSource = 'unknown') {
+    if (!critics) {
+      console.log(`${logPrefix} No parody critics found`);
+      return;
     }
 
-    // Procesar e inyectar críticos (HÍBRIDO: API + Fallback)
-    async function processCritics(critics, dataSource = 'unknown') {
-        if (!critics) {
-            console.log(`${logPrefix} No parody critics found`);
-            return;
-        }
+    const existingSection = document.querySelector('.parody-critics-section');
+    if (existingSection) {
+      console.log(`${logPrefix} Section already exists, skipping injection`);
+      return;
+    }
 
-        const existingSection = document.querySelector('.parody-critics-section');
-        if (existingSection) {
-            console.log(`${logPrefix} Section already exists, skipping injection`);
-            return;
-        }
+    const parodySection = createParodyCriticsSection(critics, dataSource);
 
-        const parodySection = createParodyCriticsSection(critics, dataSource);
+    const enhancedReviews = document.querySelector('.tmdb-reviews-section');
+    const insertionPoint =
+      enhancedReviews ||
+      document.querySelector('.streaming-lookup-container') ||
+      document.querySelector('.itemExternalLinks') ||
+      document.querySelector('.tagline');
 
-        const enhancedReviews = document.querySelector('.tmdb-reviews-section');
-        const insertionPoint = enhancedReviews ||
-                             document.querySelector('.streaming-lookup-container') ||
-                             document.querySelector('.itemExternalLinks') ||
-                             document.querySelector('.tagline');
-
-        if (insertionPoint && insertionPoint.parentNode) {
-            if (!document.querySelector('.parody-critics-section')) {
-                if (enhancedReviews) {
-                    enhancedReviews.after(parodySection);
-                } else {
-                    insertionPoint.parentNode.insertBefore(parodySection, insertionPoint.nextSibling);
-                }
-                console.log(`${logPrefix} Parody critics section injected successfully! 🎭`);
-            }
+    if (insertionPoint && insertionPoint.parentNode) {
+      if (!document.querySelector('.parody-critics-section')) {
+        if (enhancedReviews) {
+          enhancedReviews.after(parodySection);
         } else {
-            console.warn(`${logPrefix} Could not find insertion point`);
+          insertionPoint.parentNode.insertBefore(parodySection, insertionPoint.nextSibling);
         }
-    }
-
-    // Inyectar críticos en la página (NUEVA VERSIÓN HÍBRIDA)
-    async function injectParodyCritics() {
-        if (document.querySelector('.parody-critics-section')) {
-            console.log(`${logPrefix} Section already exists`);
-            return;
-        }
-
-        const itemId = getTmdbIdFromDetailsPage() || getCurrentTmdbId();
-        if (!itemId) {
-            console.log(`${logPrefix} No item ID found`);
-            return;
-        }
-
-        console.log(`${logPrefix} Processing item ID: ${itemId}`);
-
-        let critics = null;
-        let dataSource = 'fallback';
-
-        // Intentar obtener TMDB ID y buscar en API
-        if (window.ApiClient) {
-            try {
-                const userId = window.ApiClient.getCurrentUserId();
-                const item = await window.ApiClient.getItem(userId, itemId);
-                const tmdbId = item?.ProviderIds?.Tmdb;
-
-                if (tmdbId) {
-                    console.log(`${logPrefix} Found TMDB ID: ${tmdbId}`);
-
-                    // Intentar API primero
-                    critics = await fetchCriticsFromAPI(tmdbId);
-                    if (critics) {
-                        dataSource = 'api';
-                    } else {
-                        // Fallback a datos locales
-                        critics = PARODY_CRITICS_FALLBACK[tmdbId];
-                        dataSource = 'fallback';
-                        console.log(`${logPrefix} Using fallback data for ${tmdbId}`);
-                    }
-                }
-            } catch (error) {
-                console.warn(`${logPrefix} Error getting TMDB ID: ${error}`);
-            }
-        }
-
-        // Si no encontramos nada, usar datos de prueba
-        if (!critics) {
-            critics = PARODY_CRITICS_FALLBACK["338969"];
-            dataSource = 'fallback';
-        }
-
-        await processCritics(critics, dataSource);
-    }
-
-    // Monitor de páginas (TU CÓDIGO ORIGINAL)
-    function startMonitoring() {
-        injectParodyCss();
-
-        let processedPages = new Set();
-        let isProcessing = false;
-
-        const processPageSafely = () => {
-            if (isProcessing) return;
-
-            const currentUrl = window.location.hash;
-            const isDetailsPage = currentUrl.includes('details') || currentUrl.includes('id=');
-
-            if (!isDetailsPage) return;
-            if (processedPages.has(currentUrl)) return;
-
-            isProcessing = true;
-            processedPages.add(currentUrl);
-
-            setTimeout(async () => {
-                await injectParodyCritics();
-                isProcessing = false;
-            }, 1500);
-        };
-
-        let currentHash = window.location.hash;
-        setInterval(() => {
-            if (window.location.hash !== currentHash) {
-                currentHash = window.location.hash;
-                processedPages.clear();
-                processPageSafely();
-            }
-        }, 500);
-
-        processPageSafely();
-        console.log(`${logPrefix} Monitoring started (API + Fallback hybrid) 🎭`);
-    }
-
-    // Inicialización
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', startMonitoring);
+        console.log(`${logPrefix} Parody critics section injected successfully! 🎭`);
+      }
     } else {
-        startMonitoring();
+      console.warn(`${logPrefix} Could not find insertion point`);
+    }
+  }
+
+  // Inyectar críticos en la página (NUEVA VERSIÓN HÍBRIDA)
+  async function injectParodyCritics() {
+    if (document.querySelector('.parody-critics-section')) {
+      console.log(`${logPrefix} Section already exists`);
+      return;
     }
 
-    console.log(`${logPrefix} Hybrid Parody Critics script loaded! 🎭`);
+    const itemId = getTmdbIdFromDetailsPage() || getCurrentTmdbId();
+    if (!itemId) {
+      console.log(`${logPrefix} No item ID found`);
+      return;
+    }
+
+    console.log(`${logPrefix} Processing item ID: ${itemId}`);
+
+    let critics = null;
+    let dataSource = 'fallback';
+
+    // Intentar obtener TMDB ID y buscar en API
+    if (window.ApiClient) {
+      try {
+        const userId = window.ApiClient.getCurrentUserId();
+        const item = await window.ApiClient.getItem(userId, itemId);
+        const tmdbId = item?.ProviderIds?.Tmdb;
+
+        if (tmdbId) {
+          console.log(`${logPrefix} Found TMDB ID: ${tmdbId}`);
+
+          // Intentar API primero
+          critics = await fetchCriticsFromAPI(tmdbId);
+          if (critics) {
+            dataSource = 'api';
+          } else {
+            // Fallback a datos locales
+            critics = PARODY_CRITICS_FALLBACK[tmdbId];
+            dataSource = 'fallback';
+            console.log(`${logPrefix} Using fallback data for ${tmdbId}`);
+          }
+        }
+      } catch (error) {
+        console.warn(`${logPrefix} Error getting TMDB ID: ${error}`);
+      }
+    }
+
+    // Si no encontramos nada, usar datos de prueba
+    if (!critics) {
+      critics = PARODY_CRITICS_FALLBACK['338969'];
+      dataSource = 'fallback';
+    }
+
+    await processCritics(critics, dataSource);
+  }
+
+  // Monitor de páginas (TU CÓDIGO ORIGINAL)
+  function startMonitoring() {
+    injectParodyCss();
+
+    let processedPages = new Set();
+    let isProcessing = false;
+
+    const processPageSafely = () => {
+      if (isProcessing) return;
+
+      const currentUrl = window.location.hash;
+      const isDetailsPage = currentUrl.includes('details') || currentUrl.includes('id=');
+
+      if (!isDetailsPage) return;
+      if (processedPages.has(currentUrl)) return;
+
+      isProcessing = true;
+      processedPages.add(currentUrl);
+
+      setTimeout(async () => {
+        await injectParodyCritics();
+        isProcessing = false;
+      }, 1500);
+    };
+
+    let currentHash = window.location.hash;
+    setInterval(() => {
+      if (window.location.hash !== currentHash) {
+        currentHash = window.location.hash;
+        processedPages.clear();
+        processPageSafely();
+      }
+    }, 500);
+
+    processPageSafely();
+    console.log(`${logPrefix} Monitoring started (API + Fallback hybrid) 🎭`);
+  }
+
+  // Inicialización
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startMonitoring);
+  } else {
+    startMonitoring();
+  }
+
+  console.log(`${logPrefix} Hybrid Parody Critics script loaded! 🎭`);
 })();

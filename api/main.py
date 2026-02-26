@@ -178,7 +178,7 @@ async def get_critics_by_tmdb(tmdb_id: str):
 
     # Get critics
     critics_query = """
-        SELECT c.character_id, c.rating, c.content, c.generated_at,
+        SELECT c.id as critic_id, c.character_id, c.rating, c.content, c.generated_at,
                ch.name, ch.emoji, ch.personality, ch.color,
                ch.border_color, ch.accent_color
         FROM critics c
@@ -197,6 +197,7 @@ async def get_critics_by_tmdb(tmdb_id: str):
     for row in critics_rows:
         row_dict = dict(row)
         critics_dict[row_dict['character_id']] = CriticResponse(
+            critic_id=row_dict['critic_id'],
             character_id=row_dict['character_id'],
             author=row_dict['name'],
             emoji=row_dict['emoji'],
@@ -247,7 +248,8 @@ async def get_characters(active_only: bool = Query(True, description="Only retur
 
     query = """
         SELECT ch.*,
-               COUNT(c.id) as total_reviews
+               COUNT(c.id) as total_reviews,
+               ROUND(AVG(c.rating), 1) as avg_rating
         FROM characters ch
         LEFT JOIN critics c ON ch.id = c.character_id
     """
@@ -1602,40 +1604,40 @@ async def perform_media_import(session_id: str):
 
             await websocket_manager.update_import_progress(session_id,
                 current_item="Connected to Jellyfin successfully",
-                processed_items=10
+                processed_items=0,
+                total_items=0
+            )
+            await asyncio.sleep(0.3)
+
+            await websocket_manager.update_import_progress(session_id,
+                current_item="Scanning media library..."
             )
             await asyncio.sleep(0.5)
 
-            await websocket_manager.update_import_progress(session_id,
-                current_item="Scanning media library...",
-                processed_items=20
-            )
-            await asyncio.sleep(1)
+            # Real per-item WebSocket progress callback
+            async def ws_progress_cb(processed, total, item_name, added, updated, unchanged, errs):
+                await websocket_manager.update_import_progress(session_id,
+                    current_item=item_name,
+                    processed_items=processed,
+                    total_items=total,
+                    new_items=added,
+                    updated_items=updated,
+                    unchanged_items=unchanged,
+                    errors=errs
+                )
 
-            # Perform the complete sync with progress tracking
-            await websocket_manager.update_import_progress(session_id,
-                current_item="Importing movies and series...",
-                processed_items=30
-            )
+            async def ws_error_cb(item_name, error_msg):
+                await progress_adapter.record_error(error_msg, item_name)
 
-            stats = await sync_manager.sync_jellyfin_library()
-
-            await websocket_manager.update_import_progress(session_id,
-                current_item="Processing metadata...",
-                processed_items=70
+            stats = await sync_manager.sync_jellyfin_library(
+                ws_progress_callback=ws_progress_cb,
+                ws_error_callback=ws_error_cb
             )
-            await asyncio.sleep(0.5)
-
-            await websocket_manager.update_import_progress(session_id,
-                current_item="Finalizing import...",
-                processed_items=90
-            )
-            await asyncio.sleep(0.5)
 
             await websocket_manager.update_import_progress(session_id,
-                current_item="Import completed successfully!",
-                processed_items=100
+                current_item="Finalizing import..."
             )
+            await asyncio.sleep(0.3)
 
             # Import completed successfully
             await websocket_manager.complete_import_session(
@@ -1843,6 +1845,54 @@ async def delete_character_critics(character_id: str):
     except Exception as e:
         setup_logger.error(f"❌ Error deleting critics for character {character_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error deleting critics: {str(e)}")
+
+@app.delete("/api/critics/{critic_id}")
+async def delete_critic(critic_id: int):
+    """Delete a single critic review by its ID"""
+    try:
+        check_query = "SELECT id FROM critics WHERE id = ?"
+        existing = db_manager.execute_query(check_query, (critic_id,), fetch_one=True)
+
+        if not existing:
+            raise HTTPException(status_code=404, detail=f"Critic not found: {critic_id}")
+
+        db_manager.execute_query("DELETE FROM critics WHERE id = ?", (critic_id,))
+
+        return {"success": True, "message": f"Critic {critic_id} deleted successfully"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting critic: {str(e)}")
+
+
+@app.delete("/api/media/{tmdb_id}/critics")
+async def delete_all_media_critics(tmdb_id: str):
+    """Delete all critics for a specific media item"""
+    try:
+        media = db_manager.execute_query(
+            "SELECT id, title FROM media WHERE tmdb_id = ?", (tmdb_id,), fetch_one=True
+        )
+        if not media:
+            raise HTTPException(status_code=404, detail=f"Media not found: {tmdb_id}")
+
+        count = db_manager.execute_query(
+            "SELECT COUNT(*) FROM critics WHERE media_id = ?", (media[0],), fetch_one=True
+        )[0]
+
+        db_manager.execute_query("DELETE FROM critics WHERE media_id = ?", (media[0],))
+
+        return {
+            "success": True,
+            "deleted_count": count,
+            "message": f"Deleted {count} critics for '{media[1]}'"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting critics: {str(e)}")
+
 
 @app.post("/api/characters/import")
 async def import_characters(import_data: dict = Body(...)):
