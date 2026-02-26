@@ -10,9 +10,8 @@ import sqlite3
 import json
 import time
 import os
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, Any
 from datetime import datetime
-from pathlib import Path
 
 class JellyfinDatabaseTester:
     """Test Jellyfin SQLite database connectivity and data retrieval"""
@@ -346,21 +345,21 @@ class JellyfinDatabaseTester:
                 """)
                 recent_changes = cursor.fetchall()
 
-                print(f"✅ Sync analysis results:")
+                print("✅ Sync analysis results:")
                 print(f"   Movies with TMDB ID: {len(movies_with_tmdb)}")
                 print(f"   Movies without TMDB ID: {movies_without_tmdb}")
                 print(f"   Series with IDs: {len(series_with_ids)}")
                 print(f"   Recent changes (30 days): {dict(recent_changes)}")
 
                 # Show sample TMDB extraction
-                print(f"\n📋 Sample TMDB extraction:")
+                print("\n📋 Sample TMDB extraction:")
                 for movie in movies_with_tmdb[:3]:
                     movie_dict = dict(movie)
                     try:
                         provider_ids = json.loads(movie_dict['ProviderIds'])
                         tmdb_id = provider_ids.get('Tmdb')
                         print(f"   {movie_dict['Name']} → TMDB: {tmdb_id}")
-                    except:
+                    except Exception:
                         pass
 
                 return {

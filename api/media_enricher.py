@@ -2,10 +2,8 @@
 Media Enricher — fetches TMDB + FilmAffinity/Letterboxd context for a media item
 and caches the result in media.enriched_context (JSON).
 """
-import html
 import json
 import sqlite3
-import urllib.parse
 from datetime import datetime
 from typing import Optional
 
@@ -122,12 +120,16 @@ class MediaEnricher:
             return_exceptions=True
         )
         snippets = []
-        if isinstance(fa, list): snippets.extend(fa)
-        if isinstance(lb, list): snippets.extend(lb)
+        if isinstance(fa, list):
+            snippets.extend(fa)
+        if isinstance(lb, list):
+            snippets.extend(lb)
         return snippets[:6]
 
     async def _fetch_filmaffinity(self, title: str, year: Optional[int]) -> list:
-        import asyncio, re, html as _html
+        import asyncio
+        import re
+        import html as _html
         def _search():
             from ddgs import DDGS
             query = f'"{title}" {year or ""} site:filmaffinity.com/es/reviews'.strip()
@@ -164,7 +166,9 @@ class MediaEnricher:
             return []
 
     async def _fetch_letterboxd(self, title: str, year: Optional[int]) -> list:
-        import asyncio, re, html as _html
+        import asyncio
+        import re
+        import html as _html
         def _search():
             from ddgs import DDGS
             query = f'"{title}" {year or ""} site:letterboxd.com/film'.strip()

@@ -2,7 +2,7 @@
 FastAPI server for Parody Critics API
 """
 
-from fastapi import FastAPI, HTTPException, Depends, Query, BackgroundTasks, Body, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Query, BackgroundTasks, Body, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -18,8 +18,7 @@ from datetime import datetime
 
 from models.schemas import (
     CriticsResponse, CriticResponse, MediaInfo, CharacterInfo,
-    StatsResponse, GenerationRequest, GenerationResponse,
-    MediaType, SyncLogEntry
+    StatsResponse, MediaType, SyncLogEntry
 )
 from config import get_config
 from api.jellyfin_sync import JellyfinSyncManager
@@ -702,7 +701,7 @@ async def health_check():
     """Health check endpoint"""
     try:
         # Test database connection
-        result = db_manager.execute_query("SELECT 1", fetch_one=True)
+        db_manager.execute_query("SELECT 1", fetch_one=True)
 
         # Test sync manager
         sync_manager_status = "initialized" if sync_manager else "not_initialized"
@@ -1697,7 +1696,7 @@ async def start_media_import(background_tasks: BackgroundTasks):
 
     try:
         # Initialize import session
-        progress = websocket_manager.start_import_session(
+        websocket_manager.start_import_session(
             session_id,
             "Complete Media Library Import"
         )
@@ -2453,7 +2452,7 @@ async def export_characters():
             stats = db_manager.execute_query(stats_query, (char_dict['id'],), fetch_one=True)
 
             if stats and stats[0] > 0:
-                md_content += f"**Estadísticas:**\n"
+                md_content += "**Estadísticas:**\n"
                 md_content += f"- Críticas escritas: {stats[0]}\n"
                 md_content += f"- Rating promedio: {stats[1]:.1f}/10\n\n"
             else:

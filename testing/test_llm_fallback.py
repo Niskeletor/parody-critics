@@ -5,7 +5,7 @@ Test LLM fallback system: Local LLM + Cloud LLM fallback
 import httpx
 import asyncio
 import time
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any
 
 class LLMFallbackManager:
     """Manage multiple LLM endpoints with fallback strategy"""
@@ -242,7 +242,6 @@ async def test_fallback_system():
                 print(f"⏱️  Time: {result['generation_time']:.1f}s")
 
                 # Count attempts
-                successful_attempts = [a for a in result['attempts'] if a['status'] == 'success']
                 failed_attempts = [a for a in result['attempts'] if a['status'] == 'failed']
 
                 if len(failed_attempts) > 0:
@@ -257,13 +256,13 @@ async def test_fallback_system():
             })
 
     # Summary
-    print(f"\n📊 FALLBACK SYSTEM TEST SUMMARY:")
+    print("\n📊 FALLBACK SYSTEM TEST SUMMARY:")
     successful = sum(1 for r in results if r["result"]["success"])
     print(f"✅ Successful generations: {successful}/{len(results)}")
     print(f"🏥 Healthy endpoints: {len(healthy_endpoints)}/{len(manager.endpoints)}")
 
     if successful > 0:
-        print(f"🚀 LLM Fallback system is ready for production!")
+        print("🚀 LLM Fallback system is ready for production!")
 
         # Analyze which endpoints were used
         endpoint_usage = {}
@@ -272,7 +271,7 @@ async def test_fallback_system():
                 endpoint = r["result"]["endpoint_used"]
                 endpoint_usage[endpoint] = endpoint_usage.get(endpoint, 0) + 1
 
-        print(f"📈 Endpoint usage:")
+        print("📈 Endpoint usage:")
         for endpoint, count in endpoint_usage.items():
             print(f"   - {endpoint}: {count} times")
 
@@ -326,7 +325,7 @@ if __name__ == "__main__":
         # Test 2: Failure simulation
         failure_result = await test_failure_simulation()
 
-        print(f"\n🎉 All fallback tests completed!")
+        print("\n🎉 All fallback tests completed!")
 
         return {
             "normal_operation": results,
