@@ -42,7 +42,13 @@ class MediaEnricher:
                     f"{len(context['social_snippets'])} snippets")
         return context
 
-    async def enrich_all(self, limit: int = 500) -> dict:
+    async def enrich_all(
+        self,
+        limit: int = 500,
+        session_id: str = None,
+        progress_callback=None,
+        cancelled_sessions: set = None,
+    ) -> dict:
         """Enrich all media items that have no enriched_context yet."""
         rows = self._get_unenriched(limit)
         total   = len(rows)
@@ -51,7 +57,11 @@ class MediaEnricher:
 
         logger.info(f"Starting batch enrichment: {total} items pending")
 
-        for row in rows:
+        for i, row in enumerate(rows):
+            if cancelled_sessions and session_id and session_id in cancelled_sessions:
+                logger.info(f"Enrichment session {session_id} cancelled at {i}/{total}")
+                break
+
             try:
                 await self.enrich(
                     media_id   = row["id"],
@@ -64,6 +74,9 @@ class MediaEnricher:
             except Exception as e:
                 logger.warning(f"Failed to enrich {row['title']}: {e}")
                 errors += 1
+
+            if progress_callback:
+                await progress_callback(i + 1, total, row["title"])
 
         return {"total": total, "success": success, "errors": errors}
 

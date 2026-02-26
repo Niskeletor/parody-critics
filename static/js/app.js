@@ -1218,7 +1218,6 @@ class ParodyCriticsApp {
     const originalText = btn.innerHTML;
 
     try {
-      // Check status first
       const status = await this.fetchAPI('/enrich/status');
       if (status.pending === 0) {
         this.showMessage(
@@ -1229,14 +1228,17 @@ class ParodyCriticsApp {
       }
 
       btn.disabled = true;
-      btn.innerHTML = '⏳ Enriqueciendo...';
+      btn.innerHTML = '⏳ Iniciando...';
 
-      const result = await this.fetchAPI('/enrich/all', { method: 'POST' });
+      const result = await this.fetchAPI('/enrich/all', 'POST');
 
-      if (result.success) {
-        this.showMessage(`🔍 ${result.message} — el proceso corre en segundo plano`, 'success');
-        // Poll status every 5s to update button when done
-        this._pollEnrichStatus(btn, originalText);
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+
+      if (result.success && result.session_id) {
+        this.showEnrichProgress(result.session_id);
+      } else if (result.success && !result.session_id) {
+        this.showMessage(result.message, 'success');
       }
     } catch (error) {
       console.error('Enrich failed:', error);
@@ -1246,27 +1248,252 @@ class ParodyCriticsApp {
     }
   }
 
-  async _pollEnrichStatus(btn, originalText) {
-    const poll = async () => {
+  showEnrichProgress(sessionId) {
+    let modal = document.getElementById('enrich-progress-modal');
+    if (!modal) {
+      modal = this.createEnrichProgressModal(sessionId);
+      document.body.appendChild(modal);
+    }
+    modal.classList.remove('hidden');
+    modal.style.display = '';
+    this.connectToEnrichProgress(sessionId);
+  }
+
+  createEnrichProgressModal(sessionId) {
+    const modal = document.createElement('div');
+    modal.id = 'enrich-progress-modal';
+    modal.className = 'import-progress-modal';
+    modal.innerHTML = `
+      <div class="import-progress-content">
+        <div class="import-progress-header">
+          <h3>🔍 Enriching Media Context</h3>
+          <button class="close-import-btn" onclick="app.closeEnrichProgressModal()">&times;</button>
+        </div>
+        <div class="import-progress-body">
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill" id="enrich-progress-fill"></div>
+            </div>
+            <div class="progress-text">
+              <span id="enrich-percentage">0%</span>
+              <span id="enrich-status">Starting...</span>
+            </div>
+          </div>
+          <div class="import-stats">
+            <div class="stat-item">
+              <span class="stat-label">Total Items:</span>
+              <span id="enrich-total-items">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Enriched:</span>
+              <span id="enrich-processed-items" class="stat-success">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Errors:</span>
+              <span id="enrich-errors" class="stat-error">0</span>
+            </div>
+          </div>
+          <div class="current-operation">
+            <strong>Current:</strong>
+            <span id="enrich-current-item">Initializing...</span>
+          </div>
+          <div class="import-actions">
+            <button id="cancel-enrich-btn" class="btn-cancel" onclick="app.cancelEnrich('${sessionId}')">
+              Cancel Enrichment
+            </button>
+          </div>
+          <div class="import-log" id="enrich-log">
+            <div class="log-entry">🔍 Enrichment session started...</div>
+          </div>
+        </div>
+      </div>
+    `;
+    return modal;
+  }
+
+  connectToEnrichProgress(sessionId) {
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws/import-progress/${sessionId}`;
+    console.log(`🔌 Connecting to enrichment WebSocket: ${wsUrl}`);
+
+    this.enrichWebSocket = new WebSocket(wsUrl);
+
+    this.enrichWebSocket.onopen = () => {
+      console.log('✅ Enrichment WebSocket connected');
+      this.addEnrichLogEntry('🔌 Connected to progress stream');
+    };
+
+    this.enrichWebSocket.onmessage = (event) => {
       try {
-        const status = await this.fetchAPI('/enrich/status');
-        if (status.pending === 0) {
-          btn.disabled = false;
-          btn.innerHTML = originalText;
-          this.showMessage(
-            `✅ Enriquecimiento completo — ${status.enriched} items con contexto`,
-            'success'
-          );
-        } else {
-          btn.innerHTML = `⏳ Enriqueciendo (${status.pending} pendientes)`;
-          setTimeout(poll, 5000);
+        const message = JSON.parse(event.data);
+        switch (message.type) {
+          case 'import_progress':
+            this.updateEnrichProgress(message.data);
+            break;
+          case 'import_completed':
+            this.handleEnrichCompleted(message.data);
+            break;
+          case 'import_error':
+            this.handleEnrichError(message.data);
+            break;
+          case 'import_cancelled':
+            this.handleEnrichCancelled(message.data);
+            break;
         }
-      } catch {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
+      } catch (error) {
+        console.error('❌ Error parsing enrichment WebSocket message:', error);
       }
     };
-    setTimeout(poll, 5000);
+
+    this.enrichWebSocket.onclose = () => {
+      this.addEnrichLogEntry('🔌 Connection closed');
+    };
+
+    this.enrichWebSocket.onerror = () => {
+      this.addEnrichLogEntry('❌ Connection error');
+    };
+
+    this.enrichPingInterval = setInterval(() => {
+      if (this.enrichWebSocket && this.enrichWebSocket.readyState === WebSocket.OPEN) {
+        this.enrichWebSocket.send(JSON.stringify({ type: 'ping' }));
+      }
+    }, 30000);
+  }
+
+  updateEnrichProgress(data) {
+    const fill = document.getElementById('enrich-progress-fill');
+    if (fill) fill.style.width = `${data.percentage}%`;
+    const pct = document.getElementById('enrich-percentage');
+    if (pct) pct.textContent = `${Math.round(data.percentage)}%`;
+    const st = document.getElementById('enrich-status');
+    if (st) st.textContent = data.status;
+    const total = document.getElementById('enrich-total-items');
+    if (total) total.textContent = data.total_items;
+    const processed = document.getElementById('enrich-processed-items');
+    if (processed) processed.textContent = data.processed_items;
+    const errors = document.getElementById('enrich-errors');
+    if (errors) errors.textContent = data.errors;
+    const current = document.getElementById('enrich-current-item');
+    if (current) current.textContent = data.current_item || 'Processing...';
+    if (data.current_item) {
+      this.addEnrichLogEntry(`📄 Enriching: ${data.current_item}`);
+    }
+  }
+
+  handleEnrichCompleted(data) {
+    const fill = document.getElementById('enrich-progress-fill');
+    if (fill) {
+      fill.style.width = '100%';
+      fill.classList.add('completed');
+    }
+    const content = document.querySelector('#enrich-progress-modal .import-progress-content');
+    if (content) content.classList.add('import-success');
+    const pct = document.getElementById('enrich-percentage');
+    if (pct) pct.textContent = '100%';
+    const st = document.getElementById('enrich-status');
+    if (st) st.textContent = 'Enrichment Completed!';
+    const current = document.getElementById('enrich-current-item');
+    if (current) current.textContent = 'All items enriched successfully';
+
+    this.addEnrichLogEntry('✅ Enrichment completed successfully!');
+    this.addEnrichLogEntry(`📊 Final: ${data.processed_items} enriched, ${data.errors} errors`);
+
+    const cancelBtn = document.getElementById('cancel-enrich-btn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+
+    this.closeEnrichWebSocket();
+    this.showMessage(
+      `✅ Enriquecimiento completo — ${data.processed_items} items procesados`,
+      'success'
+    );
+  }
+
+  handleEnrichError(data) {
+    const fill = document.getElementById('enrich-progress-fill');
+    if (fill) fill.classList.add('import-error');
+    const content = document.querySelector('#enrich-progress-modal .import-progress-content');
+    if (content) content.classList.add('import-fail');
+    const st = document.getElementById('enrich-status');
+    if (st) st.textContent = 'Enrichment Failed';
+    const current = document.getElementById('enrich-current-item');
+    if (current) current.textContent = 'Error occurred during enrichment';
+
+    this.addEnrichLogEntry(
+      `❌ Enrichment failed: ${data.error_messages?.join(', ') || 'Unknown error'}`
+    );
+
+    const cancelBtn = document.getElementById('cancel-enrich-btn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+
+    this.closeEnrichWebSocket();
+    this.showError('Enrichment failed. Check the log for details.');
+  }
+
+  handleEnrichCancelled(data) {
+    const st = document.getElementById('enrich-status');
+    if (st) st.textContent = 'Enrichment Cancelled';
+    const current = document.getElementById('enrich-current-item');
+    if (current) current.textContent = 'Enrichment was cancelled by user';
+
+    this.addEnrichLogEntry('🛑 Enrichment cancelled by user');
+
+    const cancelBtn = document.getElementById('cancel-enrich-btn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+
+    this.closeEnrichWebSocket();
+    this.showMessage('Enrichment was cancelled.', 'warning');
+  }
+
+  async cancelEnrich(sessionId) {
+    try {
+      const response = await fetch(`${this.apiBase}/enrich/cancel/${sessionId}`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (data.success) {
+        this.addEnrichLogEntry('🛑 Cancellation requested...');
+      } else {
+        throw new Error('Failed to cancel enrichment');
+      }
+    } catch (error) {
+      console.error('❌ Failed to cancel enrichment:', error);
+      this.showError('Failed to cancel enrichment');
+    }
+  }
+
+  addEnrichLogEntry(message) {
+    const logContainer = document.getElementById('enrich-log');
+    if (logContainer) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+      const entries = logContainer.children;
+      if (entries.length > 100) {
+        logContainer.removeChild(entries[0]);
+      }
+    }
+  }
+
+  closeEnrichProgressModal() {
+    const modal = document.getElementById('enrich-progress-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
+    this.closeEnrichWebSocket();
+  }
+
+  closeEnrichWebSocket() {
+    if (this.enrichWebSocket) {
+      this.enrichWebSocket.close();
+      this.enrichWebSocket = null;
+    }
+    if (this.enrichPingInterval) {
+      clearInterval(this.enrichPingInterval);
+      this.enrichPingInterval = null;
+    }
   }
 
   showImportProgress(sessionId) {
