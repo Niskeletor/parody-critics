@@ -6,7 +6,6 @@ Simplified version for demo and testing
 
 import os
 import socket
-import sqlite3
 import sys
 from pathlib import Path
 
@@ -15,7 +14,6 @@ import requests  # Using requests instead of httpx for simplicity
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from rich.text import Text
 
 # Import logging system
 from utils.logger import get_logger, setup_logging, LogTimer, log_exception
@@ -70,7 +68,7 @@ Let's create some hilarious movie reviews together! 🎬✨
 
         # SQLite check
         try:
-            import sqlite3
+            import sqlite3  # noqa: F401
             checks["sqlite"] = True
             console.print("✅ SQLite available")
         except ImportError:
@@ -190,7 +188,7 @@ Let's create some hilarious movie reviews together! 🎬✨
             return {"success": False, "error": f"Network error: {str(e)}"}
         except requests.exceptions.Timeout as e:
             logger.error(f"Jellyfin connection timeout after 10s: {str(e)}")
-            console.print(f"[red]❌ Connection timeout: Server took too long to respond[/red]")
+            console.print("[red]❌ Connection timeout: Server took too long to respond[/red]")
             return {"success": False, "error": f"Timeout: {str(e)}"}
         except requests.exceptions.HTTPError as e:
             logger.error(f"Jellyfin HTTP error: {e.response.status_code} - {str(e)}")
@@ -244,7 +242,7 @@ Let's create some hilarious movie reviews together! 🎬✨
             return {"success": False, "error": f"Network error: {str(e)}"}
         except requests.exceptions.Timeout as e:
             logger.error(f"Ollama connection timeout after 10s: {str(e)}")
-            console.print(f"[red]❌ Connection timeout: Ollama server took too long to respond[/red]")
+            console.print("[red]❌ Connection timeout: Ollama server took too long to respond[/red]")
             return {"success": False, "error": f"Timeout: {str(e)}"}
         except Exception as e:
             logger.error(f"Unexpected error during Ollama connection test: {str(e)}")
@@ -288,7 +286,7 @@ Let's create some hilarious movie reviews together! 🎬✨
         config["JELLYFIN_URL"] = jellyfin_url
 
         # Test Jellyfin connection
-        jellyfin_test = self.test_jellyfin_connection(jellyfin_url)
+        self.test_jellyfin_connection(jellyfin_url)
 
         # API Token (optional)
         api_token = input("Jellyfin API Token (optional, press Enter to skip): ").strip()

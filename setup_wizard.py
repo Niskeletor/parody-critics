@@ -4,23 +4,18 @@
 Interactive CLI setup for first-time installation and configuration
 """
 
-import os
 import sys
 import socket
-import sqlite3
-import subprocess
 from pathlib import Path
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Dict, Any
 
 import click
 import httpx
 import questionary
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeRemainingColumn
+from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.panel import Panel
 from rich.table import Table
-from rich.text import Text
-from rich import print as rprint
 
 # Initialize Rich Console
 console = Console()
@@ -80,7 +75,7 @@ Let's create some hilarious movie reviews together! 🎬✨
             # SQLite check
             task = progress.add_task("Checking SQLite...", total=None)
             try:
-                import sqlite3
+                import sqlite3  # noqa: F401
                 checks["sqlite"] = True
                 progress.update(task, description="✅ SQLite available")
             except ImportError:
@@ -384,10 +379,9 @@ Let's create some hilarious movie reviews together! 🎬✨
             import datetime
 
             # Load .env.example as template
-            env_template = ""
             if self.env_example_file.exists():
                 with open(self.env_example_file, 'r') as f:
-                    env_template = f.read()
+                    f.read()  # kept for reference, not used directly
 
             # Create .env content
             env_content = [

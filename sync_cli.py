@@ -6,7 +6,6 @@ Command-line interface for Jellyfin sync operations
 
 import asyncio
 import sys
-import os
 from pathlib import Path
 
 import click
@@ -17,7 +16,7 @@ from rich.table import Table
 # Import our sync system
 from utils import (
     setup_logging, get_logger, log_exception,
-    SyncManager, sync_jellyfin
+    SyncManager
 )
 from config import Config
 
@@ -359,7 +358,7 @@ async def _show_status(config: Config):
             # Jellyfin server info
             if sync_manager.jellyfin_client and sync_manager.jellyfin_client.server_info:
                 server_info = sync_manager.jellyfin_client.server_info
-                console.print(f"\n[bold blue]🎬 Jellyfin Server:[/bold blue]")
+                console.print("\n[bold blue]🎬 Jellyfin Server:[/bold blue]")
                 console.print(f"  Name: {server_info.get('ServerName', 'Unknown')}")
                 console.print(f"  Version: {server_info.get('Version', 'Unknown')}")
                 console.print(f"  URL: {config.JELLYFIN_URL}")
@@ -380,7 +379,7 @@ def test():
 
     # Test imports
     try:
-        from utils import SyncManager, JellyfinClient
+        from utils import SyncManager, JellyfinClient  # noqa: F401
         console.print("[green]✅ Sync system imports OK[/green]")
     except ImportError as e:
         console.print(f"[red]❌ Import error: {str(e)}[/red]")
