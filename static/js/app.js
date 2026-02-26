@@ -1260,6 +1260,7 @@ class ParodyCriticsApp {
   }
 
   createEnrichProgressModal(sessionId) {
+    this._ensureProgressModalStyles();
     const modal = document.createElement('div');
     modal.id = 'enrich-progress-modal';
     modal.className = 'import-progress-modal';
@@ -1578,8 +1579,14 @@ class ParodyCriticsApp {
             </div>
         `;
 
-    // Add CSS styles
+    this._ensureProgressModalStyles();
+    return modal;
+  }
+
+  _ensureProgressModalStyles() {
+    if (document.getElementById('_progress-modal-styles')) return;
     const style = document.createElement('style');
+    style.id = '_progress-modal-styles';
     style.textContent = `
             .import-progress-modal {
                 position: fixed;
@@ -1852,9 +1859,7 @@ class ParodyCriticsApp {
                 border-bottom: none;
             }
         `;
-
     document.head.appendChild(style);
-    return modal;
   }
 
   connectToImportProgress(sessionId) {
