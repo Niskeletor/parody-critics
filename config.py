@@ -62,6 +62,10 @@ class Config:
     LLM_OPENAI_API_KEY = os.getenv('LLM_OPENAI_API_KEY', '')
     LLM_ANTHROPIC_API_KEY = os.getenv('LLM_ANTHROPIC_API_KEY', '')
 
+    # Enrichment APIs
+    TMDB_ACCESS_TOKEN = os.getenv('TMDB_ACCESS_TOKEN', '')
+    BRAVE_API_KEY = os.getenv('BRAVE_API_KEY', '')
+
     # Generation settings
     LLM_TIMEOUT = int(os.getenv('LLM_TIMEOUT', '180'))  # 3 minutes
     LLM_MAX_RETRIES = int(os.getenv('LLM_MAX_RETRIES', '2'))

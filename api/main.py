@@ -24,6 +24,7 @@ from models.schemas import (
 from config import get_config
 from api.jellyfin_sync import JellyfinSyncManager
 from api.llm_manager import CriticGenerationManager
+from api.media_enricher import MediaEnricher
 from utils import get_logger
 from utils.websocket_manager import websocket_manager, WebSocketProgressAdapter
 from utils.sync_manager import SyncManager
@@ -72,11 +73,12 @@ db_manager = DatabaseManager(str(DB_PATH))
 # Initialize managers (will be configured on startup)
 sync_manager: Optional[JellyfinSyncManager] = None
 llm_manager: Optional[CriticGenerationManager] = None
+media_enricher: Optional[MediaEnricher] = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan events"""
-    global sync_manager, llm_manager
+    global sync_manager, llm_manager, media_enricher
 
     # Startup
     print("🚀 Starting Parody Critics API...")
@@ -101,6 +103,14 @@ async def lifespan(app: FastAPI):
     # Initialize LLM manager
     llm_manager = CriticGenerationManager()
     print("🤖 LLM Manager initialized")
+
+    # Initialize Media Enricher
+    media_enricher = MediaEnricher(
+        db_path=str(DB_PATH),
+        tmdb_token=config.TMDB_ACCESS_TOKEN,
+        brave_key=config.BRAVE_API_KEY,
+    )
+    print("🔍 Media Enricher initialized")
 
     # Check LLM system status
     try:
@@ -241,6 +251,68 @@ async def get_stats():
 
     stats_dict = dict(stats_row)
     return StatsResponse(**stats_dict)
+
+@app.get("/api/enrich/status")
+async def get_enrich_status():
+    """Return enrichment coverage stats"""
+    if not media_enricher:
+        raise HTTPException(status_code=503, detail="Enricher not available")
+    return media_enricher.get_status()
+
+@app.post("/api/media/{tmdb_id}/enrich")
+async def enrich_single(tmdb_id: str):
+    """Enrich a single media item with TMDB + Brave context"""
+    if not media_enricher:
+        raise HTTPException(status_code=503, detail="Enricher not available")
+
+    row = db_manager.execute_query(
+        "SELECT id, tmdb_id, title, year, type FROM media WHERE tmdb_id = ?",
+        (tmdb_id,), fetch_one=True
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Media not found: {tmdb_id}")
+
+    row = dict(row)
+    try:
+        context = await media_enricher.enrich(
+            media_id=row["id"], tmdb_id=row["tmdb_id"],
+            title=row["title"], year=row.get("year"), media_type=row["type"]
+        )
+        return {
+            "success": True,
+            "title": row["title"],
+            "keywords_count": len(context.get("keywords", [])),
+            "snippets_count": len(context.get("social_snippets", [])),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Enrichment failed: {str(e)}")
+
+@app.post("/api/enrich/all")
+async def enrich_all_media(background_tasks: BackgroundTasks):
+    """Enrich all pending media items in the background"""
+    if not media_enricher:
+        raise HTTPException(status_code=503, detail="Enricher not available")
+
+    status = media_enricher.get_status()
+    if status["pending"] == 0:
+        return {"success": True, "message": "All media already enriched", "pending": 0}
+
+    background_tasks.add_task(_run_enrichment_background)
+    return {
+        "success": True,
+        "message": f"Enrichment started for {status['pending']} items",
+        "pending": status["pending"],
+    }
+
+async def _run_enrichment_background():
+    try:
+        result = await media_enricher.enrich_all()
+        setup_logger.info(
+            f"Batch enrichment complete: {result['success']}/{result['total']} OK, "
+            f"{result['errors']} errors"
+        )
+    except Exception as e:
+        setup_logger.error(f"Batch enrichment failed: {e}")
 
 @app.get("/api/characters", response_model=List[CharacterInfo])
 async def get_characters(active_only: bool = Query(True, description="Only return active characters")):
@@ -554,7 +626,7 @@ async def generate_critic_for_media(
 
     # Get media information from database
     media_query = """
-        SELECT id, tmdb_id, title, year, type, genres, overview
+        SELECT id, tmdb_id, title, year, type, genres, overview, enriched_context
         FROM media
         WHERE tmdb_id = ?
     """
@@ -573,7 +645,8 @@ async def generate_critic_for_media(
         "year": media_dict.get("year"),
         "type": media_dict["type"],
         "genres": media_dict.get("genres", ""),
-        "synopsis": media_dict.get("overview", "Sin sinopsis disponible")
+        "synopsis": media_dict.get("overview", "Sin sinopsis disponible"),
+        "enriched_context": media_dict.get("enriched_context"),
     }
 
     try:
