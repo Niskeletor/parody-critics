@@ -384,6 +384,7 @@ class CriticGenerationManager:
         type_label = "película" if media_type == "movie" else "serie"
 
         character_data = self._get_character_from_db(character)
+        logger.debug(f"Character '{character}' {'found' if character_data else 'NOT found'} in DB")
         if not character_data:
             logger.warning(f"Character '{character}' not found in DB, using fallback prompt")
             return f'Escribe una crítica de la {type_label} "{title}" ({year}) en máximo 150 palabras. Incluye una puntuación del 1 al 10 al inicio.'
@@ -485,6 +486,12 @@ No inventes tramas, personajes ni elementos que no aparezcan en la sinopsis.
 Después analiza desde tu perspectiva y con tu tono auténtico.
 Sé directo y personal."""
 
+        logger.debug(
+            f"Prompt built for '{character}' — "
+            f"enriched={'yes' if enriched_block else 'no'}, "
+            f"soul={'yes' if soul_block.strip() else 'no'}, "
+            f"len={len(prompt)}"
+        )
         return prompt
 
     def parse_critic_response(self, raw_response: str, character: str, media_info: Dict[str, Any]) -> Dict[str, Any]:
@@ -513,6 +520,8 @@ Sé directo y personal."""
         if rating is None:
             rating = 5
             logger.warning(f"No rating found in response for {character}, defaulting to {rating}")
+        else:
+            logger.debug(f"Rating parsed: {rating}/10 for {character}")
 
         return {
             "rating": rating,
