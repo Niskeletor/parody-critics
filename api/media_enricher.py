@@ -100,12 +100,18 @@ class MediaEnricher:
             f"https://api.themoviedb.org/3/{endpoint}/{tmdb_id}"
             "?language=es-ES&append_to_response=keywords,credits"
         )
+        logger.debug(f"TMDB fetch: {endpoint}/{tmdb_id}")
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.get(
                 url, headers={"Authorization": f"Bearer {self.tmdb_token}"}
             )
             resp.raise_for_status()
-            return resp.json()
+            data = resp.json()
+            kw_block = data.get("keywords", {})
+            kw_count = len(kw_block.get("keywords") or kw_block.get("results") or [])
+            cast_count = len(data.get("credits", {}).get("cast", []))
+            logger.debug(f"TMDB ok — keywords={kw_count}, cast={cast_count}")
+            return data
 
     # ─────────────────────────────────────────────────────────────
     # Social snippet fetch (FilmAffinity + Letterboxd)
@@ -144,7 +150,9 @@ class MediaEnricher:
                     film_id = m.group(1)
                     break
             if not film_id:
+                logger.debug(f"FilmAffinity: no film_id found for '{title}'")
                 return []
+            logger.debug(f"FilmAffinity: film_id={film_id} for '{title}'")
             resp = await asyncio.to_thread(
                 lambda: __import__('httpx').get(
                     f'https://www.filmaffinity.com/es/reviews/1/{film_id}.html',
@@ -153,6 +161,7 @@ class MediaEnricher:
                 )
             )
             if resp.status_code != 200:
+                logger.debug(f"FilmAffinity: HTTP {resp.status_code} for film_id={film_id}")
                 return []
             texts = re.findall(r'>([^<>{}\n]{80,})<', resp.text)
             clean = []
@@ -160,6 +169,7 @@ class MediaEnricher:
                 t = _html.unescape(t.strip())
                 if len(t) > 80 and 'filmaffinity' not in t.lower() and 'cookie' not in t.lower():
                     clean.append('[FA] ' + t[:240])
+            logger.debug(f"FilmAffinity: {len(clean[:3])} snippets for '{title}'")
             return clean[:3]
         except Exception as e:
             logger.warning(f"FilmAffinity fetch failed for {title}: {e}")
@@ -183,7 +193,9 @@ class MediaEnricher:
                     slug = m.group(1)
                     break
             if not slug:
+                logger.debug(f"Letterboxd: no slug found for '{title}'")
                 return []
+            logger.debug(f"Letterboxd: slug={slug} for '{title}'")
             resp = await asyncio.to_thread(
                 lambda: __import__('httpx').get(
                     f'https://letterboxd.com/film/{slug}/',
@@ -192,6 +204,7 @@ class MediaEnricher:
                 )
             )
             if resp.status_code != 200:
+                logger.debug(f"Letterboxd: HTTP {resp.status_code} for slug={slug}")
                 return []
             texts = re.findall(r'>([^<>{}\n]{60,})<', resp.text)
             clean = []
@@ -201,6 +214,7 @@ class MediaEnricher:
                 tl = t.lower()
                 if len(t) > 60 and not any(s in tl for s in skip) and '•' not in t:
                     clean.append('[LB] ' + t[:200])
+            logger.debug(f"Letterboxd: {len(clean[:3])} snippets for '{title}'")
             return clean[:3]
         except Exception as e:
             logger.warning(f"Letterboxd fetch failed for {title}: {e}")

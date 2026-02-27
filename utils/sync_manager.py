@@ -226,6 +226,7 @@ class SyncManager:
                     return False, False  # Already imported under a different jellyfin_id
 
             if existing:
+                logger.debug(f"Updating existing item: {media_info.get('title')} (jellyfin_id={media_info['jellyfin_id']})")
                 # Update existing item
                 self.db_connection.execute(
                     """
@@ -246,6 +247,7 @@ class SyncManager:
                 return False, True  # Not inserted, but updated
 
             else:
+                logger.debug(f"Inserting new item: {media_info.get('title')} (tmdb_id={media_info.get('tmdb_id')})")
                 # Insert new item
                 self.db_connection.execute(
                     """
