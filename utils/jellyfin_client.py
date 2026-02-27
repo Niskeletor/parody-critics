@@ -6,7 +6,6 @@ Enhanced client for Jellyfin API with pagination, caching and error handling
 
 import asyncio
 import json
-from pathlib import Path
 from typing import Dict, List, Optional, AsyncGenerator, Tuple
 from urllib.parse import urljoin
 
@@ -211,7 +210,7 @@ class JellyfinClient:
 
                 return result
 
-            except httpx.TimeoutException as e:
+            except httpx.TimeoutException:
                 last_error = JellyfinAPIError(f"Request timeout after {self.timeout}s")
                 logger.warning(f"Timeout for {endpoint} (attempt {attempt + 1})")
 

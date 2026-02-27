@@ -200,7 +200,7 @@ def main():
         config = Config()
         db_path = config.DATABASE_PATH
 
-        print(f"🎭 Parody Critics - Database Initialization")
+        print("🎭 Parody Critics - Database Initialization")
         print(f"Database: {db_path}")
 
         # Create schema
@@ -213,10 +213,10 @@ def main():
         # Check status
         check_database_status(db_path)
 
-        print(f"\n🎉 Database initialization completed successfully!")
-        print(f"\nNext steps:")
-        print(f"1. Run sync: python sync_cli.py sync")
-        print(f"2. Generate review: python critic_cli.py generate 'The Matrix'")
+        print("\n🎉 Database initialization completed successfully!")
+        print("\nNext steps:")
+        print("1. Run sync: python sync_cli.py sync")
+        print("2. Generate review: python critic_cli.py generate 'The Matrix'")
 
     except Exception as e:
         logger.error(f"Database initialization failed: {str(e)}")

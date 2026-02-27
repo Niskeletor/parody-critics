@@ -10,9 +10,8 @@ import httpx
 import sqlite3
 import json
 import time
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Any
 from datetime import datetime
-import asyncio
 
 class HybridApproachValidator:
     """Compare API vs Database approaches for Jellyfin data access"""
@@ -156,7 +155,7 @@ class HybridApproachValidator:
         api_only_titles = set(api_lookup.keys()) - set(db_lookup.keys())
         db_only_titles = set(db_lookup.keys()) - set(api_lookup.keys())
 
-        print(f"📊 Data consistency results:")
+        print("📊 Data consistency results:")
         print(f"   Common movies: {len(common_titles)}")
         print(f"   API-only movies: {len(api_only_titles)}")
         print(f"   DB-only movies: {len(db_only_titles)}")
@@ -294,7 +293,7 @@ class HybridApproachValidator:
                 movie_coverage = (movies_with_tmdb / total_movies * 100) if total_movies > 0 else 0
                 series_coverage = (series_with_ids / total_series * 100) if total_series > 0 else 0
 
-                print(f"📊 TMDB/TVDB Coverage:")
+                print("📊 TMDB/TVDB Coverage:")
                 print(f"   Movies with TMDB: {movies_with_tmdb}/{total_movies} ({movie_coverage:.1f}%)")
                 print(f"   Series with IDs: {series_with_ids}/{total_series} ({series_coverage:.1f}%)")
 
@@ -369,16 +368,16 @@ class HybridApproachValidator:
 
         if coverage_analysis.get('movie_coverage_percent', 0) > 80:
             print(f"   🎯 TMDB coverage is excellent ({coverage_analysis['movie_coverage_percent']:.1f}%)")
-            print(f"   ✅ RECOMMENDED: Hybrid approach with database-first strategy")
+            print("   ✅ RECOMMENDED: Hybrid approach with database-first strategy")
         elif coverage_analysis.get('movie_coverage_percent', 0) > 50:
             print(f"   🎯 TMDB coverage is good ({coverage_analysis['movie_coverage_percent']:.1f}%)")
-            print(f"   ⚠️  RECOMMENDED: API-first with database fallback")
+            print("   ⚠️  RECOMMENDED: API-first with database fallback")
         else:
             print(f"   🎯 TMDB coverage is low ({coverage_analysis['movie_coverage_percent']:.1f}%)")
-            print(f"   🚨 RECOMMENDED: API-only approach")
+            print("   🚨 RECOMMENDED: API-only approach")
 
-        print(f"   💡 For bulk sync: Use database for speed")
-        print(f"   💡 For real-time: Use API for accuracy")
+        print("   💡 For bulk sync: Use database for speed")
+        print("   💡 For real-time: Use API for accuracy")
 
         return results
 

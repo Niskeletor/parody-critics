@@ -5,7 +5,6 @@ Creates the SQLite database and applies schema
 """
 
 import sqlite3
-import os
 from pathlib import Path
 
 def init_database(db_path: str = "database/critics.db"):
@@ -58,7 +57,7 @@ def init_database(db_path: str = "database/critics.db"):
         active_chars = cursor.fetchone()[0]
         print(f"🎭 Active characters: {active_chars}")
 
-    print(f"🚀 Database initialized successfully!")
+    print("🚀 Database initialized successfully!")
     return db_path
 
 if __name__ == "__main__":

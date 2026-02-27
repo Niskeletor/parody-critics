@@ -35,21 +35,21 @@ def main():
         cursor.execute("SELECT COUNT(*) FROM media WHERE tmdb_id IS NULL")
         without_tmdb = cursor.fetchone()[0]
 
-        print(f"\n✅ Final Database Stats:")
+        print("\n✅ Final Database Stats:")
         print(f"   📹 Total media: {total_count:,}")
         print(f"   🎬 Movies: {movies:,}")
         print(f"   📺 Series: {series:,}")
         print(f"   🎯 With TMDB ID: {with_tmdb:,} ({(with_tmdb/total_count*100):.1f}%)")
         print(f"   ❌ Without TMDB ID: {without_tmdb:,} ({(without_tmdb/total_count*100):.1f}%)")
 
-        print(f"\n🎭 Sync Coverage:")
-        print(f"   Jellyfin total: 3,827")
+        print("\n🎭 Sync Coverage:")
+        print("   Jellyfin total: 3,827")
         print(f"   Local synced: {total_count:,}")
         print(f"   Coverage: {(total_count/3827*100):.1f}%")
         print(f"   Missing: {3827 - total_count:,} items")
 
         # Show some failed items without TMDB ID
-        print(f"\n🔍 Sample of items without TMDB ID:")
+        print("\n🔍 Sample of items without TMDB ID:")
         cursor.execute("SELECT title, year FROM media WHERE tmdb_id IS NULL LIMIT 10")
         for row in cursor.fetchall():
             print(f"   - {row[0]} ({row[1] if row[1] else 'No year'})")

@@ -3,7 +3,8 @@
 Migration: Add enriched_context column to media table.
 Safe to run multiple times (idempotent).
 """
-import sqlite3, sys
+import sqlite3
+import sys
 from pathlib import Path
 
 DB_PATH = Path(__file__).parent / "critics.db"
