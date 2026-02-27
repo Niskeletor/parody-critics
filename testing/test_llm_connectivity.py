@@ -3,7 +3,6 @@
 Test LLM connectivity and character prompt generation
 """
 import httpx
-import json
 import time
 from typing import Dict, Any
 
@@ -24,8 +23,8 @@ class LLMTester:
                 response.raise_for_status()
                 models = response.json()
 
-                print(f"✅ Connected to Ollama server")
-                print(f"📋 Available models:")
+                print("✅ Connected to Ollama server")
+                print("📋 Available models:")
                 for model in models.get('models', []):
                     print(f"   - {model['name']} ({model['details']['parameter_size']})")
 
@@ -148,7 +147,7 @@ Mantén tu tono combativo, directo y comprometido con la justicia social."""
                     "real_time_seconds": total_time
                 }
 
-                print(f"⚡ Performance metrics:")
+                print("⚡ Performance metrics:")
                 print(f"   Total time: {metrics['total_duration_ms']:.0f}ms")
                 print(f"   Tokens/sec: {metrics['tokens_per_second']:.1f}")
                 print(f"   Response tokens: {metrics['response_tokens']}")
@@ -176,8 +175,8 @@ async def main():
         performance_result = await tester.test_performance_metrics()
 
         # Summary
-        print(f"\n📋 TEST SUMMARY:")
-        print(f"✅ Connectivity: OK")
+        print("\n📋 TEST SUMMARY:")
+        print("✅ Connectivity: OK")
 
         successful_chars = [r for r in character_results if r["status"] == "success"]
         print(f"🎭 Characters tested: {len(successful_chars)}/{len(character_results)}")
@@ -189,10 +188,10 @@ async def main():
             metrics = performance_result["metrics"]
             print(f"⚡ Performance: {metrics['tokens_per_second']:.1f} tokens/sec")
 
-        print(f"\n🚀 LLM system ready for integration!")
+        print("\n🚀 LLM system ready for integration!")
 
         # Show sample responses
-        print(f"\n📝 Sample responses:")
+        print("\n📝 Sample responses:")
         for result in successful_chars[:2]:  # Show first 2
             print(f"\n--- {result['character']} ---")
             print(result['response'][:300] + "..." if len(result['response']) > 300 else result['response'])

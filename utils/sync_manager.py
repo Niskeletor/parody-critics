@@ -6,10 +6,9 @@ Main sync orchestrator that coordinates Jellyfin API, database operations, and p
 
 import asyncio
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple, Any
-import json
 
 from .jellyfin_client import JellyfinClient, extract_media_info, JellyfinAPIError
 from .sync_progress import SyncProgressDisplay, ProgressCallback, create_sync_progress
@@ -290,7 +289,7 @@ class SyncManager:
         Returns:
             Sync results summary
         """
-        operation = f"Jellyfin Library Sync"
+        operation = "Jellyfin Library Sync"
         if library_id:
             operation += f" (Library: {library_id})"
 

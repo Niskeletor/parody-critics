@@ -6,9 +6,8 @@ Visual progress tracking with Rich for Jellyfin sync operations
 
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Dict, Optional, List, Any, Callable
+from typing import Optional, List
 from datetime import datetime, timedelta
-import time
 import asyncio
 
 from rich.console import Console
@@ -22,7 +21,6 @@ from rich.table import Table
 from rich.text import Text
 from rich.layout import Layout
 from rich.live import Live
-from rich.columns import Columns
 from rich.align import Align
 
 from .logger import get_logger
@@ -422,7 +420,7 @@ async def demo_progress():
 
                 # Simulate occasional errors
                 if random.random() < 0.05:
-                    progress_display.record_error(f"Failed to process metadata", item_name)
+                    progress_display.record_error("Failed to process metadata", item_name)
 
                 # Simulate processing time
                 await asyncio.sleep(0.1)

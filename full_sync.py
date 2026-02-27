@@ -21,7 +21,7 @@ async def main():
         local_db_path=config.get_absolute_db_path()
     )
 
-    print(f"📊 Configuration loaded:")
+    print("📊 Configuration loaded:")
     print(f"   Jellyfin URL: {config.JELLYFIN_URL}")
     print(f"   Jellyfin DB: {config.JELLYFIN_DB_PATH}")
     print(f"   Local DB: {config.get_absolute_db_path()}")
@@ -30,7 +30,7 @@ async def main():
     try:
         # Get current stats
         jellyfin_counts = sync_manager.get_media_count_from_jellyfin_db()
-        print(f"\n📈 Jellyfin Media Stats:")
+        print("\n📈 Jellyfin Media Stats:")
         print(f"   Movies: {jellyfin_counts['movies']:,}")
         print(f"   Series: {jellyfin_counts['series']:,}")
         print(f"   Total: {jellyfin_counts['total']:,}")
@@ -86,7 +86,7 @@ async def main():
             cursor.execute("SELECT COUNT(*) FROM media")
             final_count = cursor.fetchone()[0]
 
-        print(f"\n🎉 Sync completed!")
+        print("\n🎉 Sync completed!")
         print(f"   Final local count: {final_count:,}")
         print(f"   Sync coverage: {(final_count/jellyfin_counts['total']*100):.1f}%")
 

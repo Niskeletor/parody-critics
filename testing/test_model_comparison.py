@@ -3,7 +3,6 @@
 Compare different models for critic generation quality
 """
 import httpx
-import json
 import time
 import asyncio
 
@@ -67,8 +66,8 @@ Incluye:
                 })
 
     # Display results
-    print(f"\n📊 MODEL COMPARISON RESULTS:")
-    print(f"=" * 60)
+    print("\n📊 MODEL COMPARISON RESULTS:")
+    print("=" * 60)
 
     for result in results:
         if "error" not in result:
@@ -76,7 +75,7 @@ Incluye:
             print(f"   ⏱️  Time: {result['generation_time']:.1f}s")
             print(f"   ⚡ Speed: {result['tokens_per_second']:.1f} tok/s")
             print(f"   📝 Length: {result['response_length']} chars ({result['token_count']} tokens)")
-            print(f"   📖 Response:")
+            print("   📖 Response:")
             print(f"   {'-' * 50}")
             # Show first 200 chars
             preview = result['response'][:200] + "..." if len(result['response']) > 200 else result['response']

@@ -3,7 +3,6 @@
 Tests for the security fixes implemented to prevent vulnerabilities
 """
 import pytest
-import httpx
 from fastapi.testclient import TestClient
 from api.main import app
 

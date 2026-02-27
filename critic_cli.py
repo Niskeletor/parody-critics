@@ -6,7 +6,6 @@ Command-line interface for generating movie and TV series reviews with AI critic
 
 import asyncio
 import sys
-from pathlib import Path
 
 import click
 from rich.console import Console
@@ -357,12 +356,12 @@ async def _generate_review(config: Config, character: str, media_info: dict, sav
                 _save_review_to_database(config, parsed_review, media_info, character)
 
         else:
-            console.print(f"\n[red]❌ Review generation failed[/red]")
+            console.print("\n[red]❌ Review generation failed[/red]")
             console.print(f"Error: {result.get('error', 'Unknown error')}")
 
             # Show attempts
             if 'attempts' in result:
-                console.print(f"\n[dim]Attempts made:[/dim]")
+                console.print("\n[dim]Attempts made:[/dim]")
                 for attempt in result['attempts']:
                     status_color = "green" if attempt['status'] == 'success' else "red"
                     console.print(f"  • {attempt['endpoint']} ({attempt['model']}): [{status_color}]{attempt['status']}[/{status_color}]")
@@ -376,7 +375,7 @@ async def _generate_review(config: Config, character: str, media_info: dict, sav
 def _display_review(result: dict, parsed_review: dict, media_info: dict):
     """Display generated review"""
 
-    console.print(f"\n🎉 [bold green]Review Generated![/bold green]")
+    console.print("\n🎉 [bold green]Review Generated![/bold green]")
 
     # Review info panel
     info_panel = Panel(
@@ -483,7 +482,7 @@ async def _show_llm_status(config: Config):
         # Show statistics if available
         stats = status.get('statistics', {})
         if stats.get('total_requests', 0) > 0:
-            console.print(f"\n[bold]📊 Usage Statistics:[/bold]")
+            console.print("\n[bold]📊 Usage Statistics:[/bold]")
             console.print(f"  Total Requests: {stats['total_requests']}")
             console.print(f"  Success Rate: {stats['successful_requests']}/{stats['total_requests']}")
             console.print(f"  Average Time: {stats.get('total_time', 0) / max(stats['successful_requests'], 1):.2f}s")
@@ -522,7 +521,7 @@ async def _test_system(config: Config):
             result = await llm_manager.generate_critic('Marco Aurelio', test_media)
 
             if result['success']:
-                console.print(f"[green]✅ Test generation successful![/green]")
+                console.print("[green]✅ Test generation successful![/green]")
                 console.print(f"Model used: {result['model_used']}")
                 console.print(f"Generation time: {result['generation_time']:.1f}s")
 
@@ -530,10 +529,10 @@ async def _test_system(config: Config):
                 preview = result['response'][:100] + "..." if len(result['response']) > 100 else result['response']
                 console.print(f"\n[dim]Preview: {preview}[/dim]")
             else:
-                console.print(f"[red]❌ Test generation failed[/red]")
+                console.print("[red]❌ Test generation failed[/red]")
                 console.print(f"Error: {result.get('error', 'Unknown error')}")
         else:
-            console.print(f"[red]❌ No healthy endpoints available[/red]")
+            console.print("[red]❌ No healthy endpoints available[/red]")
 
     except Exception as e:
         logger.error(f"System test failed: {str(e)}")
