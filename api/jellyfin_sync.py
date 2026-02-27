@@ -7,12 +7,10 @@ Author: SAL-9000
 
 import httpx
 import sqlite3
-import json
 import asyncio
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timezone
 import logging
-from pathlib import Path
 from dataclasses import dataclass, asdict
 from enum import Enum
 
