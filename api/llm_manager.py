@@ -3,12 +3,10 @@
 Hybrid LLM system with local and cloud fallback for critic generation
 """
 import httpx
-import asyncio
 import time
 import json
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List, Union
-from dataclasses import dataclass, asdict
+from datetime import datetime
+from typing import Dict, Any, Optional, List
 
 # Import our logging system
 from utils.logger import get_logger, LogTimer, log_exception
@@ -377,7 +375,6 @@ class CriticGenerationManager:
 
     def _build_character_prompt(self, character: str, media_info: Dict[str, Any]) -> str:
         """Build character-specific prompt using structured personality fields + variation engine"""
-        import json
 
         title = media_info.get("title", "Obra sin título")
         year = media_info.get("year", "Año desconocido")
@@ -463,7 +460,7 @@ class CriticGenerationManager:
             soul_lines.append(f"\nAMAS en el cine: {', '.join(loves[:8])}")
         if hates:
             soul_lines.append(f"DETESTAS en el cine: {', '.join(hates[:8])}")
-            soul_lines.append(f"Cuando detectas lo que odias, reacciona con intensidad genuina.")
+            soul_lines.append("Cuando detectas lo que odias, reacciona con intensidad genuina.")
         soul_block = "\n".join(soul_lines)
 
         prompt = f"""{identity}
