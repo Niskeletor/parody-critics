@@ -3166,11 +3166,278 @@ class ParodyCriticsApp {
     }
   }
 
-  // Open add character modal
+  // Open add character modal → routes to Soul Wizard
   openAddCharacterModal() {
-    this.currentEditingCharacter = null; // Reset editing state
-    this.showCharacterModal('Crear Nuevo Personaje');
-    console.log('🎭 Opening add character modal');
+    this.openSoulWizard();
+  }
+
+  // ── Soul Wizard ────────────────────────────────────────────────
+
+  openSoulWizard() {
+    this._soulRealName = '';
+    this._soulData = null;
+
+    // Reset Step 1
+    const realNameInput = document.getElementById('soul-real-name');
+    const archetypeSelect = document.getElementById('soul-archetype');
+    if (realNameInput) realNameInput.value = '';
+    if (archetypeSelect) archetypeSelect.value = '';
+
+    // Show Step 1, hide Step 2
+    const step1 = document.getElementById('soul-step-1');
+    const step2 = document.getElementById('soul-step-2');
+    if (step1) step1.classList.remove('hidden');
+    if (step2) step2.classList.add('hidden');
+
+    const modal = document.getElementById('soul-wizard-modal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      if (realNameInput) setTimeout(() => realNameInput.focus(), 80);
+    }
+
+    this._setupSoulWizardEvents();
+  }
+
+  closeSoulWizard() {
+    const modal = document.getElementById('soul-wizard-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  _setupSoulWizardEvents() {
+    // Only wire once
+    if (this._soulEventsWired) return;
+    this._soulEventsWired = true;
+
+    // Close buttons & backdrop
+    const modal = document.getElementById('soul-wizard-modal');
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) this.closeSoulWizard();
+    });
+    document.getElementById('soul-close-1').addEventListener('click', () => this.closeSoulWizard());
+    document.getElementById('soul-close-2').addEventListener('click', () => this.closeSoulWizard());
+    document
+      .getElementById('soul-cancel-1')
+      .addEventListener('click', () => this.closeSoulWizard());
+    document
+      .getElementById('soul-cancel-2')
+      .addEventListener('click', () => this.closeSoulWizard());
+
+    // Back button
+    document.getElementById('soul-back-btn').addEventListener('click', () => {
+      document.getElementById('soul-step-2').classList.add('hidden');
+      document.getElementById('soul-step-1').classList.remove('hidden');
+    });
+
+    // Generate button
+    document
+      .getElementById('soul-generate-btn')
+      .addEventListener('click', () => this._generateSoul());
+
+    // Save button
+    document
+      .getElementById('soul-save-btn')
+      .addEventListener('click', () => this._saveSoulCharacter());
+
+    // Regen buttons (delegated on fields section)
+    document.getElementById('soul-fields-section').addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-regen');
+      if (btn && !btn.disabled) {
+        const field = btn.dataset.field;
+        if (field) this._regenField(field, btn);
+      }
+    });
+
+    // Enter key on real name input
+    document.getElementById('soul-real-name').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') this._generateSoul();
+    });
+  }
+
+  async _generateSoul() {
+    const realName = (document.getElementById('soul-real-name').value || '').trim();
+    if (!realName) {
+      this.showError('Introduce el nombre de la persona a parodiar');
+      return;
+    }
+    const archetype = document.getElementById('soul-archetype').value || null;
+
+    this._soulRealName = realName;
+
+    // Switch to Step 2 showing progress
+    document.getElementById('soul-step-1').classList.add('hidden');
+    document.getElementById('soul-step-2').classList.remove('hidden');
+    document.getElementById('soul-step2-title').textContent = `🎭 ${realName}`;
+    document.getElementById('soul-fields-section').classList.add('hidden');
+    document.getElementById('soul-progress-section').classList.remove('hidden');
+
+    this._setSoulProgress(5, 'Iniciando búsqueda...');
+    const generateBtn = document.getElementById('soul-generate-btn');
+    if (generateBtn) generateBtn.disabled = true;
+
+    // Simulate gradual progress while waiting for API
+    const progressSteps = [
+      [1000, 15, 'Buscando contexto (DuckDuckGo)...'],
+      [3000, 30, 'Contexto obtenido, generando alma...'],
+      [6000, 45, 'Generando personalidad...'],
+      [9000, 60, 'Generando loves y hates...'],
+      [12000, 72, 'Generando motivos y frases...'],
+      [15000, 82, 'Finalizando...'],
+    ];
+    const timers = progressSteps.map(([delay, pct, msg]) =>
+      setTimeout(() => this._setSoulProgress(pct, msg), delay)
+    );
+
+    try {
+      const result = await this.fetchAPI('/characters/generate-soul', 'POST', {
+        real_name: realName,
+        archetype,
+      });
+      timers.forEach(clearTimeout);
+
+      if (!result.success) throw new Error(result.detail || 'Generation failed');
+
+      this._soulData = result.soul;
+      this._setSoulProgress(95, 'Procesando...');
+      this._populateSoulFields(result.soul);
+
+      setTimeout(() => {
+        this._setSoulProgress(100, '¡Alma generada!');
+        setTimeout(() => {
+          document.getElementById('soul-progress-section').classList.add('hidden');
+          document.getElementById('soul-fields-section').classList.remove('hidden');
+        }, 400);
+      }, 300);
+    } catch (err) {
+      timers.forEach(clearTimeout);
+      this.showError('Error generando alma: ' + err.message);
+      // Go back to Step 1
+      document.getElementById('soul-step-2').classList.add('hidden');
+      document.getElementById('soul-step-1').classList.remove('hidden');
+      if (generateBtn) generateBtn.disabled = false;
+    }
+  }
+
+  _setSoulProgress(pct, label) {
+    const fill = document.getElementById('soul-progress-fill');
+    const lbl = document.getElementById('soul-progress-label');
+    if (fill) fill.style.width = pct + '%';
+    if (lbl) lbl.textContent = label;
+  }
+
+  _populateSoulFields(soul) {
+    const listToText = (arr) => (Array.isArray(arr) ? arr.join('\n') : arr || '');
+
+    document.getElementById('sf-caricature_name').value = soul.caricature_name || '';
+    document.getElementById('sf-emoji').value = soul.emoji || '🎭';
+    document.getElementById('sf-color').value = soul.color || '#6366f1';
+    const personalityEl = document.getElementById('sf-personality');
+    if (personalityEl) personalityEl.value = soul.personality || '';
+    document.getElementById('sf-description').value = soul.description || '';
+    document.getElementById('sf-loves').value = listToText(soul.loves);
+    document.getElementById('sf-hates').value = listToText(soul.hates);
+    document.getElementById('sf-motifs').value = listToText(soul.motifs);
+    document.getElementById('sf-catchphrases').value = listToText(soul.catchphrases);
+    document.getElementById('sf-avoid').value = listToText(soul.avoid);
+    document.getElementById('sf-red_flags').value = listToText(soul.red_flags);
+  }
+
+  _collectSoulFields() {
+    const textToList = (id) =>
+      document
+        .getElementById(id)
+        .value.split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+    return {
+      caricature_name: document.getElementById('sf-caricature_name').value.trim(),
+      emoji: document.getElementById('sf-emoji').value.trim() || '🎭',
+      color: document.getElementById('sf-color').value,
+      personality: document.getElementById('sf-personality').value,
+      description: document.getElementById('sf-description').value.trim(),
+      loves: textToList('sf-loves'),
+      hates: textToList('sf-hates'),
+      motifs: textToList('sf-motifs'),
+      catchphrases: textToList('sf-catchphrases'),
+      avoid: textToList('sf-avoid'),
+      red_flags: textToList('sf-red_flags'),
+    };
+  }
+
+  async _regenField(field, btn) {
+    if (!this._soulRealName) return;
+    btn.disabled = true;
+    btn.textContent = '⏳';
+
+    const currentSoul = this._collectSoulFields();
+
+    try {
+      const result = await this.fetchAPI('/characters/regen-field', 'POST', {
+        field,
+        current_soul: currentSoul,
+        real_name: this._soulRealName,
+      });
+
+      if (!result.success) throw new Error(result.detail || 'Regen failed');
+
+      const value = result.value;
+      const listFields = ['loves', 'hates', 'motifs', 'catchphrases', 'avoid', 'red_flags'];
+      const el = document.getElementById(`sf-${field}`);
+      if (el) {
+        if (listFields.includes(field)) {
+          el.value = Array.isArray(value) ? value.join('\n') : value;
+        } else {
+          el.value = value;
+        }
+      }
+    } catch (err) {
+      this.showError(`Error regenerando ${field}: ` + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🎲';
+    }
+  }
+
+  async _saveSoulCharacter() {
+    const soul = this._collectSoulFields();
+    const name = soul.caricature_name;
+
+    if (!name) {
+      this.showError('El apodo del personaje es obligatorio');
+      return;
+    }
+
+    const saveBtn = document.getElementById('soul-save-btn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = '⏳ Guardando...';
+
+    const characterData = {
+      name,
+      emoji: soul.emoji,
+      personality: soul.personality,
+      description: soul.description,
+      color: soul.color,
+      border_color: soul.color,
+      accent_color: soul.color + '33',
+      loves: soul.loves,
+      hates: soul.hates,
+      motifs: soul.motifs,
+      catchphrases: soul.catchphrases,
+      avoid: soul.avoid,
+      red_flags: soul.red_flags,
+    };
+
+    try {
+      const result = await this.fetchAPI('/characters', 'POST', characterData);
+      if (!result.success) throw new Error(result.detail || 'Save failed');
+      this.closeSoulWizard();
+      this.showMessage(`Personaje "${name}" creado con éxito`, 'success');
+      await this.renderCharactersGrid();
+    } catch (err) {
+      this.showError('Error guardando personaje: ' + err.message);
+      saveBtn.disabled = false;
+      saveBtn.textContent = '💾 Guardar Personaje';
+    }
   }
 
   // Open edit character modal

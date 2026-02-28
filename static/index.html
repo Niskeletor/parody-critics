@@ -442,6 +442,236 @@
       </div>
     </div>
 
+    <!-- Soul Wizard Modal -->
+    <div class="modal hidden" id="soul-wizard-modal">
+      <div class="modal-content soul-wizard-content">
+        <!-- STEP 1: Name + archetype -->
+        <div id="soul-step-1">
+          <div class="modal-header">
+            <h3>🔮 Nuevo Personaje — Generador de Alma</h3>
+            <button class="modal-close" id="soul-close-1">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p class="soul-intro">
+              Introduce el nombre real de la persona que quieres parodiar. La IA buscará contexto y
+              generará su "alma" cinematográfica automáticamente.
+            </p>
+            <div class="form-group">
+              <label for="soul-real-name">Persona real a parodiar *</label>
+              <input
+                type="text"
+                id="soul-real-name"
+                placeholder="Ej: Donald Trump, Marie Curie, Quentin Tarantino..."
+                autocomplete="off"
+              />
+            </div>
+            <div class="form-group">
+              <label for="soul-archetype"
+                >Arquetipo <small>(opcional — la IA lo decide si lo dejas en blanco)</small></label
+              >
+              <select id="soul-archetype">
+                <option value="">🤖 Dejar que la IA decida</option>
+                <option value="fanatico_ideologico">Fanático Ideológico</option>
+                <option value="intelectual">Intelectual</option>
+                <option value="nostalgico">Nostálgico</option>
+                <option value="nihilista">Nihilista</option>
+                <option value="troll">Troll</option>
+                <option value="ingenuo_entusiasta">Ingenuo Entusiasta</option>
+                <option value="woke">Woke</option>
+                <option value="estoico">Estoico</option>
+              </select>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" id="soul-cancel-1">Cancelar</button>
+              <button type="button" class="btn-primary" id="soul-generate-btn">
+                ✨ Generar Alma
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: Soul fields + regen buttons -->
+        <div id="soul-step-2" class="hidden">
+          <div class="modal-header soul-header-step2">
+            <button type="button" class="btn-back" id="soul-back-btn">&#8592; Volver</button>
+            <h3 id="soul-step2-title">🎭 Alma del Personaje</h3>
+            <button class="modal-close" id="soul-close-2">&times;</button>
+          </div>
+          <div class="modal-body">
+            <!-- Progress indicator -->
+            <div id="soul-progress-section" class="soul-progress-section">
+              <div class="soul-progress-track">
+                <div class="soul-progress-fill" id="soul-progress-fill"></div>
+              </div>
+              <p class="soul-progress-label" id="soul-progress-label">Iniciando búsqueda...</p>
+            </div>
+
+            <!-- Generated fields (hidden while loading) -->
+            <div id="soul-fields-section" class="hidden">
+              <!-- Name / Emoji / Color row -->
+              <div class="soul-row-multi">
+                <div class="soul-field-group soul-fg-grow">
+                  <label>Apodo caricaturesco</label>
+                  <div class="soul-input-row">
+                    <input type="text" id="sf-caricature_name" class="soul-input" />
+                    <button class="btn-regen" data-field="caricature_name" title="Regenerar campo">
+                      🎲
+                    </button>
+                  </div>
+                </div>
+                <div class="soul-field-group soul-fg-emoji">
+                  <label>Emoji</label>
+                  <div class="soul-input-row">
+                    <input type="text" id="sf-emoji" class="soul-input" maxlength="2" />
+                    <button class="btn-regen" data-field="emoji" title="Regenerar campo">🎲</button>
+                  </div>
+                </div>
+                <div class="soul-field-group soul-fg-color">
+                  <label>Color</label>
+                  <div class="soul-input-row">
+                    <input type="color" id="sf-color" class="soul-input soul-color-input" />
+                    <button class="btn-regen" data-field="color" title="Regenerar campo">🎲</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Personality -->
+              <div class="soul-field-group">
+                <label>Arquetipo</label>
+                <div class="soul-input-row">
+                  <select id="sf-personality" class="soul-input">
+                    <option value="fanatico_ideologico">Fanático Ideológico</option>
+                    <option value="intelectual">Intelectual</option>
+                    <option value="nostalgico">Nostálgico</option>
+                    <option value="nihilista">Nihilista</option>
+                    <option value="troll">Troll</option>
+                    <option value="ingenuo_entusiasta">Ingenuo Entusiasta</option>
+                    <option value="woke">Woke</option>
+                    <option value="estoico">Estoico</option>
+                  </select>
+                  <button class="btn-regen" data-field="personality" title="Regenerar campo">
+                    🎲
+                  </button>
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div class="soul-field-group">
+                <label>Descripción</label>
+                <div class="soul-input-row soul-input-row-tall">
+                  <textarea id="sf-description" class="soul-input" rows="3"></textarea>
+                  <button
+                    class="btn-regen btn-regen-tall"
+                    data-field="description"
+                    title="Regenerar campo"
+                  >
+                    🎲
+                  </button>
+                </div>
+              </div>
+
+              <!-- Loves -->
+              <div class="soul-field-group">
+                <label>❤️ Ama en el cine <small>(una por línea)</small></label>
+                <div class="soul-input-row soul-input-row-tall">
+                  <textarea id="sf-loves" class="soul-input" rows="4"></textarea>
+                  <button
+                    class="btn-regen btn-regen-tall"
+                    data-field="loves"
+                    title="Regenerar campo"
+                  >
+                    🎲
+                  </button>
+                </div>
+              </div>
+
+              <!-- Hates -->
+              <div class="soul-field-group">
+                <label>💢 Detesta en el cine <small>(una por línea)</small></label>
+                <div class="soul-input-row soul-input-row-tall">
+                  <textarea id="sf-hates" class="soul-input" rows="4"></textarea>
+                  <button
+                    class="btn-regen btn-regen-tall"
+                    data-field="hates"
+                    title="Regenerar campo"
+                  >
+                    🎲
+                  </button>
+                </div>
+              </div>
+
+              <!-- Motifs -->
+              <div class="soul-field-group">
+                <label>🎯 Motivos recurrentes <small>(uno por línea)</small></label>
+                <div class="soul-input-row soul-input-row-tall">
+                  <textarea id="sf-motifs" class="soul-input" rows="4"></textarea>
+                  <button
+                    class="btn-regen btn-regen-tall"
+                    data-field="motifs"
+                    title="Regenerar campo"
+                  >
+                    🎲
+                  </button>
+                </div>
+              </div>
+
+              <!-- Catchphrases -->
+              <div class="soul-field-group">
+                <label>💬 Frases habituales <small>(una por línea)</small></label>
+                <div class="soul-input-row soul-input-row-tall">
+                  <textarea id="sf-catchphrases" class="soul-input" rows="3"></textarea>
+                  <button
+                    class="btn-regen btn-regen-tall"
+                    data-field="catchphrases"
+                    title="Regenerar campo"
+                  >
+                    🎲
+                  </button>
+                </div>
+              </div>
+
+              <!-- Avoid -->
+              <div class="soul-field-group">
+                <label>🚫 Comportamientos a evitar <small>(uno por línea)</small></label>
+                <div class="soul-input-row soul-input-row-tall">
+                  <textarea id="sf-avoid" class="soul-input" rows="3"></textarea>
+                  <button
+                    class="btn-regen btn-regen-tall"
+                    data-field="avoid"
+                    title="Regenerar campo"
+                  >
+                    🎲
+                  </button>
+                </div>
+              </div>
+
+              <!-- Red flags -->
+              <div class="soul-field-group">
+                <label>🚨 Detonadores de reacción intensa <small>(uno por línea)</small></label>
+                <div class="soul-input-row soul-input-row-tall">
+                  <textarea id="sf-red_flags" class="soul-input" rows="4"></textarea>
+                  <button
+                    class="btn-regen btn-regen-tall"
+                    data-field="red_flags"
+                    title="Regenerar campo"
+                  >
+                    🎲
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn-secondary" id="soul-cancel-2">Cancelar</button>
+                <button type="button" class="btn-primary" id="soul-save-btn">
+                  💾 Guardar Personaje
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Import Characters Modal -->
     <div class="modal hidden" id="import-modal">
       <div class="modal-content">

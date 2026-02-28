@@ -24,6 +24,7 @@ from config import get_config
 from api.jellyfin_sync import JellyfinSyncManager
 from api.llm_manager import CriticGenerationManager
 from api.media_enricher import MediaEnricher
+from api.soul_generator import SoulGenerator, ARCHETYPES as SOUL_ARCHETYPES
 from utils import get_logger
 from utils.websocket_manager import websocket_manager, WebSocketProgressAdapter
 from utils.sync_manager import SyncManager
@@ -2471,6 +2472,66 @@ async def export_characters():
     except Exception as e:
         setup_logger.error(f"❌ Error exporting characters: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error exporting characters: {str(e)}")
+
+# ============================================================================
+# 🔮 Soul Generator Endpoints
+# ============================================================================
+
+_soul_generator = SoulGenerator()
+
+
+@app.post("/api/characters/generate-soul")
+async def generate_soul(body: dict = Body(...)):
+    """
+    Step 1 → DDG context fetch (progress: 30%)
+    Step 2 → LLM soul generation (progress: 90%)
+    Returns full soul JSON ready for Step 2 of the wizard.
+    """
+    real_name = (body.get("real_name") or "").strip()
+    archetype = body.get("archetype") or None
+
+    if not real_name:
+        raise HTTPException(status_code=400, detail="real_name is required")
+    if archetype and archetype not in SOUL_ARCHETYPES:
+        raise HTTPException(status_code=400, detail=f"Invalid archetype: {archetype}")
+
+    try:
+        soul = await _soul_generator.generate_soul(real_name, archetype)
+        return {"success": True, "soul": soul, "real_name": real_name}
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        setup_logger.error(f"Soul generation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Soul generation failed: {e}")
+
+
+@app.post("/api/characters/regen-field")
+async def regen_field(body: dict = Body(...)):
+    """
+    Regenerate a single soul field keeping all other fields as coherence context.
+    Body: { field, current_soul, real_name }
+    Returns: { field, value }
+    """
+    field = body.get("field", "")
+    current_soul = body.get("current_soul", {})
+    real_name = (body.get("real_name") or "").strip()
+
+    if not field:
+        raise HTTPException(status_code=400, detail="field is required")
+    if not real_name:
+        raise HTTPException(status_code=400, detail="real_name is required")
+
+    try:
+        value = await _soul_generator.regen_field(field, current_soul, real_name)
+        return {"success": True, "field": field, "value": value}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        setup_logger.error(f"Field regen error: {e}")
+        raise HTTPException(status_code=500, detail=f"Regen failed: {e}")
+
 
 # ============================================================================
 
