@@ -480,7 +480,7 @@ Sinopsis: {synopsis}{enriched_block}
 
 INSTRUCCIONES:
 Escribe una crítica de máximo 150 palabras como {character} {emoji}.
-Empieza siempre con la puntuación: X/10
+Empieza siempre con la puntuación numérica: por ejemplo 7/10 (pon tu número real del 1 al 10)
 Basa tu análisis en los datos reales de la obra que te hemos dado arriba.
 No inventes tramas, personajes ni elementos que no aparezcan en la sinopsis.
 Después analiza desde tu perspectiva y con tu tono auténtico.
@@ -500,19 +500,22 @@ Sé directo y personal."""
         # Extract rating (look for patterns like "8/10", "Puntuación: 7", etc.)
         rating = None
         rating_patterns = [
-            r"(\d+)/10",
-            r"Puntuación[:\s]*(\d+)",
-            r"Calificación[:\s]*(\d+)",
-            r"Nota[:\s]*(\d+)"
+            r"\b(\d{1,2})/10",           # 8/10 — most common
+            r"Puntuación[:\s]*(\d{1,2})",
+            r"Calificación[:\s]*(\d{1,2})",
+            r"Nota[:\s]*(\d{1,2})",
+            r"^(\d{1,2})\s*[/\-]",       # line starting with number
         ]
 
         import re
         for pattern in rating_patterns:
-            match = re.search(pattern, raw_response, re.IGNORECASE)
+            match = re.search(pattern, raw_response, re.IGNORECASE | re.MULTILINE)
             if match:
                 try:
-                    rating = min(10, max(1, int(match.group(1))))  # Ensure 1-10 range
-                    break
+                    candidate = int(match.group(1))
+                    if 1 <= candidate <= 10:
+                        rating = candidate
+                        break
                 except ValueError:
                     continue
 
