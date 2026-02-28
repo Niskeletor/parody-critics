@@ -2048,3 +2048,185 @@ select:focus-visible,
     gap: 1rem;
   }
 }
+
+/* ========================================
+   Soul Wizard
+   ======================================== */
+
+.soul-wizard-content {
+  max-width: 700px;
+}
+
+.soul-intro {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+/* Step 2 header has back button */
+.soul-header-step2 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--accent-bg);
+}
+
+.soul-header-step2 h3 {
+  flex: 1;
+  margin: 0;
+}
+
+.btn-back {
+  background: none;
+  border: 1px solid var(--accent-bg);
+  color: var(--text-secondary);
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn-back:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+/* Progress bar */
+.soul-progress-section {
+  margin-bottom: 1.5rem;
+}
+
+.soul-progress-track {
+  height: 8px;
+  background: var(--accent-bg);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.soul-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-primary), #a78bfa);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+.soul-progress-label {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  text-align: center;
+  margin: 0;
+}
+
+/* Multi-column row */
+.soul-row-multi {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  align-items: flex-start;
+}
+
+.soul-fg-grow {
+  flex: 1;
+}
+
+.soul-fg-emoji {
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.soul-fg-color {
+  width: 80px;
+  flex-shrink: 0;
+}
+
+/* Field groups */
+.soul-field-group {
+  margin-bottom: 1rem;
+}
+
+.soul-field-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.35rem;
+  font-weight: 500;
+}
+
+.soul-field-group label small {
+  font-weight: normal;
+  opacity: 0.7;
+}
+
+/* Input rows */
+.soul-input-row {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.soul-input-row-tall {
+  align-items: flex-start;
+}
+
+.soul-input {
+  flex: 1;
+  background: var(--card-bg);
+  border: 1px solid var(--accent-bg);
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: var(--transition);
+  width: 100%;
+}
+
+.soul-input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
+textarea.soul-input {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.soul-color-input {
+  padding: 0.2rem 0.3rem;
+  height: 36px;
+  cursor: pointer;
+}
+
+/* Regen dice button */
+.btn-regen {
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-bg);
+  color: var(--text-primary);
+  border-radius: var(--border-radius);
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: var(--transition);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.btn-regen:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.btn-regen:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-regen-tall {
+  align-self: flex-start;
+  margin-top: 2px;
+}
