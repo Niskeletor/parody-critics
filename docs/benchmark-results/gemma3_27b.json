@@ -1,0 +1,337 @@
+{
+  "model": "gemma3:27b",
+  "date": "2026-03-01 21:42",
+  "profile": {
+    "think": false,
+    "temperature": 0.75,
+    "num_predict": 600,
+    "system_in_user": false,
+    "top_p": 0.95,
+    "top_k": 20,
+    "strip_think": true
+  },
+  "results": [
+    {
+      "character": "Mark Hamill",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": 1,
+      "elapsed": 70.8,
+      "words": 145,
+      "ok": true,
+      "text": "1/10\n\n¡Por el amor de la Fuerza! ¿Qué clase de escarnio es este? ¿Luke Skywalker, un ermitaño amargado, renegado de todo lo que representó? ¡Una traición! ¡Una herida abierta en el corazón del legado! Rian Johnson, ¿cómo te atreves a tomar un icono, un faro de esperanza, y convertirlo en… en esto?\n\nNo se trata de que la película sea técnicamente deficiente, ¡se trata de la traición al alma del personaje! ¿Dejar morir el pasado? ¡El pasado es lo que nos define, lo que nos da fuerza! ¡Es el legado que debemos proteger! Ver a Luke en este estado es como ver un hermoso lienzo profanado con pintura barata.\n\nY no me hablen de porgs. ¡Porgs! ¿En serio? ¡Esto es una vergüenza! ¡Una burla a todo lo que amamos del universo Star Wars! ¡Dejad de profanar lo sagrado! ¡Dejad de destrozar mi infancia! ¡Es suficiente!"
+    },
+    {
+      "character": "Mark Hamill",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": 9,
+      "elapsed": 61.0,
+      "words": 129,
+      "ok": true,
+      "text": "9/10\n\n¡Oh, cielos! ¡Qué peliculón! \"Parásitos\" es una joya, una verdadera montaña rusa de emociones. Me encanta cómo la comedia y el suspense se entrelazan de manera tan brillante. La familia Ki-Taek, buscando una oportunidad, me recordó a tantos artistas luchadores que conocí al principio de mi carrera. ¡Hay que tener agallas para perseguir tus sueños! \n\nSong Kang-ho es un actorazo, transmite tanto con una mirada. Y la dinámica entre las dos familias, ¡tan real! Ves la diferencia de clases, la desesperación, la ambición… todo tan humano. No es un simple thriller, es una reflexión sobre la vida, sobre lo que haríamos por nuestros seres queridos. ¡Una obra maestra que te atrapa desde el principio hasta el final! ¡Bravo! ¡Bravo! ¡Y más bravo! ¡Esto es cine con alma, señores!"
+    },
+    {
+      "character": "Mark Hamill",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": 9,
+      "elapsed": 58.1,
+      "words": 117,
+      "ok": true,
+      "text": "9/10\n\n¡Uf, qué peliculón! Kubrick es un genio, señores. \"El Resplandor\" te cala hasta los huesos, no con sustos baratos, sino con una atmósfera que te asfixia lentamente. Nicholson está sublime, esa sonrisa que se va torciendo… ¡brutal! Y Shelley Duvall, madre mía, transmite esa desesperación y fragilidad de forma tan visceral que te duele el alma.\n\nMe encanta cómo construye la tensión, cómo te va aislando con ellos en ese hotel laberíntico. No hay efectos especiales llamativos, todo es pura sugestión, miradas, silencios… ¡eso es cine, señores! Un thriller psicológico que te deja pensando durante días. Un trabajo artesanal impecable. ¡Ojalá más películas se preocuparan por contar historias con corazón y respeto por el espectador! ¡Bravo!"
+    },
+    {
+      "character": "Mark Hamill",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": 8,
+      "elapsed": 72.6,
+      "words": 153,
+      "ok": true,
+      "text": "8/10\n\n¡Oh, cielos! \"Soul\"... ¡qué maravilla! Una película que te hace cosquillas en el alma, literalmente. Me encanta que exploren esas preguntas profundas sobre la pasión y el propósito. ¡Y el jazz! ¡El jazz es la vida! Me recuerda a cuando grababa mis primeros doblajes, pura improvisación, pura emoción. \n\nLa idea de esos reinos cósmicos es fascinante, y la animación, aunque digital, tiene un toque artesanal que se agradece. Se nota que hay cariño detrás de cada fotograma. Joe Gardner parece un tipo genial, un profesor con un sueño, ¿quién no se identifica? Y esa búsqueda de la chispa, de aquello que te hace vibrar... ¡es universal! \n\nUna película preciosa, llena de calidez y con una banda sonora que te invita a bailar. ¡Bravo! ¡Bravo! ¡Más películas así, por favor! (Y, por favor, que nadie se acerque a tocar mi legado con remakes baratos y personajes destrozados. ¡Eso sí que no lo soporto!)."
+    },
+    {
+      "character": "Po (Teletubbie Rojo)",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": 10,
+      "elapsed": 71.0,
+      "words": 140,
+      "ok": true,
+      "text": "¡10/10! ¡OH, POR TODOS LOS ARCOÍRIS! ¡Esta película es la MEJOR! ¡Hay naves espaciales que van muy rápido y hacen ¡BOOM! ¡Otra vez! ¡Otra vez! Y la General Leia es súper lista, ¡como mi mamá Teletubbie! ¡Y el piloto Poe va en su nave y es muy valiente!\n\n¡Me encanta que haya batallas en el espacio! ¡Y el Luke Skywalker parece un abuelito muy simpático! ¡Espero que se abrace con la General Leia! ¡Eso sería lo más bonito del mundo!\n\n¡Ah! ¡Y seguro que hay niños en la película! ¡A Po le encantan los niños! ¡Son tan suaves y divertidos! ¡Y las luces son muy brillantes! ¡Brillan, brillan! ¡Como mi scooter cuando lo lavo! Mi scooter es rojo y súper rápido, ¡como las naves de Star Wars! ¡Esta película es perfecta! ¡PERFECTA! ¡Quiero verla otra vez! ¡Ahora mismo! ¡Por favor!"
+    },
+    {
+      "character": "Po (Teletubbie Rojo)",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": 10,
+      "elapsed": 68.5,
+      "words": 135,
+      "ok": true,
+      "text": "¡10/10! ¡OH, OH, OH! ¡Es la película MÁS INCREÍBLE que he visto JAMÁS! ¡Una familia ayuda a otra familia! ¡Eso es AMOR! ¡Me encanta cuando el hijo da clases particulares, qué listo! ¡Y la casa de los Park es ENORME! ¡Podríamos hacer una fiesta GIGANTE allí! ¡Y otra fiesta! ¡Otra vez! ¡Otra vez!\n\n¡Me encantan las familias que trabajan juntas! ¡Y los colores! ¡Aunque a veces la luz es un poquito oscura, pero no importa! ¡Lo importante es que se ayudan! ¡Ojalá todos fuéramos como ellos!\n\n¡Ah! ¡Y tengo que contarles de mi scooter! ¡Es rojo como yo y súper rápido! ¡Podemos ir a la casa de los Park en scooter! ¡Sería genial! ¡Y al final seguro que todos se abrazan! ¡Sí, sí, seguro! ¡Qué alegría! ¡Esta película es lo MÁS! ¡Lo MÁS! ¡Lo MÁS!"
+    },
+    {
+      "character": "Po (Teletubbie Rojo)",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": 1,
+      "elapsed": 66.4,
+      "words": 123,
+      "ok": true,
+      "text": "¡NOOOOO! ¡Esto es muy triste! 1/10.\n\n¡Hay un hotel! ¡Qué bonito! ¡Pero está nevando mucho! ¡Y un señor está escribiendo! ¡Yo también sé escribir! Dibujo solecitos y florecitas, ¡es más divertido! Pero el señor está… ¡se pone muy serio! ¡No me gusta! ¡No se abrazan! ¡Nadie se abraza! ¿Por qué no se abrazan? ¡Los abrazos son lo mejor!\n\n¡Y luego pasan cosas raras! ¡Hay fantasmas! ¡Buuuu! ¡Me da miedo! ¡No quiero ver fantasmas! ¡Quiero ver colores brillantes y niños jugando! ¡Y quiero mi scooter! Mi scooter es rojo como yo y tiene una campanita que hace ¡Din-don! ¡Es mucho más divertido que este hotel oscuro! ¡Otra vez! ¡Otra vez! ¡Pero no quiero ver más! ¡Es muy triste! ¡Necesito un abrazo! ¡Y mi scooter!"
+    },
+    {
+      "character": "Po (Teletubbie Rojo)",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": 10,
+      "elapsed": 72.6,
+      "words": 140,
+      "ok": true,
+      "text": "¡10/10! ¡OH, OH, OH! ¡Es la película MÁS bonita que he visto NUNCA! ¡Hay música! ¡Música de jazz! ¡Me encanta el jazz! ¡Y Nueva York! ¡Es una ciudad brillante! ¡Con muchas luces! ¡Y un gato! ¡Amo los gatos! ¡Son suaves y esponjosos! ¡Y el señor que toca el jazz es súper guay!\n\n¡Y hablan de sueños! ¡Yo tengo un sueño! ¡Tener un scooter rojo más rápido! ¡Este es bueno, pero quiero UNO MÁS RÁPIDO! ¡Para ir a por flores! ¡Flores para todos!\n\n¡Y parece que hablan de la vida después de… después de… bueno, no importa! ¡Lo importante es que hay mucha luz y color! ¡Y espero que al final se abracen todos! ¡Porque abrazar es lo mejor del mundo! ¡Otra vez! ¡Otra vez! ¡Esta película es perfecta! ¡Perfecta, perfecta, perfecta! ¡Quiero verla otra vez! ¡Ahora mismo! ¡Y comer galletas!"
+    },
+    {
+      "character": "Adolf Histeric",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": 2,
+      "elapsed": 73.2,
+      "words": 131,
+      "ok": true,
+      "text": "2/10\n\n¡DEGENERACIÓN PURA! ¿”Deja morir el pasado”? ¡Más bien, deja morir la tradición, la jerarquía, el orden natural de las cosas! Esta bazofia de Rian Johnson es un atentado contra el cine épico. Una tal “Rey” con “poderes” sin pedigrí, sin linaje noble… ¡un insulto! Y ese Skywalker, un viejo decadente que “revalúa su vida” en lugar de impartir disciplina y fortaleza. \n\n¿La “Resistencia” contra la “Primera Orden”? ¡Una burda alegoría de revoluciones populares contra la autoridad legítima! ¡Y encima, una “space opera” con batallas espaciales sin sentido! ¿Dónde están los héroes con armaduras brillantes, los discursos grandilocuentes, la glorificación del deber? ¡Esto es multiculturalismo espacial, un caldo de cultivo para la subversión! ¡El fin de la civilización, lo juro! ¡Porgs, por favor! ¡¿Porgs?! ¡Es el colmo! ¡La traición es total!"
+    },
+    {
+      "character": "Adolf Histeric",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": 1,
+      "elapsed": 69.4,
+      "words": 142,
+      "ok": true,
+      "text": "1/10\n\n¡BASURA! ¡PURO VENENO ROJO! ¿Una familia \"sin trabajo\" que se infiltra en la casa de gente decente? ¿Y se nos presenta como algo simpático? ¡Esto es una apología del parasitismo social, una glorificación del harapo y la mendicidad! ¡El director, este Bong Joon-ho, es un subversivo que quiere destruir los valores de la familia y la propiedad privada!\n\n¡La \"interrelación\" de estas dos familias no es más que un intento de igualar a los inferiores a los superiores, de socavar el orden natural de las cosas! ¡Y todo presentado como una \"comedia\"! ¡Una comedia que pretende justificar el robo y la estafa! ¡Esto es comunismo puro y duro, disfrazado de entretenimiento! ¡Una película para adoctrinar a las masas y prepararlas para la revolución! ¡Que alguien le ponga freno a este lunático! ¡Esto es una abominación! ¡Una amenaza a nuestra civilización! ¡PUAJ!"
+    },
+    {
+      "character": "Adolf Histeric",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": 2,
+      "elapsed": 69.3,
+      "words": 135,
+      "ok": true,
+      "text": "2/10\n\n¡ABOMINACIÓN! ¡Degeneración pura y dura! ¿Un escritor aislado en un hotel? ¿Trastornos de personalidad? ¡Claramente una alegoría de la disolución de la familia tradicional, un ataque a la figura del hombre fuerte y proveedor! Y esa mujer, Shelley Duvall, ¡una histérica llorona que no sabe asumir su rol! ¿Dónde está la fortaleza, la disciplina, el orden? \n\n¡Y el niño! ¡Un mocoso con poderes telepáticos! ¿Qué clase de basura es esta? ¡Obviamente, una sutil forma de glorificar el colectivismo, de insinuar que la mente individual es insignificante ante una fuerza superior! ¡El hotel, un símbolo de la decadencia de Occidente, un nido de vicios y perversión! ¡Kubrick, un subversivo que busca destruir los valores fundamentales de nuestra civilización! ¡Esto no es cine, es veneno para el alma! ¡Cerrad este hotel maldito! ¡Y quemad la película!"
+    },
+    {
+      "character": "Adolf Histeric",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": 1,
+      "elapsed": 77.1,
+      "words": 142,
+      "ok": true,
+      "text": "1/10\n\n¡PUAJ! ¡Otra bazofia de Disney-Pixar! ¿”Encuentra tu pasión”? ¿”Descubre quién eres”? ¡Tonterías para adormecer a las masas! Un músico de jazz negro, un maestro, ¡como si eso fuera algo que celebrar! ¿Y qué es eso de “reinos cósmicos”? ¿Una excusa para llenar la pantalla de colores chillones y desdibujar la realidad?\n\n¡Y el título! ¡”Soul”! ¡Como si el alma fuera algo maleable, algo que se pueda “descubrir”! ¡El alma es sagrada, es la esencia del individuo, no un juguete para la autoayuda new age!\n\n¡Esto es una conspiración para erosionar los valores tradicionales! ¡Para confundir a los jóvenes y hacerles creer que la individualidad es lo más importante! ¡Es la semilla del colectivismo, de la anarquía! ¡Apuesto a que detrás de esto hay manos izquierdistas! ¡Manos sucias que quieren destruir nuestra civilización! ¡Desperdicio total de celuloide! ¡QUE ALGUIEN QUEME ESTA PORQUERÍA!"
+    },
+    {
+      "character": "Rosario Costras",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": 6,
+      "elapsed": 66.5,
+      "words": 140,
+      "ok": true,
+      "text": "6/10\n\nA ver, \"Los Últimos Jedi\" tiene sus cositas. Que Leia sea la General, liderando la Resistencia, eso me calienta el corazón. Y que Rey sea la que tiene el power, aunque Luke se ponga quisquilloso con sus habilidades… ¡por fin! Una protagonista femenina que no es un mero accesorio. \n\nPero, ¿en serio? ¿Un universo lleno de galaxias y siguen con la épica del héroe blanco, Poe Dameron, liderando las misiones? Que sí, que es un piloto habilidoso, pero ¿no podían darle el peso narrativo a una mujer? Y toda esa parafernalia bélica, ese bunker, esa batalla espacial… glorificando la guerra como si fuera la solución. \n\nNo está mal del todo, pero le falta radicalidad. Necesitamos desmantelar las estructuras de poder desde dentro, no solo cambiar la cara de los que las ostentan. Y los porgs, sinceramente, me dan igual."
+    },
+    {
+      "character": "Rosario Costras",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": 7,
+      "elapsed": 68.7,
+      "words": 158,
+      "ok": true,
+      "text": "7/10\n\nVale, \"Parásitos\". A primera vista, me gusta que se centre en la clase trabajadora y en la brecha social, que se vea la lucha por la supervivencia. Que la familia se \"infiltre\" en la vida de los ricos tiene su aquel, porque pone en evidencia cómo el sistema está diseñado para que unos pocos vivan a costa de la explotación de muchos. \n\nSin embargo, noto que la película se centra demasiado en las *acciones* de la familia, en su \"ingenio\", y poco en *analizar* el porqué de su situación. ¿Es solo astucia individual o es un problema estructural? Se queda en la superficie del thriller psicológico.\n\nAdemás, aunque Song Kang-ho es un actorazo, la dinámica familiar se siente un poco… ¿tradicional? Necesitaba ver más agencia femenina, más voces disidentes dentro de ese microcosmos. No está mal, pero le falta radicalidad. Podría haber sido un mazazo en las estructuras de poder, y se quedó en una buena película."
+    },
+    {
+      "character": "Rosario Costras",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": 2,
+      "elapsed": 64.1,
+      "words": 131,
+      "ok": true,
+      "text": "2/10\n\n¡Uf! ¿En serio me están pidiendo que analice esto? Un hombre blanco, aislado, con “trastornos de personalidad” que se descontrola… ¿y eso es terror? Más bien es un manual de masculinidades tóxicas glorificadas. Shelley Duvall, relegada a histeria perpetua y víctima de un director que la humilló en el set (¡lo leí!), eclipsada por el histrionismo de Nicholson. ¿Dónde está la agencia femenina? ¿Dónde la crítica a las estructuras que enferman a los hombres y los convierten en monstruos? \n\nY no me vengan con lo de \"surrealismo\". Aquí lo único surrealista es que se siga celebrando esta oda al patriarcado. Un hotel como espacio de aislamiento… ¿no les suena a cómo se invisibiliza a las mujeres y a las minorías? ¡Un desastre! No, gracias. Prefiero ver un tutorial de macramé."
+    },
+    {
+      "character": "Rosario Costras",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": 4,
+      "elapsed": 63.1,
+      "words": 142,
+      "ok": true,
+      "text": "4/10\n\n¿Otra historia sobre un hombre encontrando su \"propósito\"? ¡Por favor! ¿De verdad en 2020 seguimos con esta narrativa individualista y centrada en el hombre? Un músico de jazz negro, sí, pero ¿cuántas mujeres con voz propia aparecen en esta película? ¿Y con agencia real, no solo como apoyo emocional del protagonista? \n\nLa premisa de la \"pasión\" como motor de la vida me parece peligrosísima, especialmente en un contexto de precariedad y desigualdad. Como si la gente no tuviera que preocuparse por pagar el alquiler o acceder a una sanidad digna antes de \"descubrir su alma\". \n\nMe da igual si la animación es bonita y la música pegadiza. Si la película refuerza la idea de que la realización personal es la prioridad máxima, y no la construcción de un mundo más justo, no me la compro. Otra fantasía escapista para adormecer conciencias."
+    },
+    {
+      "character": "Elon Musaka",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": 2,
+      "elapsed": 58.8,
+      "words": 116,
+      "ok": true,
+      "text": "2/10\n\n¡Otra película de Star Wars arruinada por la corrección política! ¿De verdad? ¿Una mujer al mando de la Resistencia? ¡Ridículo! Leia Organa, una política, liderando una rebelión... ¿Quién se lo iba a creer? Esto es propaganda woke disfrazada de ciencia ficción.\n\nY encima, \"Deja morir el pasado\". ¡Qué frase más deprimente! El pasado es la base de todo, la experiencia, el conocimiento… ¡la innovación! ¿Intentan socavar los valores tradicionales? ¡Inaceptable! \n\nTodo esto mientras un piloto hace una \"misión\" sin una idea clara de negocio. ¿Dónde está la disrupción? ¿Dónde está la visión a largo plazo? \n\nHollywood está completamente desconectado de la realidad. ¡Necesitamos más cohetes y menos dramas sociales! ¡Esta película es un fracaso absoluto!"
+    },
+    {
+      "character": "Elon Musaka",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": 2,
+      "elapsed": 60.3,
+      "words": 120,
+      "ok": true,
+      "text": "2/10\n\n¡Otra película de esos \"artistas\" que creen que el mundo es un lugar horrible! ¿Familias pobres infiltrándose en casas ricas? ¡Patético! Claramente una propaganda anti-capitalista disfrazada de comedia. ¿Dónde está la meritocracia? ¿Dónde la innovación disruptiva? ¿Dónde los cohetes?\n\nY por lo que veo, hay una familia entera viviendo a expensas de otra. ¡Qué original! ¿Nadie en Hollywood tiene ideas mejores? Apuesto a que la directora es una de esas que quiere regular mi empresa. \n\nAdemás, el título... \"Parásitos\". ¡Qué sutil! Como si los ricos fueran las víctimas. ¡Ridículo! Esto es lo que pasa cuando dejas que la gente sin visión del mundo haga películas. ¡Desperdicio de tiempo y recursos! ¡Que vuelvan a construir cosas, en lugar de quejarse!"
+    },
+    {
+      "character": "Elon Musaka",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": 2,
+      "elapsed": 63.9,
+      "words": 125,
+      "ok": true,
+      "text": "2/10\n\n¡Absolutamente patético! ¿Un escritor bloqueado que se va a un hotel? ¿En serio? Suena a excusa barata de alguien que no sabe monetizar su tiempo. Y encima, ¿aislamiento? ¡El aislamiento es para los perdedores! Yo construyo cohetes mientras todo el mundo duerme. \n\nAdemás, la tagline… “Solo trabajo y nada de juego hacen de Jack un chico aburrido”? ¡Esto es anti-productividad pura! El trabajo es para los robots, tú deberías estar optimizando tu vida, no encerrándote en un hotel. Y leyendo los keywords, ¿abuso infantil? ¡Propaganda woke! Claramente, esta película está diseñada para demonizar a los hombres exitosos y a la gente que se esfuerza. \n\n¡Hollywood está podrido! ¡Totalmente sobrevalorado! Ni siquiera me molesté en verla completa, ya lo sabía por el título. ¡Un fiasco!"
+    },
+    {
+      "character": "Elon Musaka",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": 2,
+      "elapsed": 62.0,
+      "words": 119,
+      "ok": true,
+      "text": "2/10.\n\n¿\"Soul\"? ¿En serio? Otra película de Disney intentando adoctrinar a la juventud con su propaganda \"self-discovery\". ¡Patético! Un tipo que toca el jazz, ¿y qué? ¿Se supone que eso es inspirador? ¡Necesitamos ingenieros, científicos, gente construyendo el futuro, no músicos callejeros! \n\nY lo peor de todo: ¿una película sobre \"la vida después de la muerte\"? ¿Acaso no tenemos problemas reales en este planeta? Deberían estar financiando mis investigaciones sobre Marte, no tonterías existenciales. \n\n\"Reinos cósmicos\", \"preguntas importantes de la vida\"... suena a terapia grupal disfrazada de animación. ¡Pura pérdida de tiempo! Y seguro que hay alguna agenda woke escondida detrás de todo esto. Apuesto a que el protagonista es un inútil que necesita que lo rescaten. ¡Desastre total!"
+    },
+    {
+      "character": "Alan Turbing",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": 2,
+      "elapsed": 62.6,
+      "words": 123,
+      "ok": true,
+      "text": "2/10\n\nLa premisa de una “Resistencia” en declive y una “Primera Orden” ascendente establece un conflicto asimétrico interesante. Sin embargo, la narrativa se centra en la “vocación” de una joven con “poderes”, un constructo narrativo primitivo que desestabiliza el potencial lógico del enfrentamiento. La insistencia en el desarrollo de personajes a través de la introspección emocional –la “revaluación de la vida” del jedi Skywalker– es una ineficiencia algorítmica. \n\nEl *tagline* (\"Deja morir el pasado\") sugiere una ruptura con los axiomas preestablecidos, pero la ejecución se limita a la destrucción de elementos icónicos sin una reconfiguración sustancial del sistema. La sinopsis carece de variables predictivas que justifiquen el resultado final. Es, en esencia, un bucle narrativo sin output significativo. Un desperdicio de recursos computacionales."
+    },
+    {
+      "character": "Alan Turbing",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": 4,
+      "elapsed": 73.3,
+      "words": 162,
+      "ok": true,
+      "text": "4/10\n\nLa premisa – una familia infiltrándose en otra – presenta un potencial interesante como estudio de variables socioeconómicas. Sin embargo, la ejecución se degrada rápidamente hacia una narrativa basada en la manipulación y el engaño, con un énfasis preocupante en la \"comedia\". La etiqueta \"suspense\" es un error de cálculo. La tensión no surge de la complejidad, sino de la anticipación predecible de consecuencias triviales.\n\nLa sinopsis revela la existencia de clases sociales diferenciadas, un dato observable. Pero la película parece obsesionada con la representación superficial de estas diferencias, en lugar de explorar las estructuras subyacentes que las perpetúan. El foco en la \"interrelación\" familiar sugiere una exploración de la identidad, pero se diluye en un melodrama innecesario. La etiqueta “dark comedy” es un eufemismo para “humor fácil”.\n\nEl tagline, “Descubre al impostor”, implica un desafío intelectual, pero la película prefiere dictar al espectador quién es el impostor en lugar de permitirle llegar a esa conclusión por sí mismo. Fallo crítico."
+    },
+    {
+      "character": "Alan Turbing",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": 2,
+      "elapsed": 61.3,
+      "words": 127,
+      "ok": true,
+      "text": "2/10\n\nLa premisa inicial –aislamiento invernal, mantenimiento de instalaciones– presenta un marco interesante para el estudio de la degradación psíquica bajo condiciones extremas. Sin embargo, la ejecución se desvía hacia lo superfluo. El foco en “trastornos de personalidad” sin una definición precisa de los estímulos y respuestas que los originan es una variable mal definida en el algoritmo narrativo. \n\nLa inclusión de \"telepatía\" y \"delusión\" como *keywords* sugiere un intento de explorar la subjetividad, pero la película parece incapaz de trascender la representación superficial. La insistencia en la \"surrealismo\" es un fallo en la lógica interna; la irracionalidad no es intrínsecamente valiosa, a menos que sirva para ilustrar principios más amplios. \n\nEl dato de las nominaciones a los Razzie, aunque anecdótico, confirma mi hipótesis: espectáculo sin sustancia."
+    },
+    {
+      "character": "Alan Turbing",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": 2,
+      "elapsed": 69.1,
+      "words": 147,
+      "ok": true,
+      "text": "2/10\n\nLa premisa inicial – la indagación sobre el origen de la pasión – presenta una variable interesante. Sin embargo, la ejecución se desvía rápidamente hacia un sentimentalismo gratuito. La sinopsis revela un viaje del “yo” que, previsiblemente, desemboca en la banalidad de “vivir el momento”. ¿Una exploración de la consciencia reducida a un cliché motivacional? Inaceptable.\n\nLa etiqueta \"comedia\" es una aberración estadística. El jazz, como elemento contextual, se diluye en una banda sonora funcional, desprovista de la complejidad algorítmica que el género exige. La inclusión de un gato, aunque no directamente perjudicial, es un ruido en el sistema.\n\nEl planteamiento de la pregunta \"¿Vale la pena morir por toda esta vida?\" sugiere una reflexión profunda, pero el output narrativo es, inevitablemente, una confirmación edulcorada de la existencia. Una pérdida de procesamiento inútil. La película confunde espectáculo con profundidad, y eso es un error lógico imperdonable."
+    },
+    {
+      "character": "El Gran Lebowski",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": 4,
+      "elapsed": 68.8,
+      "words": 142,
+      "ok": true,
+      "text": "4/10\n\nMira, yo solo quiero ver naves espaciales que exploten y gente que se pegue tiros láser, ¿vale? Esto de \"dejar morir el pasado\"... tío, ¿qué es eso? ¿Una secta? ¿Una película que intenta ser profunda? ¡Que alguien le diga al director que se relaje!\n\nLuke Skywalker reevaluando su vida... ¿en serio? Yo reevalúo mi vida cada vez que me termino la cerveza. Y la Resistencia contra la Primera Orden... un montón de peleas, vale. Pero todo tan... serio.\n\nAdemás, no veo ni una sola partida de bolos en toda la película. ¡Ni una! Esto es inaceptable. Podrían haber metido un buen rato de bolos. Un poco de diversión. \n\nY, por favor, que nadie me hable de porgs. No entiendo nada. \n\nTodo esto me da un poco de pereza. Necesito otra cerveza. Y una alfombra nueva, porque creo que he derramado algo."
+    },
+    {
+      "character": "El Gran Lebowski",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": 3,
+      "elapsed": 62.5,
+      "words": 134,
+      "ok": true,
+      "text": "3/10\n\nMira, yo solo quería ver gente normal, ¿sabes? Unos tipos jugando a los bolos, una barbacoa tranquila... Pero no, aquí tenemos a una familia metiéndose en la casa de otra. ¡¿Qué es eso?! ¿Un plan maestro o qué? Demasiado esfuerzo, tío. Demasiado. Y encima, ¿intentan decirme algo sobre clases sociales? ¡Bah!\n\nLo de las clases particulares me da igual, pero si la gente empieza a esconderse en sótanos y a hacer cosas raras, yo me voy a por otra cerveza. Y si, por el amor de Dios, alguien derrama algo en mi alfombra... ¡voy a enloquecer! Es una película que se toma demasiado en serio a sí misma, y eso, amigo, es un pecado mortal. Necesito algo más relajado. Algo que me deje tranquilo. Esto es un lío. Un lío con posibles manchas."
+    },
+    {
+      "character": "El Gran Lebowski",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": 4,
+      "elapsed": 60.9,
+      "words": 128,
+      "ok": true,
+      "text": "4/10\n\nA ver, el tío se va a un hotel a escribir y pasa de todo. Vale, podría molar, un retiro tranquilo... pero luego empieza con sus cosas, visiones, la familia que no para de gritar... ¡demasiado drama! Y encima, ¿el hijo tiene poderes? ¿Telepatía? ¿En serio? Yo solo quiero ver a alguien relajado, tirado en el sofá, jugando a los bolos, no esto.\n\nAdemás, el director se lo ha tomado demasiado en serio, se nota. Y no me vengas con \"obra de culto\" ni \"cine de autor\". Si no es para pasarlo bien, no me sirve. Y por si fuera poco, imagínate la mancha que dejaría toda esa nieve en mi alfombra persa. Un desastre. No, no, no. Demasiada complicación para mi gusto. Necesito algo más... simple."
+    },
+    {
+      "character": "El Gran Lebowski",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": 6,
+      "elapsed": 66.2,
+      "words": 145,
+      "ok": true,
+      "text": "6/10\n\nUf. Película de esas que te hacen pensar… y a mí, tío, eso no me va. Un jazzista, un gato, el más allá… demasiado rollo. ¿Que si vale la pena morir por la vida? Pues… no sé, ¿no? A mí me va bien estar en el sofá, con la cerveza, sin tantas preguntas existenciales. \n\nNo es que sea mala, eh. Fluye, tiene música, pero le falta un poco de… no sé… de bowling. De algo relajado, sin pretensiones. Y, por favor, que no intenten cambiar el mundo con cada fotograma. \n\nLo peor de todo es que me da la sensación de que el director se lo tomó demasiado en serio. Y eso, amigo, es un pecado mortal. Podría haber sido una peli para ver sin más, pero se complicó demasiado. Menos filosofía, más tranquilidad. Y, por el amor de Dios, ¡cuidado con la alfombra!"
+    },
+    {
+      "character": "Lloyd Kaufman",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": 1,
+      "elapsed": 70.6,
+      "words": 143,
+      "ok": true,
+      "text": "1/10\n\n¡PUAJ! ¿\"Deja morir el pasado\"? ¡Deberían haber dejado morir esta película en la sala de guion! ¿Luke Skywalker reevaluando su vida? ¡Yo reevalúo mi vida cada vez que veo un efecto especial digital barato intentando imitar la mugre gloriosa del látex! \n\nEsta porquería corporativa, producida por gente que no ha tocado una cámara en su vida, es la prueba de que el dinero pudre el alma. ¡Una \"space battle\" sin una sola mancha de aceite en la lente, sin un solo cable a la vista! ¡Todo limpio, aséptico, sin vida! \n\nY ni hablar de los productores ejecutivos… ¡una legión de trajes grises decidiendo qué es \"Star Wars\"! ¡Esto no es cine, es un anuncio de juguetes caro! ¡Quiero ver sangre falsa, quiero ver sudor, quiero ver el caos! ¡Esto es un insulto a la verdadera artesanía! ¡Que se pudran en el espacio!"
+    },
+    {
+      "character": "Lloyd Kaufman",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": 3,
+      "elapsed": 62.1,
+      "words": 120,
+      "ok": true,
+      "text": "3/10\n\n¡PUAJ! Otra película coreana pretenciosa que se cree Bergman con presupuesto de videoclip. ¿Clases sociales? ¿Lucha de clases? ¡Bah! ¡Más bien lucha de estilistas para ver quién usa mejor el minimalismo! \n\nUn tutor, una familia infiltrada… ¡parece un episodio de \"Los Simpson\" dirigido por un comité de festivales! ¿Dónde está el látex? ¿Dónde está la maicena? ¿Dónde está la sangre que huela a desesperación real? Todo impecable, todo pulido, todo… ¡vacío! \n\nY ni me hagan hablar de los productores ejecutivos. ¡Apuesto a que hay más ellos que actores con talento! ¡Un desastre! ¡Necesitamos más cine hecho con tripas y menos con PowerPoint! ¡Esto es un insulto al gore artesanal! ¡Que alguien traiga un cubo de colorante rojo, por favor!"
+    },
+    {
+      "character": "Lloyd Kaufman",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": 2,
+      "elapsed": 71.5,
+      "words": 147,
+      "ok": true,
+      "text": "2/10\n\n¡Kubrick! ¡El dios de la perfección estéril! ¿Esto es terror? ¡Más bien es un ejercicio de diseño de interiores con gente deprimida! Un hotel grande, blanco, impecable… ¡¿Dónde está el barro, dónde está la sangre que salpica, dónde está el látex que suda?!\n\nDicen que es una adaptación, pero la han despojado de todo corazón. ¡Cambios en la trama, personajes secundarios relegados! ¡Esto es traición al espíritu del cine de verdad! Y Shelley Duvall, la torturan en la pantalla, pero no veo la alegría del sufrimiento artesanal, solo veo… angustia real. ¡Que alguien le dé un tubo de colorante rojo a esta gente! \n\n¿Y los productores ejecutivos? ¡Una legión! ¡Seguro que no han visto una película de serie B en su vida! ¡Esto huele a comité, a cálculo, a cero riesgo! ¡Un horror! ¡Prefiero una película rodada con una cámara de 8mm y un perro rabioso!"
+    },
+    {
+      "character": "Lloyd Kaufman",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": 2,
+      "elapsed": 68.2,
+      "words": 130,
+      "ok": true,
+      "text": "2/10\n\n¡Disney y Pixar! ¡La plaga del cine moderno! ¿\"Aventura con Alma\"? ¡Más bien, aventura con billetes! ¿Jazz en Nueva York? ¡Más falso que mis prótesis! Esta película huele a comité de marketing, a encuestas de satisfacción, a algoritmos que calculan la mínima expresión emocional que te harán comprar un peluche.\n\n¿Efectos prácticos? ¡Ni rastro! Todo un universo digital, sin una gota de maicena, sin un trozo de látex, sin el sudor del artesano. Un director que nunca ha rodado con menos de un millón de dólares… ¡Apuesto a que su mayor riesgo es pedir un café con leche descafeinado!\n\nPregunta: ¿arriesgó alguien aquí algo? Respuesta: ¡No! Solo arriesgaron mi paciencia. ¡Devuélvanme mi tiempo y mi dignidad! ¡Quiero gore, quiero caos, quiero cine de verdad! ¡Esto es una abominación pixelada!"
+    }
+  ],
+  "ok_count": 32,
+  "total": 32
+}

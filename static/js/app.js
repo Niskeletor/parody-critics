@@ -3189,6 +3189,10 @@ class ParodyCriticsApp {
     if (step1) step1.classList.remove('hidden');
     if (step2) step2.classList.add('hidden');
 
+    // Always re-enable generate button (may be disabled from previous session)
+    const generateBtn = document.getElementById('soul-generate-btn');
+    if (generateBtn) generateBtn.disabled = false;
+
     const modal = document.getElementById('soul-wizard-modal');
     if (modal) {
       modal.classList.remove('hidden');
@@ -3226,6 +3230,10 @@ class ParodyCriticsApp {
     document.getElementById('soul-back-btn').addEventListener('click', () => {
       document.getElementById('soul-step-2').classList.add('hidden');
       document.getElementById('soul-step-1').classList.remove('hidden');
+      const generateBtn = document.getElementById('soul-generate-btn');
+      if (generateBtn) generateBtn.disabled = false;
+      document.getElementById('soul-progress-section').classList.add('hidden');
+      document.getElementById('soul-fields-section').classList.add('hidden');
     });
 
     // Generate button
@@ -3245,6 +3253,20 @@ class ParodyCriticsApp {
         const field = btn.dataset.field;
         if (field) this._regenField(field, btn);
       }
+    });
+
+    // Archetype change in step 2 — confirm + full regeneration
+    document.getElementById('sf-personality').addEventListener('change', (e) => {
+      if (!this._soulData) return;
+      const newValue = e.target.value;
+      const oldValue = this._soulData.personality || '';
+      if (!confirm('Cambiar el arquetipo regenerará el alma completa. ¿Continuar?')) {
+        e.target.value = oldValue;
+        return;
+      }
+      const archetypeStep1 = document.getElementById('soul-archetype');
+      if (archetypeStep1) archetypeStep1.value = newValue;
+      this._generateSoul();
     });
 
     // Enter key on real name input

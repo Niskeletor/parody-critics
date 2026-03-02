@@ -1,0 +1,337 @@
+{
+  "model": "hf.co/LatitudeGames/Muse-12B-GGUF:Q4_K_M",
+  "date": "2026-03-01 19:01",
+  "profile": {
+    "think": false,
+    "temperature": 0.75,
+    "num_predict": 2000,
+    "system_in_user": false,
+    "top_p": 0.95,
+    "top_k": 20,
+    "strip_think": true
+  },
+  "results": [
+    {
+      "character": "Mark Hamill",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Mark Hamill",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Mark Hamill",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Mark Hamill",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Po (Teletubbie Rojo)",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Po (Teletubbie Rojo)",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Po (Teletubbie Rojo)",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Po (Teletubbie Rojo)",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Adolf Histeric",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Adolf Histeric",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Adolf Histeric",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Adolf Histeric",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Rosario Costras",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Rosario Costras",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Rosario Costras",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Rosario Costras",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Elon Musaka",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Elon Musaka",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Elon Musaka",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Elon Musaka",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Alan Turbing",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Alan Turbing",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Alan Turbing",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": null,
+      "elapsed": 0.1,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Alan Turbing",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "El Gran Lebowski",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "El Gran Lebowski",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "El Gran Lebowski",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "El Gran Lebowski",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Lloyd Kaufman",
+      "tmdb_id": 181808,
+      "title": "Star Wars: Los últimos Jedi",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Lloyd Kaufman",
+      "tmdb_id": 496243,
+      "title": "Parásitos",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Lloyd Kaufman",
+      "tmdb_id": 694,
+      "title": "El resplandor",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    },
+    {
+      "character": "Lloyd Kaufman",
+      "tmdb_id": 508442,
+      "title": "Soul",
+      "rating": null,
+      "elapsed": 0.0,
+      "words": 0,
+      "ok": false,
+      "text": ""
+    }
+  ],
+  "ok_count": 0,
+  "total": 32
+}

@@ -11,6 +11,7 @@ import httpx
 
 from utils.logger import get_logger
 from config import Config
+from model_profiles import get_profile
 
 logger = get_logger("soul_generator")
 
@@ -100,17 +101,20 @@ class SoulGenerator:
     # ── DDG context fetch ─────────────────────────────────────────────────────
 
     async def fetch_context(self, real_name: str) -> list[str]:
-        """Run two DDG queries for the person and return deduplicated snippets."""
+        """Run two DDG queries for the person and return deduplicated, relevant snippets."""
         logger.info(f"DDG search for: {real_name!r}")
         queries = [
-            f"{real_name} wikipedia personalidad características",
-            f"{real_name} controversias frases opiniones polémicas",
+            f"{real_name}",                            # biographical — most direct hit
+            f"{real_name} cine películas opiniones",   # cinema angle
         ]
+
+        # Words from the name we'll use for relevance filtering (skip very short words)
+        name_tokens = {w.lower() for w in real_name.split() if len(w) > 2}
 
         all_snippets: list[str] = []
         for q in queries:
             try:
-                results = await asyncio.to_thread(self._ddg_search, q, 4)
+                results = await asyncio.to_thread(self._ddg_search, q, 5)
                 for r in results:
                     body = r.get("body", "").strip()
                     if body and len(body) > 40:
@@ -118,16 +122,22 @@ class SoulGenerator:
             except Exception as e:
                 logger.warning(f"DDG query failed ({q!r}): {e}")
 
+        # Relevance filter: keep only snippets that mention at least one name token
+        relevant = [s for s in all_snippets if any(t in s.lower() for t in name_tokens)]
+        # Fall back to all snippets if filter is too aggressive (e.g. single-word names)
+        if len(relevant) < 2:
+            relevant = all_snippets
+
         # Deduplicate preserving order
         seen: set[str] = set()
         unique: list[str] = []
-        for s in all_snippets:
+        for s in relevant:
             key = s[:80]
             if key not in seen:
                 seen.add(key)
                 unique.append(s)
 
-        logger.info(f"DDG: {len(unique)} snippets for {real_name!r}")
+        logger.info(f"DDG: {len(unique)} snippets for {real_name!r} (from {len(all_snippets)} raw)")
         return unique[:8]
 
     @staticmethod
@@ -144,16 +154,33 @@ class SoulGenerator:
         if not ep:
             raise RuntimeError("No LLM endpoint available")
 
+        # Soul generation needs reliable JSON — force think=False regardless of model
+        profile = get_profile(ep["model"])
+
+        if profile.system_in_user:
+            messages = [{"role": "user", "content": prompt}]
+        else:
+            messages = [
+                {"role": "system", "content": "Responde SOLO con JSON válido, sin texto adicional."},
+                {"role": "user", "content": prompt},
+            ]
+
         payload = {
             "model": ep["model"],
-            "prompt": prompt,
+            "messages": messages,
             "stream": False,
-            "options": {"temperature": 0.85, "top_p": 0.9},
+            "think": False,  # Soul must return full JSON — thinking mode risks truncation
+            "options": {
+                "temperature": profile.temperature,
+                "num_predict": max(profile.num_predict, 1200),  # JSON needs enough budget
+                "top_p": profile.top_p,
+                "top_k": profile.top_k,
+            },
         }
         async with httpx.AsyncClient(timeout=120) as client:
-            resp = await client.post(f"{ep['url']}/api/generate", json=payload)
+            resp = await client.post(f"{ep['url']}/api/chat", json=payload)
             resp.raise_for_status()
-        return resp.json().get("response", "")
+        return resp.json().get("message", {}).get("content", "")
 
     # ── JSON parsing ──────────────────────────────────────────────────────────
 

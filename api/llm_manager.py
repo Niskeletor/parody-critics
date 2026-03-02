@@ -3,6 +3,7 @@
 Hybrid LLM system with local and cloud fallback for critic generation
 """
 import httpx
+import re
 import time
 import json
 from datetime import datetime
@@ -11,8 +12,15 @@ from typing import Dict, Any, Optional, List
 # Import our logging system
 from utils.logger import get_logger, LogTimer, log_exception
 from config import Config
+from model_profiles import get_profile
+from prompt_builder import build_messages
 
 logger = get_logger('llm_manager')
+
+
+def _strip_think_blocks(text: str) -> str:
+    """Remove <think>...</think> sections produced by reasoning models."""
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
 
 class CriticGenerationManager:
     """Manage LLM endpoints with fallback for critic generation"""
@@ -228,7 +236,6 @@ class CriticGenerationManager:
 
         self.generation_stats['character_stats'][character]['requests'] += 1
 
-        prompt = self._build_character_prompt(character, media_info)
         attempts = []
 
         logger.info(f"Starting critic generation - Character: {character}, Media: {media_info.get('title', 'Unknown')}")
@@ -237,12 +244,21 @@ class CriticGenerationManager:
             try:
                 logger.info(f"Attempting generation with {endpoint_name} ({endpoint_config['model']})")
 
+                profile = get_profile(endpoint_config["model"])
+                messages = self._build_messages(character, media_info, profile)
+
+                logger.info(
+                    f"[profile: {endpoint_config['model']} "
+                    f"think={profile.think} temp={profile.temperature}]"
+                )
+
                 start_time = time.time()
 
                 with LogTimer(logger, f"LLM generation ({endpoint_name})"):
                     result = await self._generate_with_endpoint(
                         endpoint_config,
-                        prompt
+                        messages,
+                        profile,
                     )
 
                 generation_time = time.time() - start_time
@@ -316,50 +332,73 @@ class CriticGenerationManager:
     async def _generate_with_endpoint(
         self,
         endpoint_config: Dict[str, Any],
-        prompt: str
+        messages: List[Dict[str, str]],
+        profile,
     ) -> Dict[str, Any]:
         """Generate using specific endpoint"""
 
         if endpoint_config["type"] == "ollama":
-            return await self._generate_ollama(
+            return await self._call_ollama_chat(
                 endpoint_config["url"],
                 endpoint_config["model"],
-                prompt
+                messages,
+                profile,
             )
         elif endpoint_config["type"] == "openai":
             return await self._generate_openai(
                 endpoint_config["model"],
-                prompt
+                messages,
             )
         else:
             raise ValueError(f"Unsupported endpoint type: {endpoint_config['type']}")
 
-    async def _generate_ollama(self, url: str, model: str, prompt: str) -> Dict[str, Any]:
-        """Generate using Ollama endpoint"""
+    async def _call_ollama_chat(
+        self, url: str, model: str, messages: List[Dict[str, str]], profile
+    ) -> Dict[str, Any]:
+        """Generate using Ollama /api/chat with profile-driven parameters."""
         timeout = getattr(self.config, 'LLM_TIMEOUT', 180)
 
-        logger.debug(f"Sending request to Ollama: {url} with model {model}")
+        logger.debug(f"Sending /api/chat request to Ollama: {url} model={model}")
+
+        payload = {
+            "model": model,
+            "messages": messages,
+            "stream": False,
+            "think": profile.think,
+            "options": {
+                "temperature": profile.temperature,
+                "num_predict": profile.num_predict,
+                "top_p": profile.top_p,
+                "top_k": profile.top_k,
+            },
+        }
 
         async with httpx.AsyncClient(timeout=timeout) as client:
-            payload = {
-                "model": model,
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "temperature": 0.8,
-                    "max_tokens": 500,
-                    "top_p": 0.9
-                }
-            }
-
             try:
-                response = await client.post(f"{url}/api/generate", json=payload)
+                response = await client.post(f"{url}/api/chat", json=payload)
                 response.raise_for_status()
 
                 result = response.json()
-                logger.debug(f"Ollama response received - Response length: {len(result.get('response', ''))}")
+                msg = result.get("message", {})
+                raw_content = msg.get("content", "")
 
-                return result
+                # deepseek-r1 with think=True can return empty content
+                # (all reasoning goes to message.thinking). Strip tags just in case.
+                if not raw_content.strip() and msg.get("thinking"):
+                    logger.warning(
+                        f"Empty content from {model} — falling back to message.thinking"
+                    )
+                    raw_content = msg["thinking"]
+
+                if profile.strip_think:
+                    raw_content = _strip_think_blocks(raw_content)
+
+                thinking_len = len(msg.get("thinking", ""))
+                logger.debug(
+                    f"Ollama chat response — len={len(raw_content)} thinking_len={thinking_len}"
+                )
+                # Normalise to the shape the rest of the code expects
+                return {"response": raw_content}
 
             except httpx.TimeoutException:
                 raise Exception(f"Ollama request timed out after {timeout}s")
@@ -368,131 +407,39 @@ class CriticGenerationManager:
             except Exception as e:
                 raise Exception(f"Ollama request failed: {str(e)}")
 
-    async def _generate_openai(self, model: str, prompt: str) -> Dict[str, Any]:
+    async def _generate_openai(self, model: str, messages: List[Dict[str, str]]) -> Dict[str, Any]:
         """Generate using OpenAI endpoint (future implementation)"""
-        # Future implementation for OpenAI API
         raise NotImplementedError("OpenAI integration not yet implemented")
 
-    def _build_character_prompt(self, character: str, media_info: Dict[str, Any]) -> str:
-        """Build character-specific prompt using structured personality fields + variation engine"""
-
+    def _build_messages(
+        self, character: str, media_info: Dict[str, Any], profile
+    ) -> List[Dict[str, str]]:
+        """Build chat messages for critic generation, delegating to prompt_builder."""
+        media_type = media_info.get("type", "movie")
+        type_label = "película" if media_type == "movie" else "serie"
         title = media_info.get("title", "Obra sin título")
         year = media_info.get("year", "Año desconocido")
-        media_type = media_info.get("type", "movie")
-        genres = media_info.get("genres", "Géneros desconocidos")
-        synopsis = media_info.get("synopsis", "Sin sinopsis disponible")
-        type_label = "película" if media_type == "movie" else "serie"
 
         character_data = self._get_character_from_db(character)
         logger.debug(f"Character '{character}' {'found' if character_data else 'NOT found'} in DB")
+
         if not character_data:
-            logger.warning(f"Character '{character}' not found in DB, using fallback prompt")
-            return f'Escribe una crítica de la {type_label} "{title}" ({year}) en máximo 150 palabras. Incluye una puntuación del 1 al 10 al inicio.'
+            logger.warning(f"Character '{character}' not found in DB, using fallback messages")
+            fallback = f'Escribe una crítica de la {type_label} "{title}" ({year}) en máximo 150 palabras. Incluye una puntuación del 1 al 10 al inicio.'
+            return [{"role": "user", "content": fallback}]
 
-        character_id = character_data.get('id', '')
-        emoji = character_data.get('emoji', '🎭')
-        description = character_data.get('description', '')
-        personality = character_data.get('personality', '')
+        character_id = character_data.get("id", "")
+        motifs = json.loads(character_data.get("motifs") or "[]")
+        catchphrases = json.loads(character_data.get("catchphrases") or "[]")
 
-        # Parse structured personality fields
-        motifs = json.loads(character_data.get('motifs') or '[]')
-        catchphrases = json.loads(character_data.get('catchphrases') or '[]')
-        avoid = json.loads(character_data.get('avoid') or '[]')
-        red_flags = json.loads(character_data.get('red_flags') or '[]')
-
-        # Identity block — who the character is and how they speak
-        if description:
-            identity = description
-        else:
-            identity = f"Eres {character} {emoji}. Arquetipo: {personality}."
-
-        # Variation pack — makes each critique feel different
         variation = self._select_variation_pack(character_id, motifs, catchphrases)
-
-        variation_lines = []
-        if variation['motifs']:
-            variation_lines.append(
-                f"Para esta crítica, enfoca tu análisis usando estos conceptos: {', '.join(variation['motifs'])}."
-            )
-        if variation['catchphrase']:
-            variation_lines.append(
-                f"Puedes usar esta frase si encaja: \"{variation['catchphrase']}\""
-            )
-        variation_block = "\n".join(variation_lines)
-
-        # Critic lens — what to avoid and what to call out
-        lens_lines = []
-        if avoid:
-            lens_lines.append(f"Evita: {'; '.join(avoid)}.")
-        if red_flags:
-            lens_lines.append(f"Lo que detestas (menciónalo si aparece en la obra): {'; '.join(red_flags)}.")
-        lens_block = "\n".join(lens_lines)
-
-        # Enriched context block (TMDB + Brave, cached in DB)
-        enriched_block = ""
-        raw_enriched = media_info.get("enriched_context")
-        if raw_enriched:
-            try:
-                ec = json.loads(raw_enriched) if isinstance(raw_enriched, str) else raw_enriched
-                parts = []
-                if ec.get("director"):
-                    parts.append(f"Director: {ec['director']}")
-                if ec.get("cast"):
-                    parts.append(f"Reparto: {', '.join(ec['cast'])}")
-                if ec.get("tagline"):
-                    parts.append(f"Tagline: \"{ec['tagline']}\"")
-                if ec.get("overview_full") and len(ec["overview_full"]) > len(synopsis):
-                    parts.append(f"Sinopsis completa: {ec['overview_full'][:500]}")
-                if ec.get("keywords"):
-                    parts.append(f"Keywords temáticas: {', '.join(ec['keywords'][:12])}")
-                if ec.get("social_snippets"):
-                    snips = "\n".join(f"- {s}" for s in ec["social_snippets"][:4])
-                    parts.append(f"Contexto crítico y social:\n{snips}")
-                if parts:
-                    enriched_block = "\n\nCONTEXTO ENRIQUECIDO:\n" + "\n".join(parts)
-            except Exception as e:
-                logger.warning(f"Could not parse enriched_context: {e}")
-
-        # Soul: loves and hates
-        loves = json.loads(character_data.get("loves") or "[]")
-        hates = json.loads(character_data.get("hates") or "[]")
-        soul_lines = []
-        if loves:
-            soul_lines.append(f"\nAMAS en el cine: {', '.join(loves[:8])}")
-        if hates:
-            soul_lines.append(f"DETESTAS en el cine: {', '.join(hates[:8])}")
-            soul_lines.append("Cuando detectas lo que odias, reacciona con intensidad genuina.")
-        soul_block = "\n".join(soul_lines)
-
-        prompt = f"""{identity}
-
-{variation_block}
-
-{lens_block}
-
-{soul_block}
-
-OBRA A CRITICAR:
-Título: "{title}" ({year})
-Tipo: {type_label.capitalize()}
-Géneros: {genres}
-Sinopsis: {synopsis}{enriched_block}
-
-INSTRUCCIONES:
-Escribe una crítica de máximo 150 palabras como {character} {emoji}.
-Empieza siempre con la puntuación numérica: por ejemplo 7/10 (pon tu número real del 1 al 10)
-Basa tu análisis en los datos reales de la obra que te hemos dado arriba.
-No inventes tramas, personajes ni elementos que no aparezcan en la sinopsis.
-Después analiza desde tu perspectiva y con tu tono auténtico.
-Sé directo y personal."""
+        messages = build_messages(character_data, media_info, profile, variation)
 
         logger.debug(
-            f"Prompt built for '{character}' — "
-            f"enriched={'yes' if enriched_block else 'no'}, "
-            f"soul={'yes' if soul_block.strip() else 'no'}, "
-            f"len={len(prompt)}"
+            f"Messages built for '{character}' — "
+            f"think={profile.think}, system_in_user={profile.system_in_user}"
         )
-        return prompt
+        return messages
 
     def parse_critic_response(self, raw_response: str, character: str, media_info: Dict[str, Any]) -> Dict[str, Any]:
         """Parse LLM response to extract structured critic data"""
