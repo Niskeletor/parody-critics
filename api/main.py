@@ -19,7 +19,7 @@ from datetime import datetime
 
 from models.schemas import (
     CriticsResponse, CriticResponse, MediaInfo, CharacterInfo,
-    StatsResponse, MediaType, SyncLogEntry
+    StatsResponse, MediaType, SyncLogEntry, ErrorResponse, PaginatedMediaResponse
 )
 from config import get_config
 from api.jellyfin_sync import JellyfinSyncManager
@@ -463,26 +463,23 @@ async def get_characters(active_only: bool = Query(True, description="Only retur
 
     return characters
 
-@app.get("/api/media", response_model=List[MediaInfo])
+@app.get("/api/media", response_model=PaginatedMediaResponse)
 async def get_media(
     type: Optional[MediaType] = Query(None, description="Filter by media type"),
-    limit: int = Query(50, le=200, description="Limit results"),
-    offset: int = Query(0, description="Offset for pagination"),
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(50, ge=1, le=200, description="Items per page"),
     has_critics: Optional[bool] = Query(None, description="Filter by critic availability"),
     start_letter: Optional[str] = Query(None, description="Filter by starting letter")
 ):
-    """Get media list"""
+    """Get paginated media list"""
 
-    base_query = """
-        SELECT m.*,
-               COUNT(c.id) as critics_count,
-               CASE WHEN COUNT(c.id) > 0 THEN 1 ELSE 0 END as has_critics
+    base_conditions = """
         FROM media m
         LEFT JOIN critics c ON m.id = c.media_id
     """
 
     conditions = []
-    params = []
+    params: list = []
 
     if type:
         conditions.append("m.type = ?")
@@ -490,39 +487,59 @@ async def get_media(
 
     if start_letter:
         if start_letter == '0-9':
-            # Filter for titles starting with numbers or special characters
             conditions.append("SUBSTR(UPPER(m.title), 1, 1) GLOB '[0-9]*'")
         else:
-            # Filter for titles starting with specific letter
             conditions.append("UPPER(m.title) LIKE ?")
             params.append(f"{start_letter.upper()}%")
 
-    if conditions:
-        base_query += " WHERE " + " AND ".join(conditions)
+    where_clause = (" WHERE " + " AND ".join(conditions)) if conditions else ""
+    having_clause = f" HAVING has_critics = {1 if has_critics else 0}" if has_critics is not None else ""
 
-    base_query += " GROUP BY m.id"
+    # Count total matching rows
+    count_query = f"SELECT COUNT(DISTINCT m.id) {base_conditions}{where_clause}"
+    if having_clause:
+        count_query = f"""
+            SELECT COUNT(*) FROM (
+                SELECT m.id, COUNT(c.id) as critics_count,
+                       CASE WHEN COUNT(c.id) > 0 THEN 1 ELSE 0 END as has_critics
+                {base_conditions}{where_clause}
+                GROUP BY m.id{having_clause}
+            )
+        """
+    total = db_manager.execute_query(count_query, tuple(params))[0][0]
 
-    if has_critics is not None:
-        base_query += f" HAVING has_critics = {1 if has_critics else 0}"
-
-    base_query += " ORDER BY m.created_at DESC LIMIT ? OFFSET ?"
-    params.extend([limit, offset])
-
-    rows = db_manager.execute_query(base_query, tuple(params))
+    # Fetch page
+    offset = (page - 1) * page_size
+    data_query = f"""
+        SELECT m.*,
+               COUNT(c.id) as critics_count,
+               CASE WHEN COUNT(c.id) > 0 THEN 1 ELSE 0 END as has_critics
+        {base_conditions}{where_clause}
+        GROUP BY m.id{having_clause}
+        ORDER BY m.created_at DESC LIMIT ? OFFSET ?
+    """
+    rows = db_manager.execute_query(data_query, tuple(params) + (page_size, offset))
 
     media_list = []
     for row in rows:
         row_dict = dict(row)
-        # Parse genres JSON
         if row_dict.get('genres'):
             try:
                 row_dict['genres'] = json.loads(row_dict['genres'])
             except json.JSONDecodeError:
                 row_dict['genres'] = []
-
         media_list.append(MediaInfo(**row_dict))
 
-    return media_list
+    pages = max(1, (total + page_size - 1) // page_size)
+    return PaginatedMediaResponse(
+        items=media_list,
+        total=total,
+        page=page,
+        page_size=page_size,
+        pages=pages,
+        has_next=page < pages,
+        has_prev=page > 1,
+    )
 
 @app.get("/api/media/search", response_model=List[MediaInfo])
 async def search_media(
@@ -604,7 +621,8 @@ async def search_media(
 
     return media_list
 
-@app.get("/api/sync-logs", response_model=List[SyncLogEntry])
+@app.get("/api/sync/logs", response_model=List[SyncLogEntry])
+@app.get("/api/sync-logs", response_model=List[SyncLogEntry], include_in_schema=False)
 async def get_sync_logs(limit: int = Query(10, le=100, description="Limit results")):
     """Get recent sync operation logs"""
 
@@ -1360,7 +1378,10 @@ def _check_port_status() -> Dict[str, Any]:
 async def not_found_handler(request, exc):
     return JSONResponse(
         status_code=404,
-        content={"error": "Not found", "detail": str(exc.detail) if hasattr(exc, 'detail') else "Resource not found"}
+        content=ErrorResponse(
+            error="NotFound",
+            message=str(exc.detail) if hasattr(exc, "detail") else "Resource not found",
+        ).model_dump(),
     )
 
 # ========================================
@@ -2546,7 +2567,10 @@ async def regen_field(body: dict = Body(...)):
 async def internal_error_handler(request, exc):
     return JSONResponse(
         status_code=500,
-        content={"error": "Internal server error", "detail": "An unexpected error occurred"}
+        content=ErrorResponse(
+            error="InternalServerError",
+            message="An unexpected error occurred",
+        ).model_dump(),
     )
 
 if __name__ == "__main__":

@@ -349,13 +349,15 @@ class ParodyCriticsApp {
       this.mediaState.currentFilters.type = typeFilter;
       this.mediaState.currentFilters.critics = criticsFilter;
 
-      let url = `/media?limit=${this.mediaState.limit}&offset=${this.mediaState.currentOffset}`;
+      const page = Math.floor(this.mediaState.currentOffset / this.mediaState.limit) + 1;
+      let url = `/media?page=${page}&page_size=${this.mediaState.limit}`;
       if (typeFilter) url += `&type=${typeFilter}`;
       if (criticsFilter) url += `&has_critics=${criticsFilter}`;
       if (this.mediaState.currentFilters.letter)
         url += `&start_letter=${this.mediaState.currentFilters.letter}`;
 
-      const newMedia = await this.fetchAPI(url);
+      const response = await this.fetchAPI(url);
+      const newMedia = response.items ?? response; // backwards compat
 
       if (newMedia.length === 0) {
         this.mediaState.hasMore = false;
@@ -366,11 +368,7 @@ class ParodyCriticsApp {
         // Add new media to current data
         this.mediaState.currentData = [...this.mediaState.currentData, ...newMedia];
         this.mediaState.currentOffset += newMedia.length;
-
-        // If we got less than the limit, we've reached the end
-        if (newMedia.length < this.mediaState.limit) {
-          this.mediaState.hasMore = false;
-        }
+        this.mediaState.hasMore = response.has_next ?? newMedia.length >= this.mediaState.limit;
 
         this.renderMediaGrid(this.mediaState.currentData);
 

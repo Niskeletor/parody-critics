@@ -100,6 +100,22 @@ class SyncLogEntry(BaseModel):
     status: SyncStatus
     error_message: Optional[str]
 
+class ErrorResponse(BaseModel):
+    """Standard error response for all API errors"""
+    error: str
+    message: str
+    details: Optional[Dict] = None
+
+class PaginatedMediaResponse(BaseModel):
+    """Paginated media list with metadata"""
+    items: List["MediaInfo"]
+    total: int
+    page: int
+    page_size: int
+    pages: int
+    has_next: bool
+    has_prev: bool
+
 class GenerationRequest(BaseModel):
     """Request to generate critics for specific media"""
     tmdb_id: Optional[str] = None
