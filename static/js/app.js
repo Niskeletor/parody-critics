@@ -738,7 +738,8 @@ class ParodyCriticsApp {
 
     try {
       // Get all media with critics
-      const media = await this.fetchAPI('/media?has_critics=true&limit=20');
+      const response = await this.fetchAPI('/media?has_critics=true&page_size=20');
+      const media = response.items ?? response;
 
       if (!media || media.length === 0) {
         criticsList.innerHTML = '<div class="loading">📝 No critics found yet</div>';
