@@ -3061,9 +3061,14 @@ class ParodyCriticsApp {
     const importModal = document.getElementById('import-modal');
     const importModalClose = document.getElementById('import-modal-close');
     const importForm = document.getElementById('import-form');
+    const importCancelBtn = document.getElementById('import-cancel-btn');
 
     if (importModalClose) {
       importModalClose.addEventListener('click', () => this.closeImportModal());
+    }
+
+    if (importCancelBtn) {
+      importCancelBtn.addEventListener('click', () => this.closeImportModal());
     }
 
     if (importModal) {
@@ -3851,11 +3856,11 @@ class ParodyCriticsApp {
     const modal = document.getElementById('import-modal');
     if (modal) {
       modal.classList.add('hidden');
-      // Reset form
       const form = document.getElementById('import-form');
       if (form) form.reset();
+      const msg = document.getElementById('import-validation-msg');
+      if (msg) msg.classList.add('hidden');
     }
-    console.log('🚪 Import modal closed');
   }
 
   // Handle import form submit
@@ -3866,30 +3871,77 @@ class ParodyCriticsApp {
     const formData = new FormData(form);
     const file = formData.get('file');
     const overwrite = formData.get('overwrite') === 'on';
+    const validationMsg = document.getElementById('import-validation-msg');
 
-    if (!file) {
-      this.showError('Por favor selecciona un archivo');
+    const showValidationError = (msg) => {
+      if (validationMsg) {
+        validationMsg.textContent = msg;
+        validationMsg.style.background = '#fee2e2';
+        validationMsg.style.color = '#dc2626';
+        validationMsg.classList.remove('hidden');
+      }
+    };
+
+    const hideValidation = () => {
+      if (validationMsg) validationMsg.classList.add('hidden');
+    };
+
+    hideValidation();
+
+    if (!file || file.size === 0) {
+      showValidationError('Por favor selecciona un archivo.');
       return;
     }
 
-    // Validate file type
-    if (!file.name.endsWith('.md') && !file.name.endsWith('.json')) {
-      this.showError('Solo se admiten archivos .md (Markdown) o .json');
+    // Only .json allowed
+    if (!file.name.endsWith('.json')) {
+      showValidationError('Solo se admiten archivos .json');
+      return;
+    }
+
+    // Max 1MB sanity check
+    if (file.size > 1024 * 1024) {
+      showValidationError('El archivo es demasiado grande (máx. 1MB).');
+      return;
+    }
+
+    let fileContent;
+    try {
+      fileContent = await this.readFileAsText(file);
+    } catch {
+      showValidationError('No se pudo leer el archivo.');
+      return;
+    }
+
+    // Validate JSON structure before sending
+    let parsed;
+    try {
+      parsed = JSON.parse(fileContent);
+    } catch {
+      showValidationError('El archivo no es JSON válido.');
+      return;
+    }
+
+    const characters = Array.isArray(parsed) ? parsed : [parsed];
+    if (characters.length === 0) {
+      showValidationError('El archivo no contiene personajes.');
+      return;
+    }
+    const missing = characters.filter((c) => !c.name);
+    if (missing.length > 0) {
+      showValidationError(
+        `${missing.length} personaje(s) sin campo "name" — todos los personajes deben tener nombre.`
+      );
       return;
     }
 
     try {
       const submitBtn = form.querySelector('button[type="submit"]');
-      const originalText = submitBtn.textContent;
-      submitBtn.textContent = '⏳ Importando...';
+      submitBtn.textContent = `⏳ Importando ${characters.length} personaje(s)...`;
       submitBtn.disabled = true;
 
-      // Read file content
-      const fileContent = await this.readFileAsText(file);
+      console.log(`📁 Importing ${characters.length} character(s) from ${file.name}`);
 
-      console.log('📁 Importing characters from file:', file.name);
-
-      // Send to API
       const result = await this.fetchAPI('/characters/import', 'POST', {
         filename: file.name,
         content: fileContent,
@@ -3897,18 +3949,19 @@ class ParodyCriticsApp {
       });
 
       if (result.success) {
-        this.showMessage(
-          `Importación exitosa: ${result.imported || 0} personajes importados`,
-          'success'
-        );
+        let msg = `Importación exitosa: ${result.imported || 0} personaje(s) importado(s)`;
+        if (result.errors && result.errors.length > 0) {
+          msg += ` (${result.errors.length} omitido(s))`;
+        }
+        this.showMessage(msg, 'success');
         this.closeImportModal();
-        await this.renderCharactersGrid(); // Refresh the grid
+        await this.renderCharactersGrid();
       } else {
         throw new Error(result.error || 'Error en la importación');
       }
     } catch (error) {
       console.error('❌ Error importing characters:', error);
-      this.showError('Error importando personajes: ' + error.message);
+      showValidationError('Error importando personajes: ' + error.message);
     } finally {
       const submitBtn = form.querySelector('button[type="submit"]');
       if (submitBtn) {

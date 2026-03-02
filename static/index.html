@@ -680,35 +680,33 @@
           <button class="modal-close" id="import-modal-close">&times;</button>
         </div>
         <div class="modal-body">
-          <div class="import-options">
-            <h4>Opciones de importación:</h4>
-
-            <div class="import-method">
-              <h5>📄 Desde archivo Markdown</h5>
-              <p>Sube un archivo .md con la definición de personajes</p>
-              <input type="file" id="import-file" accept=".md,.txt" multiple />
-              <button class="btn-primary" id="import-file-btn">📁 Cargar Archivo(s)</button>
+          <form id="import-form">
+            <div class="form-group">
+              <label for="import-file">Archivo JSON</label>
+              <input type="file" name="file" id="import-file" accept=".json" required />
+              <p class="field-hint">
+                Solo archivos <strong>.json</strong>. Puede contener uno o varios personajes.
+              </p>
             </div>
-
-            <div class="import-method">
-              <h5>✍️ Pegar texto directo</h5>
-              <textarea
-                id="import-text"
-                rows="8"
-                placeholder="Pega aquí el contenido Markdown con definiciones de personajes..."
-              ></textarea>
-              <button class="btn-primary" id="import-text-btn">📝 Procesar Texto</button>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" name="overwrite" id="import-overwrite" />
+                Sobreescribir personajes existentes (por nombre)
+              </label>
             </div>
-          </div>
-
-          <div class="import-preview hidden" id="import-preview">
-            <h4>👀 Vista previa de personajes a importar:</h4>
-            <div class="preview-list" id="preview-list"></div>
-            <div class="import-actions">
-              <button class="btn-secondary" id="import-cancel-btn">Cancelar</button>
-              <button class="btn-primary" id="import-confirm-btn">✅ Confirmar Importación</button>
+            <div
+              id="import-validation-msg"
+              class="hidden"
+              style="margin-top: 8px; padding: 8px; border-radius: 6px; font-size: 0.9em"
+            ></div>
+            <div
+              class="modal-footer"
+              style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end"
+            >
+              <button type="button" class="btn-secondary" id="import-cancel-btn">Cancelar</button>
+              <button type="submit" class="btn-primary">📁 Importar</button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
