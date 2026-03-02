@@ -12,8 +12,12 @@ from typing import Dict, Any, Optional, List
 # Import our logging system
 from utils.logger import get_logger, LogTimer, log_exception
 from config import Config
-from model_profiles import get_profile
-from prompt_builder import build_messages
+try:
+    from model_profiles import get_profile  # noqa: E402
+    from prompt_builder import build_messages  # noqa: E402
+except ImportError:
+    from api.model_profiles import get_profile  # noqa: E402
+    from api.prompt_builder import build_messages  # noqa: E402
 
 logger = get_logger('llm_manager')
 

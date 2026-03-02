@@ -5,7 +5,10 @@ Knows WHAT to say (content); ModelProfile knows HOW to call the model.
 import json
 from typing import Any
 
-from model_profiles import ModelProfile
+try:
+    from model_profiles import ModelProfile  # noqa: E402
+except ImportError:
+    from api.model_profiles import ModelProfile  # noqa: E402
 from utils.logger import get_logger
 
 logger = get_logger("prompt_builder")

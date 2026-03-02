@@ -11,7 +11,10 @@ import httpx
 
 from utils.logger import get_logger
 from config import Config
-from model_profiles import get_profile
+try:
+    from model_profiles import get_profile  # noqa: E402
+except ImportError:
+    from api.model_profiles import get_profile  # noqa: E402
 
 logger = get_logger("soul_generator")
 

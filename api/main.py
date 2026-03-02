@@ -2225,11 +2225,19 @@ async def import_characters(import_data: dict = Body(...)):
                             errors.append(f"Character '{char_data.get('name')}' already exists (skipped)")
                             continue
 
+                        def _to_json_str(val):
+                            if isinstance(val, list):
+                                return json.dumps(val, ensure_ascii=False)
+                            return val if isinstance(val, str) else "[]"
+
                         if existing and overwrite:
                             # Update existing character
                             update_query = """
                                 UPDATE characters
-                                SET emoji = ?, personality = ?, description = ?, color = ?, border_color = ?, accent_color = ?
+                                SET emoji = ?, personality = ?, description = ?,
+                                    color = ?, border_color = ?, accent_color = ?,
+                                    loves = ?, hates = ?, motifs = ?,
+                                    catchphrases = ?, avoid = ?, red_flags = ?
                                 WHERE name = ?
                             """
                             db_manager.execute_query(update_query, (
@@ -2239,13 +2247,23 @@ async def import_characters(import_data: dict = Body(...)):
                                 char_data.get('color', '#6366f1'),
                                 char_data.get('border_color', '#4f46e5'),
                                 char_data.get('accent_color', '#8b5cf6'),
+                                _to_json_str(char_data.get('loves', [])),
+                                _to_json_str(char_data.get('hates', [])),
+                                _to_json_str(char_data.get('motifs', [])),
+                                _to_json_str(char_data.get('catchphrases', [])),
+                                _to_json_str(char_data.get('avoid', [])),
+                                _to_json_str(char_data.get('red_flags', [])),
                                 char_data['name']
                             ))
                         else:
                             # Insert new character
                             insert_query = """
-                                INSERT INTO characters (name, emoji, personality, description, color, border_color, accent_color, active)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, TRUE)
+                                INSERT INTO characters (
+                                    name, emoji, personality, description,
+                                    color, border_color, accent_color,
+                                    loves, hates, motifs, catchphrases, avoid, red_flags,
+                                    active
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE)
                             """
                             db_manager.execute_insert(insert_query, (
                                 char_data['name'],
@@ -2254,7 +2272,13 @@ async def import_characters(import_data: dict = Body(...)):
                                 char_data.get('description', ''),
                                 char_data.get('color', '#6366f1'),
                                 char_data.get('border_color', '#4f46e5'),
-                                char_data.get('accent_color', '#8b5cf6')
+                                char_data.get('accent_color', '#8b5cf6'),
+                                _to_json_str(char_data.get('loves', [])),
+                                _to_json_str(char_data.get('hates', [])),
+                                _to_json_str(char_data.get('motifs', [])),
+                                _to_json_str(char_data.get('catchphrases', [])),
+                                _to_json_str(char_data.get('avoid', [])),
+                                _to_json_str(char_data.get('red_flags', [])),
                             ))
 
                         imported_count += 1
@@ -2415,58 +2439,34 @@ async def import_characters(import_data: dict = Body(...)):
 
 @app.get("/api/characters/export")
 async def export_characters():
-    """Export all characters to Markdown format"""
+    """Export all active characters to JSON with full soul data (round-trip safe)."""
     try:
-        # Get all characters
         query = "SELECT * FROM characters WHERE active = TRUE ORDER BY name"
         characters = db_manager.execute_query(query)
 
         if not characters:
-            return {
-                "success": True,
-                "data": "# Personajes\n\nNo hay personajes disponibles para exportar.\n",
-                "filename": "personajes.md"
-            }
+            return {"success": True, "data": "[]", "filename": "personajes.json"}
 
-        # Generate Markdown content
-        md_content = "# 🎭 Personajes de Parody Critics\n\n"
-        md_content += f"Exportado el: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
-        md_content += f"Total de personajes: {len(characters)}\n\n"
-        md_content += "---\n\n"
-
+        list_fields = ["loves", "hates", "motifs", "catchphrases", "avoid", "red_flags"]
+        export_list = []
         for char in characters:
             char_dict = dict(char)
-            md_content += f"## {char_dict['name']}\n\n"
-            md_content += f"**Emoji:** {char_dict.get('emoji', '🎭')}\n\n"
-            md_content += f"**Personalidad:** {char_dict.get('personality', 'No especificada')}\n\n"
+            # Deserialize JSON array fields so the export is human-readable
+            for field in list_fields:
+                raw = char_dict.get(field) or "[]"
+                try:
+                    char_dict[field] = json.loads(raw) if isinstance(raw, str) else raw
+                except Exception:
+                    char_dict[field] = []
+            # Drop fields that are internal / not useful for reimport
+            char_dict.pop("prompt_template", None)
+            export_list.append(char_dict)
 
-            description = char_dict.get('description', 'Sin descripción disponible')
-            md_content += f"**Descripción:**\n{description}\n\n"
-
-            # Get character stats
-            stats_query = """
-                SELECT COUNT(*) as total_critics,
-                       AVG(rating) as avg_rating
-                FROM critics
-                WHERE character_id = ?
-            """
-            stats = db_manager.execute_query(stats_query, (char_dict['id'],), fetch_one=True)
-
-            if stats and stats[0] > 0:
-                md_content += "**Estadísticas:**\n"
-                md_content += f"- Críticas escritas: {stats[0]}\n"
-                md_content += f"- Rating promedio: {stats[1]:.1f}/10\n\n"
-            else:
-                md_content += "**Estadísticas:** Sin críticas escritas aún\n\n"
-
-            md_content += "---\n\n"
-
-        filename = f"personajes_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
-
+        filename = f"personajes_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         return {
             "success": True,
-            "data": md_content,
-            "filename": filename
+            "data": json.dumps(export_list, ensure_ascii=False, indent=2),
+            "filename": filename,
         }
 
     except Exception as e:

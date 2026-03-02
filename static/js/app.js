@@ -3937,7 +3937,7 @@ class ParodyCriticsApp {
 
       if (result.success && result.data) {
         // Create and download file
-        const blob = new Blob([result.data], { type: 'text/markdown' });
+        const blob = new Blob([result.data], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
 
         const a = document.createElement('a');
