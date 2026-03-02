@@ -29,11 +29,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar código fuente
 COPY . .
 
-# Crear directorio para base de datos
+# Crear directorio para base de datos (la DB se inicializa en runtime o se monta via volumen)
 RUN mkdir -p /app/data
-
-# Copiar base de datos existente
-COPY database/critics.db /app/data/critics.db
 
 # Crear usuario no-root para seguridad
 RUN adduser --disabled-password --gecos '' appuser && \
