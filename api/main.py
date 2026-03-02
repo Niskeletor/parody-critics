@@ -1,5 +1,32 @@
 """
 FastAPI server for Parody Critics API
+
+Endpoint groups:
+  /                          Frontend SPA (static/index.html)
+  /api/stats                 Global stats summary
+
+  /api/critics/{tmdb_id}     GET critics for a media item (used by Jellyfin plugin)
+  /api/generate/critic/...   POST generate one critic via LLM
+  /api/generate/batch        POST batch generation (multiple media)
+  /api/generate/cart-batch   POST generate for a selection cart
+  /api/critics/...           DELETE critics (single, batch, all for media)
+
+  /api/characters            CRUD + import/export + soul wizard
+  /api/characters/generate-soul   POST full soul pipeline (DDG + LLM)
+  /api/characters/regen-field     POST regenerate one soul field
+
+  /api/media                 Paginated media list with critic coverage
+  /api/media/search          Search by title
+  /api/media/import/...      WebSocket-backed import from Jellyfin
+
+  /api/sync/...              Jellyfin sync (start, cancel, progress, logs, stats)
+  /api/enrich/...            TMDB + Brave enrichment (single, all, cancel, status)
+
+  /api/llm/status            LLM endpoint health
+  /api/llm/test              Test a single LLM call
+  /api/setup/...             First-run wizard (check-requirements, test-*, save-configuration)
+
+  /ws/import-progress/{id}   WebSocket: real-time import progress
 """
 
 from fastapi import FastAPI, HTTPException, Query, BackgroundTasks, Body, WebSocket, WebSocketDisconnect

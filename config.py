@@ -30,9 +30,10 @@ class Config:
     SYNC_MAX_CONCURRENT = int(os.getenv('SYNC_MAX_CONCURRENT', '5'))
 
     # CORS Settings
+    # Override or extend via PARODY_CRITICS_CORS_ORIGINS=http://host1,http://host2
     CORS_ORIGINS = [
         "http://localhost:8096",
-        "http://192.168.45.181:8096",
+        "http://192.168.45.181:8096",  # DUNE — change for your network
         "http://127.0.0.1:8096",
         # Testing origins
         "http://localhost:3000",
@@ -58,7 +59,8 @@ class Config:
     LLM_PRIMARY_MODEL = os.getenv('LLM_PRIMARY_MODEL', 'mistral-small3.1:24b')
     LLM_SECONDARY_MODEL = os.getenv('LLM_SECONDARY_MODEL', 'type32/eva-qwen-2.5-14b:latest')
 
-    # Future cloud endpoints
+    # Cloud LLM endpoints — NOT IMPLEMENTED (Phase 1 roadmap)
+    # Defined here so the .env keys are recognised; wiring is in llm_manager.py
     LLM_OPENAI_API_KEY = os.getenv('LLM_OPENAI_API_KEY', '')
     LLM_ANTHROPIC_API_KEY = os.getenv('LLM_ANTHROPIC_API_KEY', '')
 
