@@ -49,6 +49,9 @@ build/
 *.tmp
 *.temp
 
+# Internal docs (SAL-9000 + Niskeletor only)
+docs/internal/
+
 # API keys and secrets
 config/secrets.json
 *.key
