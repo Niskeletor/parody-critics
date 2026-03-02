@@ -76,6 +76,23 @@ PROFILES: dict[str, ModelProfile] = {
     "richardyoung/qwen3-14b-abliterated:latest": ModelProfile(
         think=False, temperature=0.65, num_predict=2000, system_in_user=False
     ),
+    # mis-firefly-22b — 22B Mistral fine-tune, 13GB GGUF
+    # BENCHMARKED: leaks system prompt artifacts ([/INST], examples), flat calibration
+    # DESCARTADO — kept so it works if manually selected
+    "mis-firefly-22b:latest": ModelProfile(
+        think=False, temperature=0.75, num_predict=800, system_in_user=False
+    ),
+    # eva-qwen-2.5-14b by type32 — RP/uncensored fine-tune of Qwen2.5-14B
+    # TOP 1 benchmark: 32/32 OK, ~8s/crítica, 7GB VRAM — best speed/quality balance
+    "type32/eva-qwen-2.5-14b:latest": ModelProfile(
+        think=False, temperature=0.75, num_predict=800, system_in_user=False
+    ),
+    # dolphin3 — uncensored Llama3 fine-tune, 4GB, fast (~7s)
+    # BENCHMARKED: 28/32 OK but calibration flat (all 7/10) — DESCARTADO for production
+    # Profile kept so it works if manually selected
+    "dolphin3:latest": ModelProfile(
+        think=False, temperature=0.75, num_predict=600, system_in_user=False
+    ),
     # parody-deepseek: based on deepseek-r1, think=False to guarantee content output
     "parody-deepseek": ModelProfile(
         think=False, temperature=0.65, num_predict=800, system_in_user=True
