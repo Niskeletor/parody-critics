@@ -37,9 +37,6 @@ PROFILES: dict[str, ModelProfile] = {
         think=False, temperature=0.75, num_predict=600, system_in_user=False
     ),
     # parody-* custom Modelfiles (phi4 base, good params baked in)
-    "parody-phi4": ModelProfile(
-        think=False, temperature=0.70, num_predict=600, system_in_user=False
-    ),
     "parody-phi4:latest": ModelProfile(
         think=False, temperature=0.70, num_predict=600, system_in_user=False
     ),
@@ -94,9 +91,6 @@ PROFILES: dict[str, ModelProfile] = {
         think=False, temperature=0.75, num_predict=600, system_in_user=False
     ),
     # parody-deepseek: based on deepseek-r1, think=False to guarantee content output
-    "parody-deepseek": ModelProfile(
-        think=False, temperature=0.65, num_predict=800, system_in_user=True
-    ),
     "parody-deepseek:latest": ModelProfile(
         think=False, temperature=0.65, num_predict=800, system_in_user=True
     ),
@@ -107,6 +101,10 @@ def get_profile(model_name: str) -> ModelProfile:
     """Return profile for model_name. Falls back to heuristic for unknown models."""
     if model_name in PROFILES:
         return PROFILES[model_name]
+    # Try with :latest suffix (Ollama adds it when tag is omitted in config)
+    with_tag = model_name if ":" in model_name else f"{model_name}:latest"
+    if with_tag in PROFILES:
+        return PROFILES[with_tag]
 
     # Heuristic for unknown/custom models
     name = model_name.lower()

@@ -114,16 +114,21 @@ class SoulGenerator:
         # Words from the name we'll use for relevance filtering (skip very short words)
         name_tokens = {w.lower() for w in real_name.split() if len(w) > 2}
 
-        all_snippets: list[str] = []
-        for q in queries:
+        async def _run_query(q: str) -> list[str]:
             try:
                 results = await asyncio.to_thread(self._ddg_search, q, 5)
+                snippets = []
                 for r in results:
                     body = r.get("body", "").strip()
                     if body and len(body) > 40:
-                        all_snippets.append(body[:300])
+                        snippets.append(body[:300])
+                return snippets
             except Exception as e:
                 logger.warning(f"DDG query failed ({q!r}): {e}")
+                return []
+
+        batches = await asyncio.gather(*(_run_query(q) for q in queries))
+        all_snippets: list[str] = [s for batch in batches for s in batch]
 
         # Relevance filter: keep only snippets that mention at least one name token
         relevant = [s for s in all_snippets if any(t in s.lower() for t in name_tokens)]
@@ -311,10 +316,5 @@ Responde SOLO con: {{"{field}": <nuevo_valor>}}""".strip()
         # Post-process emoji
         if field == "emoji" and isinstance(value, str):
             value = value.strip()[:2]
-
-        # Enforce archetype if provided
-        if field == "personality" and "personality" in current_soul:
-            # Allow free regen of personality — caller decides
-            pass
 
         return value

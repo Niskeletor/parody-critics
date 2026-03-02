@@ -4,9 +4,11 @@ Hybrid LLM system with local and cloud fallback for critic generation
 """
 import asyncio
 import httpx
-import re
-import time
 import json
+import random
+import re
+import sqlite3
+import time
 from datetime import datetime
 from typing import Dict, Any, Optional, List
 
@@ -41,17 +43,6 @@ class CriticGenerationManager:
         self.config = Config()
         self.db_path = self.config.get_absolute_db_path()
         self.setup_endpoints()
-
-        # Statistics tracking
-        self.generation_stats = {
-            'total_requests': 0,
-            'successful_requests': 0,
-            'failed_requests': 0,
-            'total_tokens': 0,
-            'total_time': 0.0,
-            'character_stats': {}
-        }
-
         logger.info("CriticGenerationManager initialized successfully")
 
     def setup_endpoints(self):
@@ -61,106 +52,68 @@ class CriticGenerationManager:
                 "url": self.config.LLM_OLLAMA_URL,
                 "model": self.config.LLM_PRIMARY_MODEL,
                 "type": "ollama",
-                "priority": 1,  # Try first
-                "speed": "fast",
-                "cost": "free"
+                "priority": 1,
             },
             "ollama_secondary": {
                 "url": self.config.LLM_OLLAMA_URL,
                 "model": self.config.LLM_SECONDARY_MODEL,
                 "type": "ollama",
-                "priority": 2,  # Try second
-                "speed": "slower",
-                "cost": "free"
-            }
+                "priority": 2,
+            },
         }
-
-        # Future cloud endpoints
-        if hasattr(self.config, 'LLM_OPENAI_API_KEY') and self.config.LLM_OPENAI_API_KEY:
-            self.endpoints["openai_gpt4"] = {
-                "url": "https://api.openai.com/v1/chat/completions",
-                "model": "gpt-4",
-                "type": "openai",
-                "priority": 3,
-                "speed": "fast",
-                "cost": "paid"
-            }
-            logger.info("OpenAI endpoint configured")
-
         logger.info(f"Configured {len(self.endpoints)} LLM endpoints: {list(self.endpoints.keys())}")
 
     def _get_character_from_db(self, character_name: str) -> Optional[Dict[str, Any]]:
         """Get character data from database"""
-        import sqlite3
-
         try:
-            conn = sqlite3.connect(self.db_path)
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-
-            cursor.execute("""
-                SELECT id, name, emoji, personality, description,
-                       motifs, catchphrases, avoid, red_flags, loves, hates
-                FROM characters
-                WHERE name = ? AND active = TRUE
-            """, (character_name,))
-
-            row = cursor.fetchone()
-            conn.close()
-
-            if row:
-                return dict(row)
-            else:
-                return None
-
+            with sqlite3.connect(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
+                row = conn.execute("""
+                    SELECT id, name, emoji, personality, description,
+                           motifs, catchphrases, avoid, red_flags, loves, hates
+                    FROM characters
+                    WHERE name = ? AND active = TRUE
+                """, (character_name,)).fetchone()
+            return dict(row) if row else None
         except Exception as e:
             logger.error(f"Error getting character from database: {e}")
             return None
 
     def _get_recent_motifs(self, character_id: str, limit: int = 15) -> List[str]:
         """Get recently used motifs for a character (for anti-repetition)"""
-        import sqlite3
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT motif FROM character_motif_history
-                WHERE character_id = ?
-                ORDER BY used_at DESC
-                LIMIT ?
-            """, (character_id, limit))
-            result = [row[0] for row in cursor.fetchall()]
-            conn.close()
-            return result
+            with sqlite3.connect(self.db_path) as conn:
+                rows = conn.execute("""
+                    SELECT motif FROM character_motif_history
+                    WHERE character_id = ?
+                    ORDER BY used_at DESC
+                    LIMIT ?
+                """, (character_id, limit)).fetchall()
+            return [row[0] for row in rows]
         except Exception as e:
             logger.warning(f"Could not get recent motifs for {character_id}: {e}")
             return []
 
     def _record_motif_usage(self, character_id: str, motifs: List[str]):
         """Record used motifs and prune history to last 100 per character"""
-        import sqlite3
         if not motifs:
             return
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            for motif in motifs:
-                cursor.execute(
+            with sqlite3.connect(self.db_path) as conn:
+                conn.executemany(
                     "INSERT INTO character_motif_history (character_id, motif) VALUES (?, ?)",
-                    (character_id, motif)
+                    [(character_id, m) for m in motifs],
                 )
-            # Keep history lean — last 100 per character
-            cursor.execute("""
-                DELETE FROM character_motif_history
-                WHERE character_id = ? AND id NOT IN (
-                    SELECT id FROM character_motif_history
-                    WHERE character_id = ?
-                    ORDER BY used_at DESC
-                    LIMIT 100
-                )
-            """, (character_id, character_id))
-            conn.commit()
-            conn.close()
+                # Keep history lean — last 100 per character
+                conn.execute("""
+                    DELETE FROM character_motif_history
+                    WHERE character_id = ? AND id NOT IN (
+                        SELECT id FROM character_motif_history
+                        WHERE character_id = ?
+                        ORDER BY used_at DESC
+                        LIMIT 100
+                    )
+                """, (character_id, character_id))
         except Exception as e:
             logger.warning(f"Could not record motif usage for {character_id}: {e}")
 
@@ -168,7 +121,6 @@ class CriticGenerationManager:
         self, character_id: str, motifs: List[str], catchphrases: List[str]
     ) -> Dict[str, Any]:
         """Pick 2-3 motifs (avoiding recent) and optionally 1 catchphrase"""
-        import random
         if not motifs:
             return {"motifs": [], "catchphrase": None}
 
@@ -235,19 +187,6 @@ class CriticGenerationManager:
                 key=lambda x: x[1]["priority"]
             )
 
-        # Update stats
-        self.generation_stats['total_requests'] += 1
-
-        # Track character usage
-        if character not in self.generation_stats['character_stats']:
-            self.generation_stats['character_stats'][character] = {
-                'requests': 0,
-                'successful': 0,
-                'avg_time': 0.0
-            }
-
-        self.generation_stats['character_stats'][character]['requests'] += 1
-
         attempts = []
 
         logger.info(f"Starting critic generation - Character: {character}, Media: {media_info.get('title', 'Unknown')}")
@@ -282,16 +221,6 @@ class CriticGenerationManager:
                     "generation_time": generation_time,
                     "response": result["response"]
                 })
-
-                # Update success stats
-                self.generation_stats['successful_requests'] += 1
-                self.generation_stats['total_time'] += generation_time
-                self.generation_stats['character_stats'][character]['successful'] += 1
-
-                # Update character average time
-                char_stats = self.generation_stats['character_stats'][character]
-                if char_stats['successful'] > 0:
-                    char_stats['avg_time'] = ((char_stats['avg_time'] * (char_stats['successful'] - 1)) + generation_time) / char_stats['successful']
 
                 logger.info(f"✅ Generation successful with {endpoint_name} in {generation_time:.1f}s - Character: {character}")
 
@@ -361,8 +290,6 @@ class CriticGenerationManager:
                 break
 
         # All endpoints failed
-        self.generation_stats['failed_requests'] += 1
-
         error_summary = f"All {len(endpoints_to_try)} endpoints failed for character {character}"
         logger.error(f"🚨 {error_summary}")
 
@@ -390,13 +317,7 @@ class CriticGenerationManager:
                 messages,
                 profile,
             )
-        elif endpoint_config["type"] == "openai":
-            return await self._generate_openai(
-                endpoint_config["model"],
-                messages,
-            )
-        else:
-            raise ValueError(f"Unsupported endpoint type: {endpoint_config['type']}")
+        raise ValueError(f"Unsupported endpoint type: {endpoint_config['type']}")
 
     async def _call_ollama_chat(
         self, url: str, model: str, messages: List[Dict[str, str]], profile
@@ -487,10 +408,6 @@ class CriticGenerationManager:
             f"Could not connect to Ollama at {url} after {_CONNECT_RETRY_ATTEMPTS} attempts",
         ) from last_connect_error
 
-    async def _generate_openai(self, model: str, messages: List[Dict[str, str]]) -> Dict[str, Any]:
-        """Generate using OpenAI endpoint (future implementation)"""
-        raise NotImplementedError("OpenAI integration not yet implemented")
-
     def _build_messages(
         self, character: str, media_info: Dict[str, Any], profile
     ) -> List[Dict[str, str]]:
@@ -534,7 +451,6 @@ class CriticGenerationManager:
             r"^(\d{1,2})\s*[/\-]",       # line starting with number
         ]
 
-        import re
         for pattern in rating_patterns:
             match = re.search(pattern, raw_response, re.IGNORECASE | re.MULTILINE)
             if match:
