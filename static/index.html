@@ -26,12 +26,26 @@
             Parody Critics
           </h1>
           <nav class="nav">
-            <button class="nav-btn active" data-view="home">🏠 Inicio</button>
-            <button class="nav-btn" data-view="media">🎬 Películas & Series</button>
-            <button class="nav-btn" data-view="critics">📝 Críticas</button>
-            <button class="nav-btn" data-view="characters">🎭 Personajes</button>
-            <button class="nav-btn" data-view="status">📊 Sistema</button>
+            <button class="nav-btn active" data-view="home" data-i18n="nav.home">🏠 Inicio</button>
+            <button class="nav-btn" data-view="media" data-i18n="nav.media">
+              🎬 Películas & Series
+            </button>
+            <button class="nav-btn" data-view="critics" data-i18n="nav.critics">📝 Críticas</button>
+            <button class="nav-btn" data-view="characters" data-i18n="nav.characters">
+              🎭 Personajes
+            </button>
+            <button class="nav-btn" data-view="status" data-i18n="nav.status">📊 Sistema</button>
           </nav>
+          <div class="lang-selector-container">
+            <select
+              id="lang-selector"
+              class="lang-selector"
+              onchange="i18n.setLanguage(this.value)"
+            >
+              <option value="es">🌐 ES</option>
+              <option value="en">🌐 EN</option>
+            </select>
+          </div>
           <div class="cart-container">
             <button class="cart-btn" id="cart-btn">
               🛒 <span class="cart-count" id="cart-count">0</span>
@@ -47,27 +61,28 @@
         <!-- Home View -->
         <section class="view active" id="home-view">
           <div class="hero">
-            <h2 class="hero-title">Críticas Cinematográficas con IA</h2>
-            <p class="hero-subtitle">
-              Descubre cómo Marco Aurelio y Rosario Costras analizan tus películas y series
-              favoritas
+            <h2 class="hero-title" data-i18n="hero.title">Críticas Cinematográficas con IA</h2>
+            <p class="hero-subtitle" data-i18n="hero.subtitle">
+              Descubre cómo tus personajes favoritos analizan tus películas y series
             </p>
             <div class="hero-stats">
               <div class="stat-card">
                 <div class="stat-number" id="total-media">-</div>
-                <div class="stat-label">Películas & Series</div>
+                <div class="stat-label" data-i18n="hero.stat_media">Películas & Series</div>
               </div>
               <div class="stat-card">
                 <div class="stat-number" id="total-critics">-</div>
-                <div class="stat-label">Críticas Generadas</div>
+                <div class="stat-label" data-i18n="hero.stat_critics">Críticas Generadas</div>
               </div>
               <div class="stat-card">
                 <div class="stat-number" id="system-status">-</div>
-                <div class="stat-label">Estado del Sistema</div>
+                <div class="stat-label" data-i18n="hero.stat_status">Estado del Sistema</div>
               </div>
             </div>
             <div class="cta-buttons">
-              <button class="btn-primary" data-view="media">🎬 Explorar Películas</button>
+              <button class="btn-primary" data-view="media" data-i18n="hero.cta">
+                🎬 Explorar Películas
+              </button>
             </div>
           </div>
         </section>
@@ -78,22 +93,36 @@
             <h2>🎬 Películas & Series</h2>
             <div class="view-controls">
               <select class="filter-select" id="type-filter">
-                <option value="">Todos los tipos</option>
-                <option value="movie">Películas</option>
-                <option value="series">Series</option>
+                <option value="" data-i18n="media.filter_all_types">Todos los tipos</option>
+                <option value="movie" data-i18n="media.filter_movies">Películas</option>
+                <option value="series" data-i18n="media.filter_series">Series</option>
               </select>
               <select class="filter-select" id="critics-filter">
-                <option value="">Todos</option>
-                <option value="true">Con críticas</option>
-                <option value="false">Sin críticas</option>
+                <option value="" data-i18n="media.filter_all_critics">Todos</option>
+                <option value="true" data-i18n="media.filter_with_critics">Con críticas</option>
+                <option value="false" data-i18n="media.filter_without_critics">Sin críticas</option>
               </select>
-              <button class="btn-view-toggle" id="group-toggle" onclick="app.toggleGroupView()">
+              <button
+                class="btn-view-toggle"
+                id="group-toggle"
+                onclick="app.toggleGroupView()"
+                data-i18n="media.btn_grouped"
+              >
                 📚 Vista Agrupada
               </button>
-              <button class="btn-import" onclick="app.startMediaImport()">
+              <button
+                class="btn-import"
+                onclick="app.startMediaImport()"
+                data-i18n="media.btn_import"
+              >
                 📥 Importar Medios
               </button>
-              <button class="btn-enrich" id="enrich-btn" onclick="app.startEnrichAll()">
+              <button
+                class="btn-enrich"
+                id="enrich-btn"
+                onclick="app.startEnrichAll()"
+                data-i18n="media.btn_enrich"
+              >
                 🔍 Enriquecer Contexto
               </button>
             </div>
@@ -124,11 +153,21 @@
           <div class="view-header">
             <h2>🎭 Gestión de Personajes</h2>
             <div class="characters-actions">
-              <button class="btn-primary" id="add-character-btn">➕ Nuevo Personaje</button>
-              <button class="btn-secondary" id="import-characters-btn">
+              <button class="btn-primary" id="add-character-btn" data-i18n="characters.btn_new">
+                ➕ Nuevo Personaje
+              </button>
+              <button
+                class="btn-secondary"
+                id="import-characters-btn"
+                data-i18n="characters.btn_import"
+              >
                 📁 Importar Personajes
               </button>
-              <button class="btn-secondary" id="export-characters-btn">
+              <button
+                class="btn-secondary"
+                id="export-characters-btn"
+                data-i18n="characters.btn_export"
+              >
                 💾 Exportar Personajes
               </button>
             </div>
@@ -152,23 +191,23 @@
             <!-- System Health -->
             <div class="status-grid">
               <div class="status-card">
-                <h3>🏥 Salud del Sistema</h3>
+                <h3 data-i18n="status.health_card">🏥 Salud del Sistema</h3>
                 <div class="health-status" id="health-status">
-                  <div class="loading">Verificando...</div>
+                  <div class="loading" data-i18n="status.loading_health">Verificando...</div>
                 </div>
               </div>
 
               <!-- LLM Status -->
               <div class="status-card">
-                <h3>🤖 Estado de LLM</h3>
+                <h3 data-i18n="status.llm_card">🤖 Estado de LLM</h3>
                 <div class="llm-status" id="llm-status">
-                  <div class="loading">Verificando modelos...</div>
+                  <div class="loading" data-i18n="status.loading_llm">Verificando modelos...</div>
                 </div>
               </div>
 
               <!-- Database Stats -->
               <div class="status-card">
-                <h3>📊 Estadísticas de Base de Datos</h3>
+                <h3 data-i18n="status.db_card">📊 Estadísticas de Base de Datos</h3>
                 <div class="db-stats" id="db-stats">
                   <div class="loading">Cargando estadísticas...</div>
                 </div>
@@ -204,8 +243,10 @@
     <!-- Footer -->
     <footer class="footer">
       <div class="container">
-        <p>&copy; 2026 Parody Critics - Sistema de Críticas Paródicas con IA</p>
-        <p class="footer-tech">Powered by FastAPI + Qwen3:8b + GPT-OSS:20b</p>
+        <p data-i18n="footer.copyright">
+          &copy; 2026 Parody Critics - Sistema de Críticas Paródicas con IA
+        </p>
+        <p class="footer-tech" data-i18n="footer.powered">Powered by FastAPI + Ollama</p>
       </div>
     </footer>
 
@@ -214,19 +255,29 @@
     <div class="cart-panel hidden" id="cart-panel">
       <div class="cart-panel-content">
         <div class="cart-header">
-          <h3>🛒 Carrito de Críticas</h3>
+          <h3 data-i18n="cart.heading">🛒 Carrito de Críticas</h3>
           <button class="cart-close" onclick="app.closeCart()">&times;</button>
         </div>
         <div class="cart-body">
           <div class="cart-items" id="cart-items">
             <div class="empty-cart">
-              <p>🎬 Tu carrito está vacío</p>
-              <p>Selecciona películas y series para generar críticas</p>
+              <p data-i18n="cart.empty_line1">🎬 Tu carrito está vacío</p>
+              <p data-i18n="cart.empty_line2">
+                Selecciona películas y series para generar críticas
+              </p>
             </div>
           </div>
           <div class="cart-footer">
-            <div class="cart-total">Total: <span id="cart-total-count">0</span> elementos</div>
-            <button class="btn-primary cart-checkout" id="cart-checkout-btn" disabled>
+            <div class="cart-total">
+              <span data-i18n="cart.total">Total:</span> <span id="cart-total-count">0</span>
+              <span data-i18n="cart.items">elementos</span>
+            </div>
+            <button
+              class="btn-primary cart-checkout"
+              id="cart-checkout-btn"
+              disabled
+              data-i18n="cart.checkout_btn"
+            >
               ✨ Procesar Críticas
             </button>
           </div>
@@ -238,13 +289,15 @@
     <section class="view" id="checkout-view">
       <div class="checkout-container">
         <div class="checkout-header">
-          <h2>🎭 Checkout - Generar Críticas por Lotes</h2>
-          <button class="btn-back" onclick="app.showView('media')">← Volver a Películas</button>
+          <h2 data-i18n="checkout.heading">🎭 Checkout - Generar Críticas por Lotes</h2>
+          <button class="btn-back" onclick="app.showView('media')" data-i18n="checkout.btn_back">
+            ← Volver a Películas
+          </button>
         </div>
 
         <!-- Selected Media Summary -->
         <div class="checkout-section">
-          <h3>📽️ Contenido Seleccionado</h3>
+          <h3 data-i18n="checkout.section_media">📽️ Contenido Seleccionado</h3>
           <div class="selected-media-list" id="checkout-media-list">
             <!-- Selected media items will be shown here -->
           </div>
@@ -252,7 +305,7 @@
 
         <!-- Critic Selection -->
         <div class="checkout-section">
-          <h3>👥 Selecciona los Críticos</h3>
+          <h3 data-i18n="checkout.section_critics">👥 Selecciona los Críticos</h3>
           <div class="critics-selection" id="critics-selection">
             <!-- Critic checkboxes will be shown here -->
           </div>
@@ -266,6 +319,7 @@
               id="start-processing-btn"
               onclick="app.startBatchProcessing()"
               disabled
+              data-i18n="checkout.btn_start"
             >
               🚀 Iniciar Procesamiento
             </button>
@@ -273,6 +327,7 @@
               class="btn-secondary hidden"
               id="cancel-processing-btn"
               onclick="app.cancelBatchProcessing()"
+              data-i18n="checkout.btn_cancel"
             >
               ⏹️ Cancelar
             </button>
@@ -280,30 +335,51 @@
 
           <!-- Progress Section -->
           <div class="progress-section hidden" id="progress-section">
-            <h4>📊 Progreso del Procesamiento</h4>
+            <h4 data-i18n="checkout.progress_heading">📊 Progreso del Procesamiento</h4>
             <div class="progress-bar">
               <div class="progress-fill" id="progress-fill"></div>
               <div class="progress-text" id="progress-text">0%</div>
             </div>
             <div class="processing-details">
-              <div class="processing-status" id="processing-status">Preparando...</div>
+              <div class="processing-status" id="processing-status" data-i18n="checkout.preparing">
+                Preparando...
+              </div>
               <div class="processing-current" id="processing-current"></div>
               <div class="processing-stats">
-                <span class="stat">✅ Completadas: <span id="completed-count">0</span></span>
-                <span class="stat">❌ Errores: <span id="error-count">0</span></span>
-                <span class="stat">⏳ Restantes: <span id="remaining-count">0</span></span>
+                <span class="stat"
+                  ><span data-i18n="checkout.stat_completed">✅ Completadas:</span>
+                  <span id="completed-count">0</span></span
+                >
+                <span class="stat"
+                  ><span data-i18n="checkout.stat_errors">❌ Errores:</span>
+                  <span id="error-count">0</span></span
+                >
+                <span class="stat"
+                  ><span data-i18n="checkout.stat_remaining">⏳ Restantes:</span>
+                  <span id="remaining-count">0</span></span
+                >
               </div>
             </div>
           </div>
 
           <!-- Results Section -->
           <div class="results-section hidden" id="results-section">
-            <h4>🎉 Resultados del Procesamiento</h4>
+            <h4 data-i18n="checkout.results_heading">🎉 Resultados del Procesamiento</h4>
             <div class="results-summary" id="results-summary"></div>
             <div class="results-list" id="results-list"></div>
             <div class="results-actions">
-              <button class="btn-primary" onclick="app.resetCheckout()">🔄 Nueva Selección</button>
-              <button class="btn-secondary" onclick="app.showView('critics')">
+              <button
+                class="btn-primary"
+                onclick="app.resetCheckout()"
+                data-i18n="checkout.btn_new_selection"
+              >
+                🔄 Nueva Selección
+              </button>
+              <button
+                class="btn-secondary"
+                onclick="app.showView('critics')"
+                data-i18n="checkout.btn_view_critics"
+              >
                 📝 Ver Todas las Críticas
               </button>
             </div>
@@ -334,12 +410,15 @@
             <input type="hidden" id="character-id" name="id" />
 
             <div class="form-group">
-              <label for="character-name">Nombre del Personaje *</label>
+              <label for="character-name" data-i18n="modal.character.label_name"
+                >Nombre del Personaje *</label
+              >
               <input
                 type="text"
                 id="character-name"
                 name="name"
                 required
+                data-i18n-placeholder="modal.character.placeholder_name"
                 placeholder="Ej: Marco Aurelio"
               />
             </div>
@@ -373,12 +452,15 @@
             </div>
 
             <div class="form-group">
-              <label for="character-description">Descripción *</label>
+              <label for="character-description" data-i18n="modal.character.label_description"
+                >Descripción *</label
+              >
               <textarea
                 id="character-description"
                 name="description"
                 required
                 rows="3"
+                data-i18n-placeholder="modal.character.placeholder_description"
                 placeholder="Breve descripción del personaje y su estilo crítico..."
               ></textarea>
             </div>
@@ -394,22 +476,28 @@
             </div>
 
             <div class="form-group">
-              <label>❤️ Ama en el cine</label>
+              <label data-i18n="modal.character.label_loves">❤️ Ama en el cine</label>
               <input
                 type="text"
                 id="char-loves"
+                data-i18n-placeholder="modal.character.placeholder_loves"
                 placeholder="ej: filosofía estoica, dilemas morales, sacrificio..."
               />
-              <small>Temas, géneros y valores que este personaje adora (separados por comas)</small>
+              <small data-i18n="modal.character.hint_loves"
+                >Temas, géneros y valores que este personaje adora (separados por comas)</small
+              >
             </div>
             <div class="form-group">
-              <label>💢 Detesta en el cine</label>
+              <label data-i18n="modal.character.label_hates">💢 Detesta en el cine</label>
               <input
                 type="text"
                 id="char-hates"
+                data-i18n-placeholder="modal.character.placeholder_hates"
                 placeholder="ej: masculinidad tóxica, CGI sin alma, remakes..."
               />
-              <small>Lo que le hace reaccionar con intensidad (separados por comas)</small>
+              <small data-i18n="modal.character.hint_hates"
+                >Lo que le hace reaccionar con intensidad (separados por comas)</small
+              >
             </div>
 
             <div class="form-row">
@@ -430,10 +518,20 @@
             </div>
 
             <div class="form-actions">
-              <button type="button" class="btn-secondary" id="character-cancel-btn">
+              <button
+                type="button"
+                class="btn-secondary"
+                id="character-cancel-btn"
+                data-i18n="modal.character.btn_cancel"
+              >
                 Cancelar
               </button>
-              <button type="submit" class="btn-primary" id="character-save-btn">
+              <button
+                type="submit"
+                class="btn-primary"
+                id="character-save-btn"
+                data-i18n="modal.character.btn_save"
+              >
                 💾 Guardar Personaje
               </button>
             </div>
@@ -448,19 +546,22 @@
         <!-- STEP 1: Name + archetype -->
         <div id="soul-step-1">
           <div class="modal-header">
-            <h3>🔮 Nuevo Personaje — Generador de Alma</h3>
+            <h3 data-i18n="modal.soul.title">🔮 Nuevo Personaje — Generador de Alma</h3>
             <button class="modal-close" id="soul-close-1">&times;</button>
           </div>
           <div class="modal-body">
-            <p class="soul-intro">
+            <p class="soul-intro" data-i18n="modal.soul.intro">
               Introduce el nombre real de la persona que quieres parodiar. La IA buscará contexto y
               generará su "alma" cinematográfica automáticamente.
             </p>
             <div class="form-group">
-              <label for="soul-real-name">Persona real a parodiar *</label>
+              <label for="soul-real-name" data-i18n="modal.soul.label_real_name"
+                >Persona real a parodiar *</label
+              >
               <input
                 type="text"
                 id="soul-real-name"
+                data-i18n-placeholder="modal.soul.placeholder_real_name"
                 placeholder="Ej: Donald Trump, Marie Curie, Quentin Tarantino..."
                 autocomplete="off"
               />
@@ -470,7 +571,9 @@
                 >Arquetipo <small>(opcional — la IA lo decide si lo dejas en blanco)</small></label
               >
               <select id="soul-archetype">
-                <option value="">🤖 Dejar que la IA decida</option>
+                <option value="" data-i18n="modal.soul.archetype_ai">
+                  🤖 Dejar que la IA decida
+                </option>
                 <option value="fanatico_ideologico">Fanático Ideológico</option>
                 <option value="intelectual">Intelectual</option>
                 <option value="nostalgico">Nostálgico</option>
@@ -482,8 +585,20 @@
               </select>
             </div>
             <div class="form-actions">
-              <button type="button" class="btn-secondary" id="soul-cancel-1">Cancelar</button>
-              <button type="button" class="btn-primary" id="soul-generate-btn">
+              <button
+                type="button"
+                class="btn-secondary"
+                id="soul-cancel-1"
+                data-i18n="modal.soul.btn_cancel"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                class="btn-primary"
+                id="soul-generate-btn"
+                data-i18n="modal.soul.btn_generate"
+              >
                 ✨ Generar Alma
               </button>
             </div>
@@ -503,7 +618,13 @@
               <div class="soul-progress-track">
                 <div class="soul-progress-fill" id="soul-progress-fill"></div>
               </div>
-              <p class="soul-progress-label" id="soul-progress-label">Iniciando búsqueda...</p>
+              <p
+                class="soul-progress-label"
+                id="soul-progress-label"
+                data-i18n="modal.soul.progress_init"
+              >
+                Iniciando búsqueda...
+              </p>
             </div>
 
             <!-- Generated fields (hidden while loading) -->
@@ -511,7 +632,7 @@
               <!-- Name / Emoji / Color row -->
               <div class="soul-row-multi">
                 <div class="soul-field-group soul-fg-grow">
-                  <label>Apodo caricaturesco</label>
+                  <label data-i18n="modal.soul.label_caricature">Apodo caricaturesco</label>
                   <div class="soul-input-row">
                     <input type="text" id="sf-caricature_name" class="soul-input" />
                     <button class="btn-regen" data-field="caricature_name" title="Regenerar campo">
@@ -572,7 +693,7 @@
 
               <!-- Loves -->
               <div class="soul-field-group">
-                <label>❤️ Ama en el cine <small>(una por línea)</small></label>
+                <label data-i18n="modal.soul.label_loves">❤️ Ama en el cine</label>
                 <div class="soul-input-row soul-input-row-tall">
                   <textarea id="sf-loves" class="soul-input" rows="4"></textarea>
                   <button
@@ -587,7 +708,7 @@
 
               <!-- Hates -->
               <div class="soul-field-group">
-                <label>💢 Detesta en el cine <small>(una por línea)</small></label>
+                <label data-i18n="modal.soul.label_hates">💢 Detesta en el cine</label>
                 <div class="soul-input-row soul-input-row-tall">
                   <textarea id="sf-hates" class="soul-input" rows="4"></textarea>
                   <button
@@ -602,7 +723,7 @@
 
               <!-- Motifs -->
               <div class="soul-field-group">
-                <label>🎯 Motivos recurrentes <small>(uno por línea)</small></label>
+                <label data-i18n="modal.soul.label_motifs">🎯 Motivos recurrentes</label>
                 <div class="soul-input-row soul-input-row-tall">
                   <textarea id="sf-motifs" class="soul-input" rows="4"></textarea>
                   <button
@@ -617,7 +738,7 @@
 
               <!-- Catchphrases -->
               <div class="soul-field-group">
-                <label>💬 Frases habituales <small>(una por línea)</small></label>
+                <label data-i18n="modal.soul.label_catchphrases">💬 Frases habituales</label>
                 <div class="soul-input-row soul-input-row-tall">
                   <textarea id="sf-catchphrases" class="soul-input" rows="3"></textarea>
                   <button
@@ -632,7 +753,7 @@
 
               <!-- Avoid -->
               <div class="soul-field-group">
-                <label>🚫 Comportamientos a evitar <small>(uno por línea)</small></label>
+                <label data-i18n="modal.soul.label_avoid">🚫 Comportamientos a evitar</label>
                 <div class="soul-input-row soul-input-row-tall">
                   <textarea id="sf-avoid" class="soul-input" rows="3"></textarea>
                   <button
@@ -647,7 +768,9 @@
 
               <!-- Red flags -->
               <div class="soul-field-group">
-                <label>🚨 Detonadores de reacción intensa <small>(uno por línea)</small></label>
+                <label data-i18n="modal.soul.label_red_flags"
+                  >🚨 Detonadores de reacción intensa</label
+                >
                 <div class="soul-input-row soul-input-row-tall">
                   <textarea id="sf-red_flags" class="soul-input" rows="4"></textarea>
                   <button
@@ -661,8 +784,20 @@
               </div>
 
               <div class="form-actions">
-                <button type="button" class="btn-secondary" id="soul-cancel-2">Cancelar</button>
-                <button type="button" class="btn-primary" id="soul-save-btn">
+                <button
+                  type="button"
+                  class="btn-secondary"
+                  id="soul-cancel-2"
+                  data-i18n="modal.soul.btn_cancel2"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  class="btn-primary"
+                  id="soul-save-btn"
+                  data-i18n="modal.soul.btn_save"
+                >
                   💾 Guardar Personaje
                 </button>
               </div>
@@ -676,7 +811,7 @@
     <div class="modal hidden" id="import-modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>📁 Importar Personajes</h3>
+          <h3 data-i18n="modal.import.title">📁 Importar Personajes</h3>
           <button class="modal-close" id="import-modal-close">&times;</button>
         </div>
         <div class="modal-body">
@@ -703,14 +838,32 @@
               class="modal-footer"
               style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end"
             >
-              <button type="button" class="btn-secondary" id="import-cancel-btn">Cancelar</button>
-              <button type="submit" class="btn-primary">📁 Importar</button>
+              <button
+                type="button"
+                class="btn-secondary"
+                id="import-cancel-btn"
+                data-i18n="modal.import.btn_cancel"
+              >
+                Cancelar
+              </button>
+              <button type="submit" class="btn-primary" data-i18n="modal.import.btn_import">
+                📁 Importar
+              </button>
             </div>
           </form>
         </div>
       </div>
     </div>
 
+    <script src="/static/js/i18n.js"></script>
     <script src="/static/js/app.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', async () => {
+        await i18n.init();
+        // Sync selector with active language
+        const sel = document.getElementById('lang-selector');
+        if (sel) sel.value = i18n.current;
+      });
+    </script>
   </body>
 </html>
