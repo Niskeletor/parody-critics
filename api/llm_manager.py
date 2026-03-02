@@ -2,6 +2,7 @@
 🎭 Parody Critics - LLM Manager
 Hybrid LLM system with local and cloud fallback for critic generation
 """
+import asyncio
 import httpx
 import re
 import time
@@ -15,9 +16,16 @@ from config import Config
 try:
     from model_profiles import get_profile  # noqa: E402
     from prompt_builder import build_messages  # noqa: E402
+    from llm_errors import LLMConnectionError, LLMTimeoutError, LLMHTTPError  # noqa: E402
 except ImportError:
     from api.model_profiles import get_profile  # noqa: E402
     from api.prompt_builder import build_messages  # noqa: E402
+    from api.llm_errors import LLMConnectionError, LLMTimeoutError, LLMHTTPError  # noqa: E402
+
+# Retry config: only on connection errors (transient). Never on timeouts —
+# if Ollama already spent 180s once, retrying wastes another 180s.
+_CONNECT_RETRY_ATTEMPTS = 3
+_CONNECT_RETRY_BACKOFF = 2.0  # seconds; doubles each attempt (2s, 4s)
 
 logger = get_logger('llm_manager')
 
@@ -298,25 +306,59 @@ class CriticGenerationManager:
                     "attempts": attempts
                 }
 
-            except Exception as e:
-                error_msg = str(e)
-                logger.warning(f"❌ Generation failed with {endpoint_name}: {error_msg}")
-                log_exception(logger, e, f"Generation with {endpoint_name}")
+            except LLMTimeoutError as e:
+                logger.warning(
+                    f"⏱️ {endpoint_name} timed out after {e.timeout_seconds}s "
+                    f"— trying next endpoint"
+                )
+                attempts.append({
+                    "endpoint": endpoint_name,
+                    "model": endpoint_config["model"],
+                    "status": "timeout",
+                    "error": str(e),
+                    "timestamp": datetime.now().isoformat(),
+                })
 
+            except LLMConnectionError as e:
+                logger.warning(
+                    f"🔌 {endpoint_name} unreachable after retries — trying next endpoint"
+                )
+                attempts.append({
+                    "endpoint": endpoint_name,
+                    "model": endpoint_config["model"],
+                    "status": "connection_error",
+                    "error": str(e),
+                    "timestamp": datetime.now().isoformat(),
+                })
+
+            except LLMHTTPError as e:
+                logger.warning(
+                    f"🌐 {endpoint_name} HTTP {e.status_code} — trying next endpoint"
+                )
+                attempts.append({
+                    "endpoint": endpoint_name,
+                    "model": endpoint_config["model"],
+                    "status": f"http_{e.status_code}",
+                    "error": str(e),
+                    "timestamp": datetime.now().isoformat(),
+                })
+
+            except Exception as e:
+                logger.warning(
+                    f"❌ {endpoint_name} unexpected error — trying next endpoint"
+                )
+                log_exception(logger, e, f"Generation with {endpoint_name}")
                 attempts.append({
                     "endpoint": endpoint_name,
                     "model": endpoint_config["model"],
                     "status": "failed",
-                    "error": error_msg,
-                    "timestamp": datetime.now().isoformat()
+                    "error": str(e),
+                    "timestamp": datetime.now().isoformat(),
                 })
 
-                if not getattr(self.config, 'LLM_ENABLE_FALLBACK', True):
-                    # If fallback is disabled, stop after first failure
-                    logger.info("Fallback disabled - stopping after first failure")
-                    break
-
-                continue
+            if not self.config.LLM_ENABLE_FALLBACK:
+                logger.info("Fallback disabled — stopping after first failure")
+                break
 
         # All endpoints failed
         self.generation_stats['failed_requests'] += 1
@@ -359,10 +401,16 @@ class CriticGenerationManager:
     async def _call_ollama_chat(
         self, url: str, model: str, messages: List[Dict[str, str]], profile
     ) -> Dict[str, Any]:
-        """Generate using Ollama /api/chat with profile-driven parameters."""
-        timeout = getattr(self.config, 'LLM_TIMEOUT', 180)
+        """Generate using Ollama /api/chat with profile-driven parameters.
 
-        logger.debug(f"Sending /api/chat request to Ollama: {url} model={model}")
+        Retry policy:
+        - ConnectError (server unreachable): up to _CONNECT_RETRY_ATTEMPTS with
+          exponential backoff. Transient — worth retrying.
+        - TimeoutException: no retry. If 180s wasn't enough once, retrying wastes
+          another 180s. Caller should try the secondary model instead.
+        - HTTPStatusError: no retry. HTTP errors are deterministic.
+        """
+        timeout = getattr(self.config, 'LLM_TIMEOUT', 180)
 
         payload = {
             "model": model,
@@ -377,17 +425,24 @@ class CriticGenerationManager:
             },
         }
 
-        async with httpx.AsyncClient(timeout=timeout) as client:
+        last_connect_error: Optional[Exception] = None
+
+        for attempt in range(_CONNECT_RETRY_ATTEMPTS):
             try:
-                response = await client.post(f"{url}/api/chat", json=payload)
-                response.raise_for_status()
+                async with httpx.AsyncClient(timeout=timeout) as client:
+                    logger.debug(
+                        f"Ollama /api/chat → {url} model={model} "
+                        f"(attempt {attempt + 1}/{_CONNECT_RETRY_ATTEMPTS})"
+                    )
+                    response = await client.post(f"{url}/api/chat", json=payload)
+                    response.raise_for_status()
 
                 result = response.json()
                 msg = result.get("message", {})
                 raw_content = msg.get("content", "")
 
-                # deepseek-r1 with think=True can return empty content
-                # (all reasoning goes to message.thinking). Strip tags just in case.
+                # deepseek-r1 with think=True can return empty content —
+                # all reasoning goes to message.thinking.
                 if not raw_content.strip() and msg.get("thinking"):
                     logger.warning(
                         f"Empty content from {model} — falling back to message.thinking"
@@ -399,17 +454,38 @@ class CriticGenerationManager:
 
                 thinking_len = len(msg.get("thinking", ""))
                 logger.debug(
-                    f"Ollama chat response — len={len(raw_content)} thinking_len={thinking_len}"
+                    f"Ollama response — content_len={len(raw_content)} "
+                    f"thinking_len={thinking_len}"
                 )
-                # Normalise to the shape the rest of the code expects
                 return {"response": raw_content}
 
-            except httpx.TimeoutException:
-                raise Exception(f"Ollama request timed out after {timeout}s")
+            except httpx.TimeoutException as e:
+                # Don't retry — propagate immediately so caller tries secondary
+                raise LLMTimeoutError(
+                    f"Ollama timed out after {timeout}s (model={model})",
+                    timeout_seconds=timeout,
+                ) from e
+
             except httpx.HTTPStatusError as e:
-                raise Exception(f"Ollama HTTP error {e.response.status_code}: {e.response.text}")
-            except Exception as e:
-                raise Exception(f"Ollama request failed: {str(e)}")
+                raise LLMHTTPError(
+                    f"Ollama HTTP {e.response.status_code}: {e.response.text[:200]}",
+                    status_code=e.response.status_code,
+                ) from e
+
+            except httpx.ConnectError as e:
+                last_connect_error = e
+                if attempt < _CONNECT_RETRY_ATTEMPTS - 1:
+                    wait = _CONNECT_RETRY_BACKOFF * (2 ** attempt)
+                    logger.warning(
+                        f"Ollama connection failed (attempt {attempt + 1}), "
+                        f"retrying in {wait:.0f}s — {e}"
+                    )
+                    await asyncio.sleep(wait)
+                    continue
+
+        raise LLMConnectionError(
+            f"Could not connect to Ollama at {url} after {_CONNECT_RETRY_ATTEMPTS} attempts",
+        ) from last_connect_error
 
     async def _generate_openai(self, model: str, messages: List[Dict[str, str]]) -> Dict[str, Any]:
         """Generate using OpenAI endpoint (future implementation)"""
