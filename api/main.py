@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException, Query, BackgroundTasks, Body, WebSoc
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+import re
 import sqlite3
 import json
 import httpx
@@ -2256,16 +2257,22 @@ async def import_characters(import_data: dict = Body(...)):
                                 char_data['name']
                             ))
                         else:
+                            # Generate slug id from name if not provided
+                            char_id = char_data.get('id') or re.sub(
+                                r'[^a-z0-9]+', '_',
+                                char_data['name'].lower().strip()
+                            ).strip('_')
                             # Insert new character
                             insert_query = """
                                 INSERT INTO characters (
-                                    name, emoji, personality, description,
+                                    id, name, emoji, personality, description,
                                     color, border_color, accent_color,
                                     loves, hates, motifs, catchphrases, avoid, red_flags,
                                     active
-                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE)
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE)
                             """
                             db_manager.execute_insert(insert_query, (
+                                char_id,
                                 char_data['name'],
                                 char_data.get('emoji', '🎭'),
                                 char_data.get('personality', ''),
