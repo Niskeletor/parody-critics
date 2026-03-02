@@ -8,6 +8,7 @@ Author: SAL-9000
 
 import httpx
 import json
+import os
 import time
 from typing import Dict, Any
 from datetime import datetime
@@ -272,9 +273,9 @@ class JellyfinAPITester:
 
 def main():
     """Main test execution"""
-    # Jellyfin configuration
-    JELLYFIN_URL = "http://192.168.45.181:8097"  # jellyfin-stg container
-    API_TOKEN = "JELLYFIN_API_TOKEN_REDACTED"
+    # Configuration — read from environment (set JELLYFIN_URL and JELLYFIN_API_TOKEN in .env)
+    JELLYFIN_URL = os.getenv("JELLYFIN_URL", "http://localhost:8096")
+    API_TOKEN = os.getenv("JELLYFIN_API_TOKEN", "")
 
     # Create tester instance
     tester = JellyfinAPITester(JELLYFIN_URL, API_TOKEN)

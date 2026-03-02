@@ -255,10 +255,10 @@ Let's create some hilarious movie reviews together! 🎬✨
         console.print("\n[bold yellow]📝 Demo Configuration (Pre-filled values)[/bold yellow]")
 
         config = {
-            "JELLYFIN_URL": "http://192.168.45.181:8097",
+            "JELLYFIN_URL": "http://localhost:8096",
             "JELLYFIN_API_TOKEN": "demo-api-token",
-            "LLM_OLLAMA_URL": "http://192.168.45.104:11434",
-            "LLM_PRIMARY_MODEL": "qwen3:8b",
+            "LLM_OLLAMA_URL": "http://localhost:11434",
+            "LLM_PRIMARY_MODEL": "mistral-small3.1:24b",
             "LLM_SECONDARY_MODEL": "gpt-oss:20b",
             "LLM_TIMEOUT": "180",
             "LLM_MAX_RETRIES": "2",
@@ -279,9 +279,9 @@ Let's create some hilarious movie reviews together! 🎬✨
 
         # Jellyfin URL
         console.print("\n[cyan]Jellyfin Configuration:[/cyan]")
-        jellyfin_url = input("Jellyfin Server URL [http://192.168.45.181:8097]: ").strip()
+        jellyfin_url = input("Jellyfin Server URL [http://localhost:8096]: ").strip()
         if not jellyfin_url:
-            jellyfin_url = "http://192.168.45.181:8097"
+            jellyfin_url = "http://localhost:8096"
 
         config["JELLYFIN_URL"] = jellyfin_url
 
@@ -302,9 +302,9 @@ Let's create some hilarious movie reviews together! 🎬✨
 
         # LLM Configuration
         console.print("\n[cyan]LLM Configuration:[/cyan]")
-        ollama_url = input("Ollama Server URL [http://192.168.45.104:11434]: ").strip()
+        ollama_url = input("Ollama Server URL [http://localhost:11434]: ").strip()
         if not ollama_url:
-            ollama_url = "http://192.168.45.104:11434"
+            ollama_url = "http://localhost:11434"
 
         config["LLM_OLLAMA_URL"] = ollama_url
 

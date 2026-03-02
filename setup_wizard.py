@@ -174,7 +174,7 @@ Let's create some hilarious movie reviews together! 🎬✨
         # Get Jellyfin URL
         jellyfin_url = questionary.text(
             "Jellyfin Server URL:",
-            default="http://192.168.45.181:8097",
+            default="http://localhost:8096",
             instruction="(Include http:// or https://)"
         ).ask()
 
@@ -264,7 +264,7 @@ Let's create some hilarious movie reviews together! 🎬✨
             # Configure Ollama
             ollama_url = questionary.text(
                 "Ollama Server URL:",
-                default="http://192.168.45.104:11434",
+                default="http://localhost:11434",
                 instruction="(Default Ollama port is 11434)"
             ).ask()
 

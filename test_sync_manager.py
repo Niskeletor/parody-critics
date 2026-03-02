@@ -15,10 +15,10 @@ from api.jellyfin_sync import JellyfinSyncManager
 async def test_sync_manager():
     """Test the sync manager functionality"""
 
-    # Configuration
-    jellyfin_url = "http://192.168.45.181:8097"
-    api_token = "JELLYFIN_API_TOKEN_REDACTED"
-    jellyfin_db_path = "/home/stilgar/docker/jellyfin-upgrade/config/data/jellyfin.db"
+    # Configuration — read from environment (set JELLYFIN_URL and JELLYFIN_API_TOKEN in .env)
+    jellyfin_url = os.getenv("JELLYFIN_URL", "http://localhost:8096")
+    api_token = os.getenv("JELLYFIN_API_TOKEN", "")
+    jellyfin_db_path = os.getenv("JELLYFIN_DB_PATH", "")
     local_db_path = "database/critics.db"
 
     print("🎭 Testing Jellyfin Sync Manager")

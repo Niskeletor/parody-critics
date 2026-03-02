@@ -7,6 +7,7 @@ Author: SAL-9000
 """
 
 import httpx
+import os
 import sqlite3
 import json
 import time
@@ -384,10 +385,10 @@ class HybridApproachValidator:
 
 def main():
     """Main validation execution"""
-    # Configuration
-    API_URL = "http://192.168.45.181:8097"  # jellyfin-stg
-    API_TOKEN = "JELLYFIN_API_TOKEN_REDACTED"
-    DB_PATH = "/home/stilgar/docker/jellyfin-upgrade/config/data/jellyfin.db"
+    # Configuration — read from environment (set JELLYFIN_URL and JELLYFIN_API_TOKEN in .env)
+    API_URL = os.getenv("JELLYFIN_URL", "http://localhost:8096")
+    API_TOKEN = os.getenv("JELLYFIN_API_TOKEN", "")
+    DB_PATH = os.getenv("JELLYFIN_DB_PATH", "")
 
     # Create validator
     validator = HybridApproachValidator(API_URL, API_TOKEN, DB_PATH)
