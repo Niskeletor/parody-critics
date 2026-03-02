@@ -30,10 +30,10 @@ class Config:
     SYNC_MAX_CONCURRENT = int(os.getenv('SYNC_MAX_CONCURRENT', '5'))
 
     # CORS Settings
-    # Override or extend via PARODY_CRITICS_CORS_ORIGINS=http://host1,http://host2
+    # JELLYFIN_URL is added automatically — no need to hardcode your IP here.
+    # Add extra origins via PARODY_CRITICS_CORS_ORIGINS=http://host1,http://host2
     CORS_ORIGINS = [
         "http://localhost:8096",
-        "http://192.168.45.181:8096",  # DUNE — change for your network
         "http://127.0.0.1:8096",
         # Testing origins
         "http://localhost:3000",
@@ -41,6 +41,9 @@ class Config:
         "http://127.0.0.1:3000",
         "null"  # For file:// protocol testing
     ]
+    # Automatically allow the configured Jellyfin instance
+    if JELLYFIN_URL not in CORS_ORIGINS:
+        CORS_ORIGINS.append(JELLYFIN_URL)
 
     # Add custom origins from environment
     custom_origins = os.getenv('PARODY_CRITICS_CORS_ORIGINS', '')
@@ -89,15 +92,6 @@ class StilagarConfig(Config):
     """Configuration for Stilgar server deployment"""
     DEBUG = False
     API_HOST = '0.0.0.0'
-    JELLYFIN_URL = 'http://localhost:8096'  # Local on stilgar
-
-    # Additional CORS origins for Stilgar network
-    CORS_ORIGINS = Config.CORS_ORIGINS + [
-        "http://192.168.45.181:8096",
-        "http://stilgar:8096",
-        "https://192.168.45.181:8096",
-        "https://stilgar:8096"
-    ]
 
 class ProductionConfig(Config):
     """Production environment configuration"""
