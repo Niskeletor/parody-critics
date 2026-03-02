@@ -210,7 +210,7 @@ class SoulGenerator:
 
     # ── Prompt builders ───────────────────────────────────────────────────────
 
-    def _soul_prompt(self, real_name: str, snippets: list[str], archetype: str | None) -> str:
+    def _soul_prompt(self, real_name: str, snippets: list[str], archetype: str | None, language: str = "es") -> str:
         snippets_block = "\n".join(f"- {s}" for s in snippets) if snippets else "(sin contexto externo)"
         archetype_line = (
             f'El arquetipo ha sido preseleccionado: "{archetype}". Usa EXACTAMENTE ese valor en "personality".'
@@ -248,7 +248,8 @@ Genera un JSON válido con EXACTAMENTE estos campos:
 IMPORTANTE:
 - Todos los campos deben ser COHERENTES entre sí
 - El foco es cómo esta persona vería el CINE, no su vida en general
-- Responde SOLO con el JSON válido, sin texto adicional ni bloques markdown""".strip()
+- Responde SOLO con el JSON válido, sin texto adicional ni bloques markdown
+{"- Generate all text fields in English." if language == "en" else ""}""".strip()
 
     def _regen_prompt(self, field: str, current_soul: dict, real_name: str) -> str:
         context = {k: v for k, v in current_soul.items() if k != field}
@@ -267,14 +268,14 @@ Responde SOLO con: {{"{field}": <nuevo_valor>}}""".strip()
 
     # ── Public API ────────────────────────────────────────────────────────────
 
-    async def generate_soul(self, real_name: str, archetype: str | None = None) -> dict:
+    async def generate_soul(self, real_name: str, archetype: str | None = None, language: str = "es") -> dict:
         """
         Full pipeline: DDG → LLM → validated soul dict.
         Returns the soul dict on success.
         Raises RuntimeError on failure.
         """
         snippets = await self.fetch_context(real_name)
-        prompt = self._soul_prompt(real_name, snippets, archetype)
+        prompt = self._soul_prompt(real_name, snippets, archetype, language=language)
 
         logger.info(f"Generating soul for {real_name!r} (archetype={archetype})")
         raw = await self._call_llm(prompt)

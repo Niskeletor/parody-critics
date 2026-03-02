@@ -768,7 +768,8 @@ async def health_check():
 async def generate_critic_for_media(
     tmdb_id: str,
     character: str = Query(..., description="Character name (Marco Aurelio or Rosario Costras)"),
-    force_endpoint: Optional[str] = Query(None, description="Force specific LLM endpoint")
+    force_endpoint: Optional[str] = Query(None, description="Force specific LLM endpoint"),
+    language: str = Query("es", description="Output language for the critic ('es' | 'en')")
 ):
     """Generate a new critic for specific media using LLM"""
     if not llm_manager:
@@ -814,7 +815,8 @@ async def generate_critic_for_media(
         result = await llm_manager.generate_critic(
             character=character,
             media_info=media_info,
-            force_endpoint=force_endpoint
+            force_endpoint=force_endpoint,
+            language=language,
         )
 
         if not result["success"]:
@@ -2544,6 +2546,7 @@ async def generate_soul(body: dict = Body(...)):
     """
     real_name = (body.get("real_name") or "").strip()
     archetype = body.get("archetype") or None
+    language = body.get("language", "es")
 
     if not real_name:
         raise HTTPException(status_code=400, detail="real_name is required")
@@ -2551,7 +2554,7 @@ async def generate_soul(body: dict = Body(...)):
         raise HTTPException(status_code=400, detail=f"Invalid archetype: {archetype}")
 
     try:
-        soul = await _soul_generator.generate_soul(real_name, archetype)
+        soul = await _soul_generator.generate_soul(real_name, archetype, language=language)
         return {"success": True, "soul": soul, "real_name": real_name}
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e))

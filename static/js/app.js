@@ -2711,7 +2711,7 @@ class ParodyCriticsApp {
     const signal = this.batchProcessing.controller.signal;
 
     const response = await fetch(
-      `${this.apiBase}/generate/critic/${tmdbId}?character=${encodeURIComponent(criticId)}`,
+      `${this.apiBase}/generate/critic/${tmdbId}?character=${encodeURIComponent(criticId)}&language=${i18n.current}`,
       {
         method: 'POST',
         headers: {
@@ -3315,6 +3315,7 @@ class ParodyCriticsApp {
       const result = await this.fetchAPI('/characters/generate-soul', 'POST', {
         real_name: realName,
         archetype,
+        language: i18n.current,
       });
       timers.forEach(clearTimeout);
 

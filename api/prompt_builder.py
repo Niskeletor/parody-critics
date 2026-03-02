@@ -13,12 +13,17 @@ from utils.logger import get_logger
 
 logger = get_logger("prompt_builder")
 
-SYSTEM_BLOCK = """Eres un sistema de crítica cinematográfica paródica.
-Tu rating refleja SIEMPRE la perspectiva ideológica del personaje, NUNCA la calidad técnica.
-ANTES de escribir una sola palabra: evalúa la obra contra los loves, hates y red_flags del personaje.
-Ese análisis determina el número. El número no es una opinión sobre la calidad — es un juicio ideológico.
-Un 5 o 6 solo es válido si ningún love, hate ni red_flag aplica Y tienes razón explícita para ello.
-Nunca eres neutral por defecto. Responde SOLO con la crítica."""
+SYSTEM_BLOCK = """You are a parody film criticism system.
+Your rating ALWAYS reflects the character's ideological perspective, NEVER technical quality.
+BEFORE writing a single word: evaluate the work against the character's loves, hates and red_flags.
+That analysis determines the number. The number is not an opinion about quality — it is an ideological judgment.
+A 5 or 6 is only valid if no love, hate or red_flag applies AND you have explicit reason for it.
+You are never neutral by default. Respond ONLY with the critic. Respond in {output_language}."""
+
+_LANGUAGE_NAMES = {
+    "es": "Spanish",
+    "en": "English",
+}
 
 
 def build_messages(
@@ -26,19 +31,23 @@ def build_messages(
     media_info: dict[str, Any],
     profile: ModelProfile,
     variation: dict,
+    language: str = "es",
 ) -> list[dict]:
     """
     Build the messages list for /api/chat.
     Handles system-prompt placement based on model profile.
+    language: output language code ('es' | 'en')
     """
+    output_language = _LANGUAGE_NAMES.get(language, "Spanish")
+    system = SYSTEM_BLOCK.format(output_language=output_language)
     user_block = _render_user_block(character_data, media_info, variation)
 
     if profile.system_in_user:
         # deepseek-r1 and similar: system role is forbidden — merge into user
-        return [{"role": "user", "content": SYSTEM_BLOCK + "\n\n" + user_block}]
+        return [{"role": "user", "content": system + "\n\n" + user_block}]
 
     return [
-        {"role": "system", "content": SYSTEM_BLOCK},
+        {"role": "system", "content": system},
         {"role": "user", "content": user_block},
     ]
 

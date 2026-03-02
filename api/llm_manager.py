@@ -221,7 +221,8 @@ class CriticGenerationManager:
         self,
         character: str,
         media_info: Dict[str, Any],
-        force_endpoint: Optional[str] = None
+        force_endpoint: Optional[str] = None,
+        language: str = "es",
     ) -> Dict[str, Any]:
         """Generate critic with automatic fallback"""
 
@@ -244,7 +245,7 @@ class CriticGenerationManager:
                 logger.info(f"Attempting generation with {endpoint_name} ({endpoint_config['model']})")
 
                 profile = get_profile(endpoint_config["model"])
-                messages = self._build_messages(character, media_info, profile)
+                messages = self._build_messages(character, media_info, profile, language=language)
 
                 logger.info(
                     f"[profile: {endpoint_config['model']} "
@@ -573,7 +574,7 @@ class CriticGenerationManager:
         return {"response": content}
 
     def _build_messages(
-        self, character: str, media_info: Dict[str, Any], profile
+        self, character: str, media_info: Dict[str, Any], profile, language: str = "es"
     ) -> List[Dict[str, str]]:
         """Build chat messages for critic generation, delegating to prompt_builder."""
         media_type = media_info.get("type", "movie")
@@ -594,7 +595,7 @@ class CriticGenerationManager:
         catchphrases = json.loads(character_data.get("catchphrases") or "[]")
 
         variation = self._select_variation_pack(character_id, motifs, catchphrases)
-        messages = build_messages(character_data, media_info, profile, variation)
+        messages = build_messages(character_data, media_info, profile, variation, language=language)
 
         logger.debug(
             f"Messages built for '{character}' — "
