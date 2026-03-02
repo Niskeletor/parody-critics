@@ -65,9 +65,9 @@ class SoulGenerator:
         config = Config()
         self.endpoints = [
             {
-                "url": "http://192.168.2.69:11434",
-                "model": "phi4:latest",
-                "label": "secondary/phi4",
+                "url": config.LLM_OLLAMA_URL,
+                "model": config.LLM_SECONDARY_MODEL or config.LLM_PRIMARY_MODEL,
+                "label": f"secondary/{config.LLM_SECONDARY_MODEL or config.LLM_PRIMARY_MODEL}",
             },
             {
                 "url": config.LLM_OLLAMA_URL,

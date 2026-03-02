@@ -54,9 +54,9 @@ class Config:
 
     # LLM Configuration
     # Primary Ollama endpoint (local)
-    LLM_OLLAMA_URL = os.getenv('LLM_OLLAMA_URL', 'http://192.168.45.104:11434')
-    LLM_PRIMARY_MODEL = os.getenv('LLM_PRIMARY_MODEL', 'qwen3:8b')
-    LLM_SECONDARY_MODEL = os.getenv('LLM_SECONDARY_MODEL', 'gpt-oss:20b')
+    LLM_OLLAMA_URL = os.getenv('LLM_OLLAMA_URL', 'http://localhost:11434')
+    LLM_PRIMARY_MODEL = os.getenv('LLM_PRIMARY_MODEL', 'mistral-small3.1:24b')
+    LLM_SECONDARY_MODEL = os.getenv('LLM_SECONDARY_MODEL', 'type32/eva-qwen-2.5-14b:latest')
 
     # Future cloud endpoints
     LLM_OPENAI_API_KEY = os.getenv('LLM_OPENAI_API_KEY', '')
