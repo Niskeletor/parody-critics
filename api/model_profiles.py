@@ -94,6 +94,32 @@ PROFILES: dict[str, ModelProfile] = {
     "parody-deepseek:latest": ModelProfile(
         think=False, temperature=0.65, num_predict=800, system_in_user=True
     ),
+    # ── Cloud models ────────────────────────────────────────────────────────────
+    # num_predict is ignored by cloud callers (they use max_tokens=600 directly)
+    # OpenAI
+    "gpt-4o-mini": ModelProfile(
+        think=False, temperature=0.75, num_predict=600, system_in_user=False
+    ),
+    "gpt-4o": ModelProfile(
+        think=False, temperature=0.75, num_predict=600, system_in_user=False
+    ),
+    # Anthropic
+    "claude-haiku-4-5-20251001": ModelProfile(
+        think=False, temperature=0.75, num_predict=600, system_in_user=False
+    ),
+    "claude-sonnet-4-6": ModelProfile(
+        think=False, temperature=0.75, num_predict=600, system_in_user=False
+    ),
+    # Groq free tier
+    "llama-3.3-70b-versatile": ModelProfile(
+        think=False, temperature=0.75, num_predict=600, system_in_user=False
+    ),
+    "llama-3.1-8b-instant": ModelProfile(
+        think=False, temperature=0.75, num_predict=600, system_in_user=False
+    ),
+    "gemma2-9b-it": ModelProfile(
+        think=False, temperature=0.75, num_predict=600, system_in_user=False
+    ),
 }
 
 

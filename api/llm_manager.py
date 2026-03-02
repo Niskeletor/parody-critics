@@ -31,6 +31,11 @@ _CONNECT_RETRY_BACKOFF = 2.0  # seconds; doubles each attempt (2s, 4s)
 
 logger = get_logger('llm_manager')
 
+_OPENAI_BASE_URLS = {
+    "openai": "https://api.openai.com/v1",
+    "groq":   "https://api.groq.com/openai/v1",
+}
+
 
 def _strip_think_blocks(text: str) -> str:
     """Remove <think>...</think> sections produced by reasoning models."""
@@ -46,21 +51,49 @@ class CriticGenerationManager:
         logger.info("CriticGenerationManager initialized successfully")
 
     def setup_endpoints(self):
-        """Setup available LLM endpoints with priority order"""
-        self.endpoints = {
-            "ollama_primary": {
+        """Setup available LLM endpoints with priority order.
+
+        When LLM_PROVIDER=ollama (default): primary + secondary both Ollama.
+        When LLM_PROVIDER=groq|openai|anthropic: cloud primary, optional Ollama secondary.
+        Fallback between endpoints respects LLM_ENABLE_FALLBACK.
+        """
+        self.endpoints = {}
+
+        if self.config.LLM_PROVIDER == "ollama":
+            self.endpoints["ollama_primary"] = {
                 "url": self.config.LLM_OLLAMA_URL,
                 "model": self.config.LLM_PRIMARY_MODEL,
                 "type": "ollama",
                 "priority": 1,
-            },
-            "ollama_secondary": {
+            }
+            self.endpoints["ollama_secondary"] = {
                 "url": self.config.LLM_OLLAMA_URL,
                 "model": self.config.LLM_SECONDARY_MODEL,
                 "type": "ollama",
                 "priority": 2,
-            },
-        }
+            }
+        else:
+            # Cloud primary
+            if not self.config.LLM_API_KEY:
+                logger.warning(
+                    f"LLM_PROVIDER={self.config.LLM_PROVIDER} but LLM_API_KEY is empty — "
+                    "generation will fail until a key is configured"
+                )
+            self.endpoints["cloud_primary"] = {
+                "type": self.config.LLM_PROVIDER,   # "openai" | "groq" | "anthropic"
+                "model": self.config.LLM_PRIMARY_MODEL,
+                "api_key": self.config.LLM_API_KEY,
+                "priority": 1,
+            }
+            # Ollama secondary as fallback (if a secondary model is configured)
+            if self.config.LLM_SECONDARY_MODEL:
+                self.endpoints["ollama_secondary"] = {
+                    "url": self.config.LLM_OLLAMA_URL,
+                    "model": self.config.LLM_SECONDARY_MODEL,
+                    "type": "ollama",
+                    "priority": 2,
+                }
+
         logger.info(f"Configured {len(self.endpoints)} LLM endpoints: {list(self.endpoints.keys())}")
 
     def _get_character_from_db(self, character_name: str) -> Optional[Dict[str, Any]]:
@@ -142,32 +175,47 @@ class CriticGenerationManager:
     async def health_check_endpoint(self, endpoint_name: str) -> Dict[str, Any]:
         """Check if an endpoint is healthy and responsive"""
         endpoint = self.endpoints[endpoint_name]
+        ep_type = endpoint["type"]
 
         try:
-            if endpoint["type"] == "ollama":
+            if ep_type == "ollama":
                 async with httpx.AsyncClient(timeout=10.0) as client:
                     response = await client.get(f"{endpoint['url']}/api/tags")
                     response.raise_for_status()
-
                     models = response.json().get("models", [])
                     model_available = any(m["name"] == endpoint["model"] for m in models)
-
                     return {
                         "status": "healthy" if model_available else "model_unavailable",
                         "model_available": model_available,
-                        "response_time": response.elapsed.total_seconds() if response.elapsed else 0
+                        "response_time": response.elapsed.total_seconds() if response.elapsed else 0,
                     }
-            else:
-                # Future: Add health checks for other endpoint types
-                return {"status": "not_implemented"}
+
+            elif ep_type in ("openai", "groq"):
+                # GET /models is a free call — validates the API key works
+                base_url = _OPENAI_BASE_URLS[ep_type]
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    r = await client.get(
+                        f"{base_url}/models",
+                        headers={"Authorization": f"Bearer {endpoint['api_key']}"},
+                    )
+                return {
+                    "status": "healthy" if r.status_code == 200 else "auth_error",
+                    "provider": ep_type,
+                }
+
+            elif ep_type == "anthropic":
+                # Anthropic has no free health endpoint — check key presence only
+                return {
+                    "status": "healthy" if endpoint.get("api_key") else "no_api_key",
+                    "provider": "anthropic",
+                }
+
+            return {"status": "unknown_type"}
 
         except Exception as e:
             logger.warning(f"Health check failed for {endpoint_name}: {str(e)}")
             log_exception(logger, e, f"Health check for {endpoint_name}")
-            return {
-                "status": "unhealthy",
-                "error": str(e)
-            }
+            return {"status": "unhealthy", "error": str(e)}
 
     async def generate_critic(
         self,
@@ -308,16 +356,32 @@ class CriticGenerationManager:
         messages: List[Dict[str, str]],
         profile,
     ) -> Dict[str, Any]:
-        """Generate using specific endpoint"""
+        """Dispatch generation to the appropriate provider caller."""
+        ep_type = endpoint_config["type"]
 
-        if endpoint_config["type"] == "ollama":
+        if ep_type == "ollama":
             return await self._call_ollama_chat(
                 endpoint_config["url"],
                 endpoint_config["model"],
                 messages,
                 profile,
             )
-        raise ValueError(f"Unsupported endpoint type: {endpoint_config['type']}")
+        if ep_type in ("openai", "groq"):
+            return await self._call_openai_chat(
+                ep_type,
+                endpoint_config["model"],
+                endpoint_config["api_key"],
+                messages,
+                profile,
+            )
+        if ep_type == "anthropic":
+            return await self._call_anthropic_chat(
+                endpoint_config["model"],
+                endpoint_config["api_key"],
+                messages,
+                profile,
+            )
+        raise ValueError(f"Unsupported endpoint type: {ep_type}")
 
     async def _call_ollama_chat(
         self, url: str, model: str, messages: List[Dict[str, str]], profile
@@ -407,6 +471,106 @@ class CriticGenerationManager:
         raise LLMConnectionError(
             f"Could not connect to Ollama at {url} after {_CONNECT_RETRY_ATTEMPTS} attempts",
         ) from last_connect_error
+
+    async def _call_openai_chat(
+        self, provider: str, model: str, api_key: str,
+        messages: List[Dict[str, str]], profile
+    ) -> Dict[str, Any]:
+        """Generate via OpenAI-compatible API (OpenAI and Groq share the same format).
+
+        No connection retries — cloud endpoints don't have transient ConnectErrors.
+        Errors map directly to existing LLM exception types.
+        """
+        base_url = _OPENAI_BASE_URLS[provider]
+        timeout = getattr(self.config, "LLM_TIMEOUT", 60)
+
+        payload = {
+            "model": model,
+            "messages": messages,
+            "temperature": profile.temperature,
+            "max_tokens": 600,
+            "stream": False,
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=timeout) as client:
+                logger.debug(f"{provider} /chat/completions → model={model}")
+                response = await client.post(
+                    f"{base_url}/chat/completions",
+                    headers={"Authorization": f"Bearer {api_key}"},
+                    json=payload,
+                )
+                response.raise_for_status()
+        except httpx.TimeoutException as e:
+            raise LLMTimeoutError(
+                f"{provider} timed out after {timeout}s (model={model})",
+                timeout_seconds=timeout,
+            ) from e
+        except httpx.HTTPStatusError as e:
+            raise LLMHTTPError(
+                f"{provider} HTTP {e.response.status_code}: {e.response.text[:200]}",
+                status_code=e.response.status_code,
+            ) from e
+
+        content = response.json()["choices"][0]["message"]["content"]
+        logger.debug(f"{provider} response — content_len={len(content)}")
+        return {"response": content}
+
+    async def _call_anthropic_chat(
+        self, model: str, api_key: str,
+        messages: List[Dict[str, str]], profile
+    ) -> Dict[str, Any]:
+        """Generate via Anthropic Messages API.
+
+        Anthropic does not accept role:'system' inside messages — it must be
+        passed as a top-level 'system' field. We extract it here.
+        """
+        timeout = getattr(self.config, "LLM_TIMEOUT", 60)
+
+        # Extract system prompt (Anthropic requires it as a separate field)
+        system = ""
+        user_messages = []
+        for m in messages:
+            if m["role"] == "system":
+                system = m["content"]
+            else:
+                user_messages.append(m)
+
+        payload = {
+            "model": model,
+            "max_tokens": 600,
+            "temperature": profile.temperature,
+            "messages": user_messages,
+        }
+        if system:
+            payload["system"] = system
+
+        try:
+            async with httpx.AsyncClient(timeout=timeout) as client:
+                logger.debug(f"anthropic /v1/messages → model={model}")
+                response = await client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={
+                        "x-api-key": api_key,
+                        "anthropic-version": "2023-06-01",
+                    },
+                    json=payload,
+                )
+                response.raise_for_status()
+        except httpx.TimeoutException as e:
+            raise LLMTimeoutError(
+                f"Anthropic timed out after {timeout}s (model={model})",
+                timeout_seconds=timeout,
+            ) from e
+        except httpx.HTTPStatusError as e:
+            raise LLMHTTPError(
+                f"Anthropic HTTP {e.response.status_code}: {e.response.text[:200]}",
+                status_code=e.response.status_code,
+            ) from e
+
+        content = response.json()["content"][0]["text"]
+        logger.debug(f"anthropic response — content_len={len(content)}")
+        return {"response": content}
 
     def _build_messages(
         self, character: str, media_info: Dict[str, Any], profile

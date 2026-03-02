@@ -62,10 +62,17 @@ class Config:
     LLM_PRIMARY_MODEL = os.getenv('LLM_PRIMARY_MODEL', 'mistral-small3.1:24b')
     LLM_SECONDARY_MODEL = os.getenv('LLM_SECONDARY_MODEL', 'type32/eva-qwen-2.5-14b:latest')
 
-    # Cloud LLM endpoints — NOT IMPLEMENTED (Phase 1 roadmap)
-    # Defined here so the .env keys are recognised; wiring is in llm_manager.py
-    LLM_OPENAI_API_KEY = os.getenv('LLM_OPENAI_API_KEY', '')
-    LLM_ANTHROPIC_API_KEY = os.getenv('LLM_ANTHROPIC_API_KEY', '')
+    # Cloud LLM provider (alternative to Ollama — no GPU required)
+    # LLM_PROVIDER=ollama  →  use local Ollama (default)
+    # LLM_PROVIDER=groq    →  Groq API (free tier available — recommended for onboarding)
+    # LLM_PROVIDER=openai  →  OpenAI API
+    # LLM_PROVIDER=anthropic → Anthropic API
+    LLM_PROVIDER = os.getenv('LLM_PROVIDER', 'ollama')
+    LLM_API_KEY  = os.getenv('LLM_API_KEY', '')
+    # Recommended models per provider:
+    #   Groq free tier: llama-3.3-70b-versatile | llama-3.1-8b-instant
+    #   OpenAI:         gpt-4o-mini | gpt-4o
+    #   Anthropic:      claude-haiku-4-5-20251001 | claude-sonnet-4-6
 
     # Enrichment APIs
     TMDB_ACCESS_TOKEN = os.getenv('TMDB_ACCESS_TOKEN', '')
