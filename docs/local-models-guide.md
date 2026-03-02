@@ -20,7 +20,6 @@ This guide covers the models we've tested, what to expect from each, and how to 
 
 | Model | VRAM needed | Speed | Quality | Install |
 |-------|-------------|-------|---------|---------|
-| `phi4:latest` | **6 GB** | ⚡ ~7s | ⭐⭐⭐ | `ollama pull phi4` |
 | `type32/eva-qwen-2.5-14b` | **8 GB** | ⚡ ~8s | ⭐⭐⭐⭐ | `ollama pull type32/eva-qwen-2.5-14b` |
 | `mistral-small3.1:24b` | **16 GB** | 🐢 ~20s | ⭐⭐⭐⭐⭐ | `ollama pull mistral-small3.1:24b` |
 | `gemma3:27b` | **24 GB** ⚠️ | ⚡ ~8s | ⭐⭐⭐⭐⭐ | `ollama pull gemma3:27b` |
@@ -41,7 +40,26 @@ This guide covers the models we've tested, what to expect from each, and how to 
 These are models we've tested extensively with the full character roster and a set of reference films.
 All install with a single `ollama pull` command.
 
-### Best overall — `type32/eva-qwen-2.5-14b`
+### Best quality — `mistral-small3.1:24b`
+
+```bash
+ollama pull mistral-small3.1:24b
+```
+
+| | |
+|-|-|
+| **Size** | ~14 GB VRAM |
+| **Speed** | ~15-20s per review |
+| **Why it works** | Strongest ideological consistency of all tested models. Characters feel genuinely distinct. |
+| **Minimum hardware** | 16 GB VRAM recommended |
+
+Our top pick for quality. Adolf gives `1/10` to everything that contradicts his worldview — and
+the reasons change per film. Po is terrified by The Shining (`1/10`) but loves Soul (`10/10`).
+Elon dismisses anything that isn't a productivity win (`1/10`). The ideological logic is tight.
+
+---
+
+### Best speed — `type32/eva-qwen-2.5-14b`
 
 ```bash
 ollama pull type32/eva-qwen-2.5-14b
@@ -54,47 +72,9 @@ ollama pull type32/eva-qwen-2.5-14b
 | **Why it works** | Strong instruction-following, good ideological calibration, consistent character voices |
 | **Minimum hardware** | 8 GB VRAM (GPU) or 16 GB RAM (CPU, much slower) |
 
-Our top pick. Characters like Adolf and Rosario give ideologically coherent ratings — not just
-the usual "decent film, 7 out of 10". A fascist character will genuinely hate a Korean film for
-the right reasons. A feminist critic will love Soul. That's the whole point.
-
----
-
-### Best quality (slower) — `mistral-small3.1:24b`
-
-```bash
-ollama pull mistral-small3.1:24b
-```
-
-| | |
-|-|-|
-| **Size** | ~14 GB VRAM |
-| **Speed** | ~20s per review |
-| **Why it works** | Larger model, strongest ideological consistency of all tested models |
-| **Minimum hardware** | 16 GB VRAM recommended |
-
-If you have a 16 GB GPU and don't mind waiting a bit longer, this is the step up.
-Characters are sharper, ratings more extreme when they should be. Adolf will give 1/10 to
-everything that contradicts his worldview. Rosario will give 9/10 to Soul.
-
----
-
-### Fastest — `phi4:latest`
-
-```bash
-ollama pull phi4
-```
-
-| | |
-|-|-|
-| **Size** | ~8 GB VRAM |
-| **Speed** | ~7s per review |
-| **Why it works** | Very fast, reliable, 100% success rate in testing |
-| **Minimum hardware** | 8 GB VRAM (GPU) or 16 GB RAM (CPU, much slower) |
-
-Great if speed matters more than calibration depth. Some characters (especially Alan Turbing
-and El Gran Lebowski) can be a bit harsh across the board, but the overall experience is solid
-and it never fails to produce a review.
+Best if speed matters. Characters give ideologically coherent ratings with good range.
+Highlight: Adolf gives `10/10` to Soul — ideologically justified (order, harmony, discipline).
+One quirk: El Gran Lebowski tends to float around 6-7/10 across most films.
 
 ---
 
@@ -125,8 +105,10 @@ We tested these and they don't work well for this use case — saving you the do
 
 | Model | Problem |
 |-------|---------|
+| `phi4:latest` | Confirmed negative bias — gives 1/10 to everything regardless of character (Po gives 2/10 to Star Wars) |
 | `dolphin3` | Gives ~7/10 to everything regardless of character ideology |
 | `phi4-reasoning:14b` | Takes 20+ minutes per review due to how Ollama handles its thinking tokens |
+| `mis-firefly-22b` | Leaks system prompt artifacts in output (`[/INST]`, examples), flat calibration |
 | `qwen3:14b` (default settings) | Reviews are very short (~100 words) because thinking tokens eat the budget |
 | RP/narrative fine-tunes in general | Trained to write beautiful prose, not to reason ideologically — flat ratings |
 

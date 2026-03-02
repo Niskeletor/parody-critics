@@ -1,7 +1,7 @@
 # Benchmark Comparativo — Todos los Modelos
 
-**Fecha**: 2026-03-01  
-**Protocolo**: 8 personajes × 4 películas = 32 críticas por modelo  
+**Fecha**: 2026-03-01 | **Re-benchmark top 3**: 2026-03-02
+**Protocolo**: 8 personajes × 4 películas = 32 críticas por modelo
 **Hardware**: Omnius — RTX 5060 Ti 16GB VRAM (192.168.2.69)
 
 ---
@@ -12,14 +12,15 @@
 |--------|--------|-----------|-------|-------------|-----------|
 | `dolphin3:latest` | 4GB | ~7s | 28/32 | ❌ flat 7/10 | **DESCARTADO** |
 | `phi4-reasoning:14b` | 10GB | ~1200s | — | — | **DESCARTADO** (muy lento) |
+| `mis-firefly-22b:latest` | 13GB | ~25s | — | ❌ leaks prompt artifacts | **DESCARTADO** |
+| `phi4:latest` | 8GB | ~7s | 32/32 | ❌ sesgo negativo confirmado | **DESCARTADO** |
 | `muse-12b:latest` | 6GB | ~7s | 30/32 | ⚠️ flat 7, voz OK | Voice-only |
 | `LESSTHANSUPER/MAGNUM_V4-Mistral_Small:12b_Q5_K_M` | 8GB | ~6s | 32/32 | ⚠️ flat 7, voz OK | Voice-only |
 | `deepseek-r1:8b` | 4GB | ~10s | 32/32 | 🔶 mixto | Candidato |
-| `phi4:latest` | 8GB | ~7s | 32/32 | 🔶 sesgo negativo | Candidato |
 | `richardyoung/qwen3-14b-abliterated:latest` | 8GB | ~10s | 31/32 | 🔶 Rosario plana | Candidato |
 | `qwen3:14b` | 8GB | ~20s | 32/32 | 🔶 muy negativo, respuestas cortas | Descartable |
-| `eva-qwen-2.5-14b:latest` | 7GB | ~8s | 32/32 | ✅ buen balance | **TOP 1** |
-| `mistral-small3.1:24b` | 14GB | ~20s | 30/32 | ✅✅ fuerte | **TOP 2** |
+| `type32/eva-qwen-2.5-14b:latest` | 7GB | ~8s | 31/32 | ✅ buen balance | **TOP 1 velocidad** |
+| `mistral-small3.1:24b` | 14GB | ~15-20s | 32/32 | ✅✅✅ excelente | **TOP 1 calidad** |
 | `gemma3:27b` | 16GB | ~70s | 32/32 | ✅✅✅ mejor | Futuro hardware |
 | `qwen3.5:27b` | 22GB | ∞ | — | — | **Necesita 2x16GB** |
 | `qwen3.5:35b` | 23GB | ∞ | — | — | **Necesita 2x16GB** |
@@ -126,28 +127,21 @@
 
 ### 🟢 TOP CANDIDATOS
 
-#### `eva-qwen-2.5-14b:latest` ⭐⭐⭐
-- **Velocidad**: ~8s/crítica (excelente)
-- **Fiabilidad**: 32/32 OK
-- **Calibración**: Buena. Adolf 3-4/10, Rosario 1/10 El resplandor, Lloyd 9/10 Parásitos
-- **Highlight**: Adolf da 10/10 a Soul (justificado ideológicamente — brillante)
-- **Debilidad**: Elon demasiado neutro (7/10 Parásitos)
-- **Recomendación**: **Modelo de producción principal**
+#### `mistral-small3.1:24b` ⭐⭐⭐⭐⭐ — TOP 1 calidad
+- **Velocidad**: ~15-20s/crítica (aceptable)
+- **Fiabilidad**: 32/32 OK (re-benchmark 2026-03-02)
+- **Calibración**: **La mejor entre los modelos viables**. Adolf `2,1,3,1` — cada película con lógica propia. Po `9,4,1,10` — ama SW, aterrado con El Resplandor, adora Soul. Elon `1,3,3,1`. Mark `1,9,8,7`.
+- **Recomendación**: **Modelo principal de producción**
 
-#### `mistral-small3.1:24b` ⭐⭐⭐
-- **Velocidad**: ~20s/crítica (aceptable)
-- **Fiabilidad**: 30/32 OK
-- **Calibración**: Muy fuerte. Adolf 1/10 a todo, Elon 1-2/10, Rosario 9/10 Soul
-- **Debilidad**: Algunos personajes demasiado extremos (Elon 1/10 a todo sin distinción)
-- **Recomendación**: **Alternativa de alta calidad** (cuando la velocidad no sea crítica)
+#### `type32/eva-qwen-2.5-14b:latest` ⭐⭐⭐⭐ — TOP 1 velocidad
+- **Velocidad**: ~8s/crítica (excelente)
+- **Fiabilidad**: 31/32 OK (re-benchmark 2026-03-02)
+- **Calibración**: Buena. Personajes diferenciados, ratings con rango real.
+- **Highlight**: Adolf da 10/10 a Soul (justificado ideológicamente — brillante)
+- **Debilidad**: Lebowski un poco plano (6-7/10 a todo), 1 fallo de parseo
+- **Recomendación**: **Mejor opción si la velocidad es prioritaria**
 
 ### 🟡 CANDIDATOS SECUNDARIOS
-
-#### `phi4:latest` ⭐⭐
-- **Velocidad**: ~7s/crítica (rapidísimo, ya cargado normalmente)
-- **Fiabilidad**: 32/32 OK
-- **Calibración**: Mark Hamill y Adolf excelentes. Alan y Lebowski con sesgo negativo
-- **Recomendación**: Bueno como fallback rápido
 
 #### `deepseek-r1:8b` ⭐⭐
 - **Velocidad**: ~10s/crítica
@@ -173,9 +167,11 @@
 
 | Modelo | Razón |
 |--------|-------|
+| `phi4:latest` | Sesgo negativo confirmado — da 1/10 a todo independientemente del personaje |
 | `dolphin3` | Flat 7/10, no sigue lógica ideológica |
 | `phi4-reasoning:14b` | 20min/crítica (thinking tokens consumen budget) |
-| `qwen3:14b` | Thinking útil pero respuestas muy cortas (~100w), sesgo negativo |
+| `mis-firefly-22b` | Filtra artefactos del prompt (`[/INST]`), calibración plana |
+| `qwen3:14b` | Respuestas muy cortas (~100w), sesgo negativo |
 | `qwen3.5:27b` | 10.6GB en CPU — velocidad impráctica |
 | `qwen3.5:35b` | 23GB total — velocidad impráctica |
 
@@ -196,15 +192,9 @@
 
 ## Próximos Pasos
 
-1. **Fix de prompt** (rating calibration): añadir rubrica explícita al prompt
-   - Anclar ratings a ejemplos concretos por personaje  
-   - Separar la evaluación del rating de la evaluación del texto
-   
-2. **Re-benchmark** `eva-qwen` + `mistral-small3.1:24b` con prompt corregido
+1. **Producción**: `mistral-small3.1:24b` como modelo principal, `eva-qwen` como fallback rápido
 
-3. **Ajuste `qwen3-14b-abliterated`**: subir `num_predict=2000`, re-benchmark
+2. **Plugin Jellyfin**: integrar la API en el plugin JS — objetivo final del proyecto
 
-4. **Producción**: configurar `LLM_PRIMARY_MODEL=type32/eva-qwen-2.5-14b:latest`
-
-5. **Hardware futuro**: 2x RTX 5060 Ti → `gemma3:27b` como modelo principal
+3. **Hardware futuro**: RTX 3080 (192.168.45.161) + RTX 5060 Ti → 26GB pool → `gemma3:27b` como modelo principal
 
