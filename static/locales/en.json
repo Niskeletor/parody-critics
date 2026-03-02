@@ -53,7 +53,10 @@
     "loading": "🎭 Loading characters...",
     "error_loading": "❌ Error loading characters",
     "btn_edit_title": "Edit",
-    "btn_delete_title": "Delete"
+    "btn_delete_title": "Delete",
+    "none_available": "No characters available",
+    "none_action": "Create your first critic character to get started",
+    "btn_create": "➕ Create Character"
   },
   "status": {
     "heading": "📊 System Status",

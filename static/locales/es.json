@@ -53,7 +53,10 @@
     "loading": "🎭 Cargando personajes...",
     "error_loading": "❌ Error cargando personajes",
     "btn_edit_title": "Editar",
-    "btn_delete_title": "Eliminar"
+    "btn_delete_title": "Eliminar",
+    "none_available": "No hay personajes disponibles",
+    "none_action": "Crea tu primer personaje crítico para comenzar",
+    "btn_create": "➕ Crear Personaje"
   },
   "status": {
     "heading": "📊 Estado del Sistema",

@@ -299,7 +299,7 @@ class ParodyCriticsApp {
       console.log('✅ Initial data loaded successfully');
     } catch (error) {
       console.error('❌ Failed to load initial data:', error);
-      this.showError('Failed to load initial data: ' + error.message);
+      this.showError(t('error.load_data', { error: error.message }));
     }
   }
 
@@ -315,10 +315,10 @@ class ParodyCriticsApp {
       const health = await this.fetchAPI('/health');
       const statusElement = document.getElementById('system-status');
       if (health.status === 'healthy') {
-        statusElement.textContent = '✅ Operativo';
+        statusElement.textContent = t('status.operative');
         statusElement.style.color = 'var(--success)';
       } else {
-        statusElement.textContent = '⚠️ Issues';
+        statusElement.textContent = t('status.issues');
         statusElement.style.color = 'var(--warning)';
       }
     } catch (error) {
@@ -334,7 +334,7 @@ class ParodyCriticsApp {
       this.mediaState.currentData = [];
       this.mediaState.currentOffset = 0;
       this.mediaState.hasMore = true;
-      mediaGrid.innerHTML = '<div class="loading">🎬 Cargando películas y series...</div>';
+      mediaGrid.innerHTML = `<div class="loading">${t('media.loading_all')}</div>`;
     } else if (this.mediaState.isLoading || !this.mediaState.hasMore) {
       return; // Already loading or no more data
     }
@@ -362,7 +362,7 @@ class ParodyCriticsApp {
       if (newMedia.length === 0) {
         this.mediaState.hasMore = false;
         if (this.mediaState.currentData.length === 0) {
-          mediaGrid.innerHTML = '<div class="loading">📭 No se encontraron películas</div>';
+          mediaGrid.innerHTML = `<div class="loading">${t('media.not_found')}</div>`;
         }
       } else {
         // Add new media to current data
@@ -390,7 +390,7 @@ class ParodyCriticsApp {
     } catch (error) {
       console.error('Failed to load media:', error);
       if (reset) {
-        mediaGrid.innerHTML = '<div class="loading">❌ Error loading media</div>';
+        mediaGrid.innerHTML = `<div class="loading">${t('media.error_loading')}</div>`;
       }
     } finally {
       this.mediaState.isLoading = false;
@@ -629,8 +629,8 @@ class ParodyCriticsApp {
     // Update button text
     const toggleButton = document.getElementById('group-toggle');
     toggleButton.textContent = this.mediaState.isGroupedView
-      ? '📄 Vista Lista'
-      : '📚 Vista Agrupada';
+      ? t('media.btn_list')
+      : t('media.btn_grouped');
 
     // Re-render with current data
     if (this.mediaState.currentData.length > 0) {
@@ -672,7 +672,7 @@ class ParodyCriticsApp {
     let html = '<div class="alphabet-nav">';
 
     // "Todos" button
-    html += `<button class="letter-btn active" onclick="app.filterByLetter('')" data-letter="">TODOS</button>`;
+    html += `<button class="letter-btn active" onclick="app.filterByLetter('')" data-letter="">${t('media.alphabet_all')}</button>`;
 
     // Numbers button
     html += `<button class="letter-btn" onclick="app.filterByLetter('0-9')" data-letter="0-9">#</button>`;
@@ -734,7 +734,7 @@ class ParodyCriticsApp {
 
   async loadCriticsData() {
     const criticsList = document.getElementById('critics-list');
-    criticsList.innerHTML = '<div class="loading">📝 Cargando críticas...</div>';
+    criticsList.innerHTML = `<div class="loading">${t('critics.loading')}</div>`;
 
     try {
       // Get all media with critics
@@ -742,7 +742,7 @@ class ParodyCriticsApp {
       const media = response.items ?? response;
 
       if (!media || media.length === 0) {
-        criticsList.innerHTML = '<div class="loading">📝 No critics found yet</div>';
+        criticsList.innerHTML = `<div class="loading">${t('critics.none_found')}</div>`;
         return;
       }
 
@@ -762,7 +762,7 @@ class ParodyCriticsApp {
       this.renderCriticsList(validCritics);
     } catch (error) {
       console.error('Failed to load critics:', error);
-      criticsList.innerHTML = '<div class="loading">❌ Error loading critics</div>';
+      criticsList.innerHTML = `<div class="loading">${t('critics.error_loading')}</div>`;
     }
   }
 
@@ -770,7 +770,7 @@ class ParodyCriticsApp {
     const criticsList = document.getElementById('critics-list');
 
     if (!criticsData || criticsData.length === 0) {
-      criticsList.innerHTML = '<div class="loading">📝 No critics available</div>';
+      criticsList.innerHTML = `<div class="loading">${t('critics.none_available')}</div>`;
       return;
     }
 
@@ -844,7 +844,7 @@ class ParodyCriticsApp {
         .join('');
     } catch (error) {
       console.error('Failed to load characters:', error);
-      characterSelector.innerHTML = '<div class="loading">❌ Error loading characters</div>';
+      characterSelector.innerHTML = `<div class="loading">${t('characters.error_loading')}</div>`;
     }
   }
 
@@ -947,9 +947,9 @@ class ParodyCriticsApp {
             `;
     } catch (error) {
       console.error('Failed to load status data:', error);
-      healthStatus.innerHTML = '<div class="loading">❌ Error loading health status</div>';
-      llmStatus.innerHTML = '<div class="loading">❌ Error loading LLM status</div>';
-      dbStats.innerHTML = '<div class="loading">❌ Error loading database stats</div>';
+      healthStatus.innerHTML = `<div class="loading">${t('status.error_health')}</div>`;
+      llmStatus.innerHTML = `<div class="loading">${t('status.error_llm')}</div>`;
+      dbStats.innerHTML = `<div class="loading">${t('status.error_db')}</div>`;
     }
   }
 
@@ -1208,7 +1208,7 @@ class ParodyCriticsApp {
       }
     } catch (error) {
       console.error('❌ Failed to start import:', error);
-      this.showError('Failed to start media import. Please try again.');
+      this.showError(t('import.error_start'));
     }
   }
 
@@ -1227,7 +1227,7 @@ class ParodyCriticsApp {
       }
 
       btn.disabled = true;
-      btn.innerHTML = '⏳ Iniciando...';
+      btn.innerHTML = t('enrich.btn_starting');
 
       const result = await this.fetchAPI('/enrich/all', 'POST');
 
@@ -1241,7 +1241,7 @@ class ParodyCriticsApp {
       }
     } catch (error) {
       console.error('Enrich failed:', error);
-      this.showError('Error al iniciar el enriquecimiento');
+      this.showError(t('enrich.error_start'));
       btn.disabled = false;
       btn.innerHTML = originalText;
     }
@@ -1374,7 +1374,7 @@ class ParodyCriticsApp {
     const errors = document.getElementById('enrich-errors');
     if (errors) errors.textContent = data.errors;
     const current = document.getElementById('enrich-current-item');
-    if (current) current.textContent = data.current_item || 'Processing...';
+    if (current) current.textContent = data.current_item || t('import.processing');
     if (data.current_item) {
       this.addEnrichLogEntry(`📄 Enriching: ${data.current_item}`);
     }
@@ -1391,9 +1391,9 @@ class ParodyCriticsApp {
     const pct = document.getElementById('enrich-percentage');
     if (pct) pct.textContent = '100%';
     const st = document.getElementById('enrich-status');
-    if (st) st.textContent = 'Enrichment Completed!';
+    if (st) st.textContent = t('enrich.completed');
     const current = document.getElementById('enrich-current-item');
-    if (current) current.textContent = 'All items enriched successfully';
+    if (current) current.textContent = t('enrich.all_done');
 
     this.addEnrichLogEntry('✅ Enrichment completed successfully!');
     this.addEnrichLogEntry(`📊 Final: ${data.processed_items} enriched, ${data.errors} errors`);
@@ -1414,9 +1414,9 @@ class ParodyCriticsApp {
     const content = document.querySelector('#enrich-progress-modal .import-progress-content');
     if (content) content.classList.add('import-fail');
     const st = document.getElementById('enrich-status');
-    if (st) st.textContent = 'Enrichment Failed';
+    if (st) st.textContent = t('enrich.failed');
     const current = document.getElementById('enrich-current-item');
-    if (current) current.textContent = 'Error occurred during enrichment';
+    if (current) current.textContent = t('enrich.error_occurred');
 
     this.addEnrichLogEntry(
       `❌ Enrichment failed: ${data.error_messages?.join(', ') || 'Unknown error'}`
@@ -1426,14 +1426,14 @@ class ParodyCriticsApp {
     if (cancelBtn) cancelBtn.style.display = 'none';
 
     this.closeEnrichWebSocket();
-    this.showError('Enrichment failed. Check the log for details.');
+    this.showError(t('enrich.error_failed'));
   }
 
   handleEnrichCancelled(data) {
     const st = document.getElementById('enrich-status');
-    if (st) st.textContent = 'Enrichment Cancelled';
+    if (st) st.textContent = t('enrich.cancelled');
     const current = document.getElementById('enrich-current-item');
-    if (current) current.textContent = 'Enrichment was cancelled by user';
+    if (current) current.textContent = t('enrich.was_cancelled');
 
     this.addEnrichLogEntry('🛑 Enrichment cancelled by user');
 
@@ -1457,7 +1457,7 @@ class ParodyCriticsApp {
       }
     } catch (error) {
       console.error('❌ Failed to cancel enrichment:', error);
-      this.showError('Failed to cancel enrichment');
+      this.showError(t('enrich.error_cancel'));
     }
   }
 
@@ -1933,7 +1933,8 @@ class ParodyCriticsApp {
     document.getElementById('error-items').textContent = data.errors;
 
     // Update current item
-    document.getElementById('current-item').textContent = data.current_item || 'Processing...';
+    document.getElementById('current-item').textContent =
+      data.current_item || t('import.processing');
 
     // Add log entry for progress
     if (data.current_item) {
@@ -1947,8 +1948,8 @@ class ParodyCriticsApp {
     fill.classList.add('completed');
     document.querySelector('.import-progress-content').classList.add('import-success');
     document.getElementById('import-percentage').textContent = '100%';
-    document.getElementById('import-status').textContent = 'Import Completed!';
-    document.getElementById('current-item').textContent = 'All items processed successfully';
+    document.getElementById('import-status').textContent = t('import.completed');
+    document.getElementById('current-item').textContent = t('import.all_done');
 
     this.addLogEntry('✅ Import completed successfully!');
     this.addLogEntry(`📊 Final stats: ${data.processed_items} items processed`);
@@ -1989,8 +1990,8 @@ class ParodyCriticsApp {
     const fill = document.getElementById('import-progress-fill');
     fill.classList.add('import-error');
     document.querySelector('.import-progress-content').classList.add('import-fail');
-    document.getElementById('import-status').textContent = 'Import Failed';
-    document.getElementById('current-item').textContent = 'Error occurred during import';
+    document.getElementById('import-status').textContent = t('import.failed');
+    document.getElementById('current-item').textContent = t('import.error_occurred');
 
     this.addLogEntry(`❌ Import failed: ${data.error_messages?.join(', ') || 'Unknown error'}`);
 
@@ -2001,12 +2002,12 @@ class ParodyCriticsApp {
     this.closeImportWebSocket();
 
     // Show error message
-    this.showError('Media import failed. Check the log for details.');
+    this.showError(t('import.error_failed'));
   }
 
   handleImportCancelled(data) {
-    document.getElementById('import-status').textContent = 'Import Cancelled';
-    document.getElementById('current-item').textContent = 'Import was cancelled by user';
+    document.getElementById('import-status').textContent = t('import.cancelled');
+    document.getElementById('current-item').textContent = t('import.was_cancelled');
 
     this.addLogEntry('🛑 Import cancelled by user');
 
@@ -2025,7 +2026,7 @@ class ParodyCriticsApp {
   // ========================================
 
   async deleteSingleCritic(criticId, tmdbId, authorName) {
-    if (!confirm(`¿Eliminar la crítica de "${authorName}"?`)) return;
+    if (!confirm(t('critics.confirm_delete', { author: authorName }))) return;
 
     try {
       const result = await this.fetchAPI(`/critics/${criticId}`, 'DELETE');
@@ -2043,15 +2044,12 @@ class ParodyCriticsApp {
         this.showMessage(`Crítica de "${authorName}" eliminada`, 'success');
       }
     } catch (error) {
-      this.showError('Error eliminando crítica: ' + error.message);
+      this.showError(t('critics.error_delete', { error: error.message }));
     }
   }
 
   async deleteAllMediaCritics(tmdbId, title) {
-    if (
-      !confirm(`¿Eliminar TODAS las críticas de "${title}"?\n\nEsta acción no se puede deshacer.`)
-    )
-      return;
+    if (!confirm(t('critics.confirm_delete_all', { title }))) return;
 
     try {
       const result = await this.fetchAPI(`/media/${tmdbId}/critics`, 'DELETE');
@@ -2061,7 +2059,7 @@ class ParodyCriticsApp {
         this._updateCardCriticCount(tmdbId, 0);
       }
     } catch (error) {
-      this.showError('Error eliminando críticas: ' + error.message);
+      this.showError(t('critics.error_delete_all', { error: error.message }));
     }
   }
 
@@ -2071,14 +2069,14 @@ class ParodyCriticsApp {
     const countEl = card.querySelector('.critics-count');
     if (!countEl) return;
     if (delta === 0) {
-      countEl.textContent = '📝 Sin críticas';
+      countEl.textContent = t('critics.none_for_media');
       countEl.className = 'critics-count';
     } else {
       const match = countEl.textContent.match(/(\d+)/);
       const current = match ? parseInt(match[1]) : 0;
       const newCount = Math.max(0, current + delta);
       if (newCount === 0) {
-        countEl.textContent = '📝 Sin críticas';
+        countEl.textContent = t('critics.none_for_media');
         countEl.className = 'critics-count';
       } else {
         countEl.textContent = `📝 ${newCount} críticas`;
@@ -3088,7 +3086,7 @@ class ParodyCriticsApp {
     if (!charactersGrid) return;
 
     try {
-      charactersGrid.innerHTML = '<div class="loading">🎭 Cargando personajes...</div>';
+      charactersGrid.innerHTML = `<div class="loading">${t('characters.loading')}</div>`;
 
       const characters = await this.fetchAPI('/characters');
 
@@ -3096,10 +3094,10 @@ class ParodyCriticsApp {
         charactersGrid.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">🎭</div>
-                        <h3>No hay personajes disponibles</h3>
-                        <p>Crea tu primer personaje crítico para comenzar</p>
+                        <h3>${t('characters.none_available')}</h3>
+                        <p>${t('characters.none_action')}</p>
                         <button class="btn-primary" onclick="app.openAddCharacterModal()">
-                            ➕ Crear Personaje
+                            ${t('characters.btn_create')}
                         </button>
                     </div>
                 `;
@@ -3116,10 +3114,10 @@ class ParodyCriticsApp {
                         <div class="character-card-header">
                             <div class="character-emoji">${character.emoji || '🎭'}</div>
                             <div class="character-actions">
-                                <button class="btn-icon" onclick="app.editCharacter('${character.id}')" title="Editar">
+                                <button class="btn-icon" onclick="app.editCharacter('${character.id}')" title="${t('characters.btn_edit_title')}">
                                     ✏️
                                 </button>
-                                <button class="btn-icon btn-danger" onclick="app.deleteCharacter('${character.id}', '${character.name}')" title="Eliminar">
+                                <button class="btn-icon btn-danger" onclick="app.deleteCharacter('${character.id}', '${character.name}')" title="${t('characters.btn_delete_title')}">
                                     🗑️
                                 </button>
                             </div>
@@ -3480,7 +3478,7 @@ class ParodyCriticsApp {
       }
 
       this.currentEditingCharacter = character;
-      this.showCharacterModal('Editar Personaje', character);
+      this.showCharacterModal(t('modal.character.title_edit'), character);
     } catch (error) {
       console.error('❌ Error loading character for edit:', error);
       this.showError('Error cargando personaje: ' + error.message);
@@ -3663,7 +3661,7 @@ class ParodyCriticsApp {
       }
     } catch (error) {
       console.error('❌ Error deleting character critics:', error);
-      this.showError('Error eliminando críticas: ' + error.message);
+      this.showError(t('critics.error_delete_all', { error: error.message }));
     }
   }
 
@@ -3831,7 +3829,7 @@ class ParodyCriticsApp {
         );
       }
     } catch (error) {
-      this.showError('Error eliminando críticas: ' + error.message);
+      this.showError(t('critics.error_delete_all', { error: error.message }));
     }
   }
 
