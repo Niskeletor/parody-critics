@@ -243,35 +243,58 @@
                 </div>
               </div>
 
-              <!-- Database Export -->
+              <!-- Database Backup & Restore -->
               <div class="status-card">
                 <h3>💾 Copia de Seguridad</h3>
                 <p class="status-card-desc">
-                  Descarga un backup consistente de la base de datos SQLite. Seguro incluso con el
-                  servidor en ejecución.
+                  Exporta un backup verificado o restaura desde un archivo .db anterior.
                 </p>
-                <button
-                  id="db-export-btn"
-                  class="btn btn-secondary db-export-btn"
-                  onclick="app.exportDatabase()"
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
+                <div class="db-backup-actions">
+                  <button
+                    id="db-export-btn"
+                    class="btn btn-secondary db-export-btn"
+                    onclick="app.exportDatabase()"
                   >
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  Exportar DB
-                </button>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Exportar DB
+                  </button>
+                  <button
+                    id="db-import-open-btn"
+                    class="btn btn-secondary"
+                    onclick="app.openImportModal()"
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    Importar DB
+                  </button>
+                </div>
                 <span class="db-export-status" id="db-export-status"></span>
               </div>
             </div>
@@ -337,6 +360,133 @@
     <script>
       document.getElementById('footer-year').textContent = new Date().getFullYear();
     </script>
+
+    <!-- DB Import Modal -->
+    <div class="modal hidden" id="db-import-modal">
+      <div class="modal-content db-import-modal-content">
+        <button class="modal-close" onclick="app.closeImportModal()">&times;</button>
+
+        <!-- Step 1: Pre-flight -->
+        <div id="db-import-step1">
+          <div class="modal-header">
+            <h3>⚠️ Restaurar Base de Datos</h3>
+          </div>
+          <div class="modal-body">
+            <p class="db-import-warning">
+              La base de datos actual será <strong>reemplazada completamente</strong>. Esta acción
+              no se puede deshacer — se creará un snapshot automático de seguridad antes de
+              restaurar.
+            </p>
+
+            <div class="db-import-active-ops hidden" id="db-import-active-ops">
+              <span class="db-import-ops-text" id="db-import-ops-text"></span>
+              <button class="btn-danger" onclick="app._dbImportForceStop()">
+                Detener y continuar
+              </button>
+            </div>
+
+            <div class="db-import-step1-actions">
+              <button
+                class="btn btn-primary db-import-export-first-btn"
+                onclick="app._dbImportExportFirst()"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Exportar backup ahora y continuar
+              </button>
+              <button class="btn btn-secondary" onclick="app._dbImportGoStep2()">
+                Ya tengo backup, continuar →
+              </button>
+              <button class="btn-ghost" onclick="app.closeImportModal()">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Upload + progress -->
+        <div id="db-import-step2" class="hidden">
+          <div class="modal-header">
+            <h3>💾 Selecciona el archivo de backup</h3>
+          </div>
+          <div class="modal-body">
+            <!-- File drop zone -->
+            <div
+              class="db-dropzone"
+              id="db-dropzone"
+              ondragover="
+                event.preventDefault();
+                this.classList.add('dragover');
+              "
+              ondragleave="this.classList.remove('dragover')"
+              ondrop="app._dbImportHandleDrop(event)"
+            >
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              <p>Arrastra tu archivo <code>.db</code> aquí</p>
+              <p class="db-dropzone-hint">o</p>
+              <label class="btn btn-secondary db-dropzone-label">
+                Seleccionar archivo
+                <input
+                  type="file"
+                  id="db-import-file"
+                  accept=".db"
+                  style="display: none"
+                  onchange="app._dbImportHandleFile(this.files[0])"
+                />
+              </label>
+              <p class="db-dropzone-hint">Formato: .db · Máx 100 MB</p>
+            </div>
+
+            <!-- Progress (hidden until upload starts) -->
+            <div class="db-import-progress hidden" id="db-import-progress">
+              <div class="db-progress-bar-wrap">
+                <div class="db-progress-bar" id="db-progress-bar"></div>
+              </div>
+              <div class="db-import-stages">
+                <div class="db-stage" id="db-stage-upload">○ Subiendo…</div>
+                <div class="db-stage" id="db-stage-verify">○ Verificando integridad…</div>
+                <div class="db-stage" id="db-stage-snapshot">○ Snapshot de seguridad…</div>
+                <div class="db-stage" id="db-stage-restore">○ Restaurando…</div>
+              </div>
+            </div>
+
+            <!-- Result (hidden until done) -->
+            <div class="db-import-result hidden" id="db-import-result"></div>
+
+            <div class="db-import-step2-actions">
+              <button class="btn-ghost" id="db-import-cancel-btn" onclick="app.closeImportModal()">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Cart Side Panel with Overlay -->
     <div class="cart-overlay hidden" id="cart-overlay" onclick="app.closeCart()"></div>
