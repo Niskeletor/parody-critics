@@ -26,6 +26,10 @@ class ParodyCriticsApp {
       },
     };
 
+    // 🔍 Search state
+    this._searchDebounce = null;
+    this.isSearchActive = false;
+
     // 🛒 E-commerce Cart System properties
     this.cart = new Map(); // Map of tmdb_id -> media object
     this.isCartOpen = false;
@@ -411,6 +415,48 @@ class ParodyCriticsApp {
     this.generateAlphabetNavigation();
   }
 
+  onSearchInput(value) {
+    clearTimeout(this._searchDebounce);
+    const q = value.trim();
+
+    if (q.length === 0) {
+      this.isSearchActive = false;
+      this._setFiltersDisabled(false);
+      this.loadMediaData();
+      return;
+    }
+
+    if (q.length < 2) return;
+
+    this._searchDebounce = setTimeout(() => this._runSearch(q), 300);
+  }
+
+  async _runSearch(q) {
+    this.isSearchActive = true;
+    this._setFiltersDisabled(true);
+
+    const mediaGrid = document.getElementById('media-grid');
+    mediaGrid.innerHTML = `<div class="loading">🔍 Buscando "${q}"…</div>`;
+
+    try {
+      const results = await this.fetchAPI(`/media/search?query=${encodeURIComponent(q)}&limit=20`);
+      if (results.length === 0) {
+        mediaGrid.innerHTML = `<div class="loading">Sin resultados para <em>"${q}"</em></div>`;
+      } else {
+        this.renderMediaGrid(results);
+      }
+    } catch {
+      mediaGrid.innerHTML = `<div class="loading">Error al buscar. Inténtalo de nuevo.</div>`;
+    }
+  }
+
+  _setFiltersDisabled(disabled) {
+    ['type-filter', 'critics-filter', 'group-toggle'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.disabled = disabled;
+    });
+  }
+
   setupInfiniteScroll() {
     // Remove any existing scroll listeners to avoid duplicates
     window.removeEventListener('scroll', this.handleScroll);
@@ -426,8 +472,8 @@ class ParodyCriticsApp {
     const windowHeight = window.innerHeight || document.documentElement.clientHeight;
     const documentHeight = document.documentElement.scrollHeight;
 
-    // Load more when user is 300px from bottom
-    if (scrollTop + windowHeight >= documentHeight - 300) {
+    // Load more when user is 300px from bottom (not during search)
+    if (!this.isSearchActive && scrollTop + windowHeight >= documentHeight - 300) {
       console.log('📜 Scroll detected near bottom, loading more media...');
       this.loadMediaData(false); // false = don't reset, append more data
     }

@@ -126,6 +126,37 @@ def _run_auto_migrations(db_path: str):
             if col not in existing_char_cols:
                 migrations.append(f"ALTER TABLE characters ADD COLUMN {col} TEXT DEFAULT '{default}'")
 
+        # FTS5 index for media search
+        vtables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='media_fts'").fetchall()}
+        if "media_fts" not in vtables:
+            conn.execute("CREATE VIRTUAL TABLE media_fts USING FTS5 (title, content=media)")
+
+        # Sync triggers so new media rows are indexed immediately
+        triggers = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='trigger'").fetchall()}
+        if "media_fts_insert" not in triggers:
+            conn.execute("""
+                CREATE TRIGGER media_fts_insert AFTER INSERT ON media BEGIN
+                    INSERT INTO media_fts(rowid, title) VALUES (new.id, new.title);
+                END
+            """)
+        if "media_fts_delete" not in triggers:
+            conn.execute("""
+                CREATE TRIGGER media_fts_delete AFTER DELETE ON media BEGIN
+                    INSERT INTO media_fts(media_fts, rowid, title) VALUES('delete', old.id, old.title);
+                END
+            """)
+        if "media_fts_update" not in triggers:
+            conn.execute("""
+                CREATE TRIGGER media_fts_update AFTER UPDATE OF title ON media BEGIN
+                    INSERT INTO media_fts(media_fts, rowid, title) VALUES('delete', old.id, old.title);
+                    INSERT INTO media_fts(rowid, title) VALUES (new.id, new.title);
+                END
+            """)
+
+        # Always rebuild on startup — guarantees index consistency (fast: <100ms for ~5k rows)
+        conn.execute("INSERT INTO media_fts(media_fts) VALUES('rebuild')")
+        setup_logger.info("FTS index rebuilt")
+
         # Motif history table
         if "character_motif_history" not in tables:
             migrations.append("""
@@ -144,8 +175,8 @@ def _run_auto_migrations(db_path: str):
             conn.execute(sql)
             setup_logger.info(f"Migration applied: {sql.strip()[:80]}")
 
+        conn.commit()
         if migrations:
-            conn.commit()
             setup_logger.info(f"✅ Auto-migration: {len(migrations)} statement(s) applied")
         else:
             setup_logger.info("✅ Auto-migration: schema up to date")
@@ -609,17 +640,21 @@ async def search_media(
         LIMIT ?
     """
 
-    # Create FTS query pattern with proper escaping for special characters
-    fts_query = query.strip()
+    # Build FTS5 query: each word quoted (escapes operators), last word gets * for prefix match.
+    # "Mari"       → "Mari"*           → matches Marilyn, Marino, etc.
+    # "Marilyn Ma" → "Marilyn" "Ma"*   → matches Marilyn Manson, Marilyn Mansion, etc.
+    def build_fts_query(q: str) -> str:
+        words = q.strip().split()
+        tokens = []
+        for i, word in enumerate(words):
+            escaped = word.replace('"', '""')   # only " needs escaping inside quoted token
+            tokens.append(f'"{escaped}"*' if i == len(words) - 1 else f'"{escaped}"')
+        return " ".join(tokens)
 
-    # Escape FTS special characters to prevent syntax errors
-    fts_special_chars = '"*()[]{}~:'
-    for char in fts_special_chars:
-        fts_query = fts_query.replace(char, f'"{char}"')
+    fts_query = build_fts_query(query)
 
-    # If FTS query is problematic, fallback to LIKE search
     try_fts = True
-    if len(fts_query) < 2 or any(c in fts_query for c in ['<', '>', 'script']):
+    if any(c in query for c in ['<', '>', 'script']):
         try_fts = False
 
     # Try FTS first, fallback to LIKE if needed
@@ -2605,6 +2640,20 @@ async def regen_field(body: dict = Body(...)):
 
 
 # ============================================================================
+
+@app.post("/api/admin/fts-rebuild")
+async def fts_rebuild():
+    """Rebuild the FTS search index manually. Use if search results look incomplete."""
+    import sqlite3 as _sqlite3
+    conn = _sqlite3.connect(str(DB_PATH))
+    try:
+        conn.execute("INSERT INTO media_fts(media_fts) VALUES('rebuild')")
+        conn.commit()
+        count = conn.execute("SELECT COUNT(*) FROM media").fetchone()[0]
+        return {"status": "ok", "message": f"FTS index rebuilt — {count} items indexed"}
+    finally:
+        conn.close()
+
 
 @app.exception_handler(500)
 async def internal_error_handler(request, exc):

@@ -128,6 +128,33 @@
             </div>
           </div>
 
+          <!-- Search Bar -->
+          <div class="media-search-bar">
+            <svg
+              class="search-icon"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="search"
+              id="media-search"
+              class="search-input"
+              placeholder="Buscar película o serie…"
+              autocomplete="off"
+              oninput="app.onSearchInput(this.value)"
+            />
+          </div>
+
           <!-- Alphabet Navigation -->
           <div id="alphabet-navigation" class="alphabet-navigation">
             <!-- Alphabet buttons will be generated here -->

@@ -376,6 +376,57 @@ body {
   align-items: center;
 }
 
+/* ── Search bar (full-width, below view-header) ── */
+
+.media-search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.media-search-bar .search-icon {
+  position: absolute;
+  left: var(--space-4);
+  color: var(--text-muted);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.search-input {
+  width: 100%;
+  background: var(--secondary-bg);
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-3) var(--space-4) var(--space-3) 2.75rem;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  transition: var(--transition);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--border-emphasis);
+  background: var(--accent-bg);
+}
+
+.search-input::-webkit-search-cancel-button {
+  cursor: pointer;
+  opacity: 0.5;
+}
+
+.search-input:disabled,
+.filter-select:disabled,
+.btn-view-toggle:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
 /* ── Toolbar buttons (media view) ── */
 
 .btn-view-toggle,
