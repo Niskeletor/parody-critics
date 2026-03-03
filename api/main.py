@@ -2644,6 +2644,17 @@ async def regen_field(body: dict = Body(...)):
 
 # ============================================================================
 
+@app.get("/api/admin/db/import/precheck")
+async def import_precheck():
+    """Return list of active blocking operations that should stop before a DB import."""
+    active_ops = []
+    if sync_manager and sync_manager.current_sync and sync_manager.current_sync.status.value == "running":
+        active_ops.append("sync")
+    if active_enrichment_session is not None:
+        active_ops.append("enrichment")
+    return {"active_ops": active_ops}
+
+
 @app.post("/api/admin/fts-rebuild")
 async def fts_rebuild():
     """Rebuild the FTS search index manually. Use if search results look incomplete."""
