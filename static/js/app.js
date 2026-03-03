@@ -471,8 +471,11 @@ class ParodyCriticsApp {
 
   renderListView(media) {
     return media
-      .map(
-        (item) => `
+      .map((item) => {
+        const posterSrc = item.jellyfin_id
+          ? `/api/poster/${item.jellyfin_id}`
+          : '/static/images/parody_critics_logo.png';
+        return `
             <div class="media-card" data-tmdb-id="${item.tmdb_id}">
                 <!-- 🛒 E-commerce Selection Checkbox -->
                 <div class="media-card-select" onclick="app.toggleMediaSelection({
@@ -480,10 +483,12 @@ class ParodyCriticsApp {
                     title: '${item.title.replace(/'/g, "\\'")}',
                     year: '${item.year || 'N/A'}',
                     type: '${item.type}',
-                    poster_url: '${item.poster_url || ''}',
+                    poster_url: '${posterSrc}',
                     has_critics: ${item.has_critics || false}
                 })">
                 </div>
+
+                <img class="media-card-poster" src="${posterSrc || '/static/images/parody_critics_logo.png'}" alt="${item.title.replace(/"/g, '&quot;')}" onerror="this.src='/static/images/parody_critics_logo.png'">
 
                 <div class="media-card-header" onclick="app.showMediaDetails('${item.tmdb_id}')">
                     <h3 class="media-title">${item.title}</h3>
@@ -505,8 +510,8 @@ class ParodyCriticsApp {
                     </span>
                 </div>
             </div>
-        `
-      )
+          `;
+      })
       .join('');
   }
 
@@ -777,8 +782,16 @@ class ParodyCriticsApp {
     let html = '';
 
     criticsData.forEach(({ media, critics }) => {
+      const bannerSrc = media.jellyfin_id
+        ? `/api/banner/${media.jellyfin_id}`
+        : '/static/images/parody_critics_logo.png';
       html += `<div class="media-critics-section">
-                <h3 class="media-section-title">${media.title} (${media.year})</h3>`;
+                <div class="media-section-banner">
+                  <img class="media-section-banner-img" src="${bannerSrc}" alt="${media.title.replace(/"/g, '&quot;')}" onerror="this.src='/static/images/parody_critics_logo.png'">
+                  <div class="media-section-banner-overlay">
+                    <h3 class="media-section-title">${media.title} <span class="media-section-year">(${media.year})</span></h3>
+                  </div>
+                </div>`;
 
       Object.values(critics).forEach((critic) => {
         html += this.renderCriticCard(critic, media);
@@ -806,7 +819,7 @@ class ParodyCriticsApp {
                         <span class="critic-character-emoji">${critic.emoji || '🎭'}</span>
                         <div class="critic-character-info">
                             <h3>${critic.author}</h3>
-                            <span class="personality">${critic.personality}</span>
+                            <span class="personality">${(critic.personality || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</span>
                         </div>
                     </div>
                     <div style="display:flex; align-items:center; gap:0.5rem;">
@@ -1144,35 +1157,19 @@ class ParodyCriticsApp {
   }
 
   showMessage(message, type = 'info') {
-    // Simple message display (could be enhanced with a toast system)
-    const colors = {
-      success: '#4ade80',
-      error: '#ef4444',
-      warning: '#fbbf24',
-      info: '#3b82f6',
-    };
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      document.body.appendChild(container);
+    }
 
-    const messageDiv = document.createElement('div');
-    messageDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${colors[type]};
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            max-width: 400px;
-            font-weight: 500;
-        `;
-    messageDiv.textContent = message;
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
 
-    document.body.appendChild(messageDiv);
-
-    setTimeout(() => {
-      messageDiv.remove();
-    }, 5000);
+    setTimeout(() => toast.remove(), 5000);
   }
 
   showError(message) {
@@ -2283,9 +2280,9 @@ class ParodyCriticsApp {
       html += `
                 <div class="cart-item" data-tmdb-id="${tmdbId}">
                     <img class="cart-item-poster"
-                         src="${item.poster_url || '/static/images/no-poster.png'}"
+                         src="${item.poster_url || '/static/images/parody_critics_logo.png'}"
                          alt="${item.title}"
-                         onerror="this.src='/static/images/no-poster.png'">
+                         onerror="this.src='/static/images/parody_critics_logo.png'">
                     <div class="cart-item-info">
                         <div class="cart-item-title">${item.title}</div>
                         <div class="cart-item-meta">
@@ -2405,9 +2402,9 @@ class ParodyCriticsApp {
         html += `
                 <div class="checkout-media-item" data-tmdb-id="${tmdbId}">
                     <img class="checkout-media-poster"
-                         src="${item.poster_url || '/static/images/no-poster.png'}"
+                         src="${item.poster_url || '/static/images/parody_critics_logo.png'}"
                          alt="${item.title}"
-                         onerror="this.src='/static/images/no-poster.png'">
+                         onerror="this.src='/static/images/parody_critics_logo.png'">
                     <div class="checkout-media-info">
                         <div class="checkout-media-title">${item.title}</div>
                         <div class="checkout-media-meta">
@@ -2460,6 +2457,11 @@ class ParodyCriticsApp {
       let html = '';
       characters.forEach((character) => {
         const isSelected = this.batchProcessing.selectedCritics.has(character.id);
+        const desc = character.description || 'Crítico experto';
+        const truncatedDesc = desc.length > 90 ? desc.slice(0, 90) + '…' : desc;
+        const personality = (character.personality || '')
+          .replace(/_/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase());
         html += `
                     <div class="critic-checkbox-item ${isSelected ? 'selected' : ''}"
                          onclick="app.toggleCriticSelection('${character.id}')">
@@ -2468,9 +2470,13 @@ class ParodyCriticsApp {
                                id="critic-${character.id}"
                                ${isSelected ? 'checked' : ''}
                                onchange="app.toggleCriticSelection('${character.id}')">
+                        <span class="critic-emoji">${character.emoji || '🎭'}</span>
                         <div class="critic-info">
-                            <div class="critic-name">${character.name}</div>
-                            <div class="critic-description">${character.description || 'Crítico experto'}</div>
+                            <div class="critic-header">
+                                <span class="critic-name">${character.name}</span>
+                                ${personality ? `<span class="critic-personality-tag">${personality}</span>` : ''}
+                            </div>
+                            <div class="critic-description">${truncatedDesc}</div>
                         </div>
                     </div>
                 `;
@@ -3125,7 +3131,7 @@ class ParodyCriticsApp {
 
                         <div class="character-card-body">
                             <h3 class="character-name">${character.name}</h3>
-                            <p class="character-personality">${character.personality || 'Personalidad única'}</p>
+                            <p class="character-personality">${(character.personality || 'Personalidad única').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</p>
                             <p class="character-description">${character.description || 'Sin descripción'}</p>
                         </div>
 

@@ -31,7 +31,7 @@ Endpoint groups:
 
 from fastapi import FastAPI, HTTPException, Query, BackgroundTasks, Body, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 import re
 import sqlite3
@@ -248,6 +248,24 @@ async def root():
         "docs": "/docs",
         "frontend": "/static/index.html"
     }
+
+@app.get("/api/poster/{jellyfin_id}")
+async def get_poster(jellyfin_id: str):
+    """Proxy Jellyfin item poster — keeps auth token server-side."""
+    url = f"{config.JELLYFIN_URL}/Items/{jellyfin_id}/Images/Thumb?maxWidth=400&quality=90"
+    if config.JELLYFIN_API_TOKEN:
+        url += f"&api_key={config.JELLYFIN_API_TOKEN}"
+    return RedirectResponse(url=url, status_code=302)
+
+
+@app.get("/api/banner/{jellyfin_id}")
+async def get_banner(jellyfin_id: str):
+    """Proxy Jellyfin item backdrop/banner — wide cinematic image."""
+    url = f"{config.JELLYFIN_URL}/Items/{jellyfin_id}/Images/Backdrop/0?maxWidth=800&quality=85"
+    if config.JELLYFIN_API_TOKEN:
+        url += f"&api_key={config.JELLYFIN_API_TOKEN}"
+    return RedirectResponse(url=url, status_code=302)
+
 
 @app.get("/api/critics/{tmdb_id}", response_model=CriticsResponse)
 async def get_critics_by_tmdb(tmdb_id: str):
