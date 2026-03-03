@@ -1018,6 +1018,26 @@ class ParodyCriticsApp {
     }
   }
 
+  exportDatabase() {
+    const status = document.getElementById('db-export-status');
+    const btn = document.querySelector('.db-export-btn');
+    if (btn) btn.disabled = true;
+    if (status) status.textContent = 'Preparando…';
+
+    const a = document.createElement('a');
+    a.href = '/api/admin/db/export';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // Reset feedback after a moment
+    setTimeout(() => {
+      if (btn) btn.disabled = false;
+      if (status) status.textContent = '';
+    }, 3000);
+  }
+
   async loadCheckoutData() {
     console.log('🛒 Loading checkout data...');
 

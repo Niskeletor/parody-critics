@@ -31,11 +31,13 @@ Endpoint groups:
 
 from fastapi import FastAPI, HTTPException, Query, BackgroundTasks, Body, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
+import os
 import re
 import sqlite3
 import json
+import tempfile
 import httpx
 import uuid
 import asyncio
@@ -2653,6 +2655,37 @@ async def fts_rebuild():
         return {"status": "ok", "message": f"FTS index rebuilt — {count} items indexed"}
     finally:
         conn.close()
+
+
+@app.get("/api/admin/db/export")
+async def export_database():
+    """Download a safe backup of the SQLite database."""
+    db_path = Path(DB_PATH)
+    if not db_path.exists():
+        raise HTTPException(status_code=404, detail="Database not found")
+
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    filename = f"critics_backup_{date_str}.db"
+
+    # sqlite3.backup() produces a consistent snapshot even during live writes
+    tmp_fd, tmp_path = tempfile.mkstemp(suffix=".db")
+    os.close(tmp_fd)
+    try:
+        src = sqlite3.connect(str(db_path))
+        dst = sqlite3.connect(tmp_path)
+        src.backup(dst)
+        dst.close()
+        src.close()
+        with open(tmp_path, "rb") as f:
+            data = f.read()
+    finally:
+        os.unlink(tmp_path)
+
+    return Response(
+        content=data,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @app.exception_handler(500)
