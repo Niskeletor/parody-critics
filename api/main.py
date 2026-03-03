@@ -2660,15 +2660,26 @@ async def fts_rebuild():
 
 @app.get("/api/admin/db/export")
 async def export_database():
-    """Download a safe backup of the SQLite database."""
+    """Download a verified backup of the SQLite database."""
     db_path = Path(DB_PATH)
     if not db_path.exists():
         raise HTTPException(status_code=404, detail="Database not found")
 
+    # Pre-backup integrity check on the live DB
+    src_check = sqlite3.connect(str(db_path))
+    try:
+        result = src_check.execute("PRAGMA integrity_check").fetchall()
+        if result != [("ok",)]:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Live DB failed integrity check: {result[0][0]}",
+            )
+    finally:
+        src_check.close()
+
     date_str = datetime.now().strftime("%Y-%m-%d")
     filename = f"critics_backup_{date_str}.db"
 
-    # sqlite3.backup() produces a consistent snapshot even during live writes
     tmp_fd, tmp_path = tempfile.mkstemp(suffix=".db")
     os.close(tmp_fd)
     try:
@@ -2679,6 +2690,19 @@ async def export_database():
         finally:
             dst.close()
             src.close()
+
+        # Post-backup integrity check on the copy
+        bk_check = sqlite3.connect(tmp_path)
+        try:
+            bk_result = bk_check.execute("PRAGMA integrity_check").fetchall()
+            if bk_result != [("ok",)]:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Backup copy failed integrity check: {bk_result[0][0]}",
+                )
+        finally:
+            bk_check.close()
+
         with open(tmp_path, "rb") as f:
             data = f.read()
     finally:
@@ -2687,7 +2711,10 @@ async def export_database():
     return Response(
         content=data,
         media_type="application/octet-stream",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Content-Length": str(len(data)),
+        },
     )
 
 
