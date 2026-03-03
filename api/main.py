@@ -177,6 +177,7 @@ def _run_auto_migrations(db_path: str):
             conn.execute(sql)
             setup_logger.info(f"Migration applied: {sql.strip()[:80]}")
 
+        conn.execute("PRAGMA user_version = 1")
         conn.commit()
         if migrations:
             setup_logger.info(f"✅ Auto-migration: {len(migrations)} statement(s) applied")
