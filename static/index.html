@@ -17,6 +17,9 @@
     />
   </head>
   <body>
+    <!-- Gold dust particles — ambient background decoration -->
+    <canvas id="gold-particles" aria-hidden="true"></canvas>
+
     <!-- Header -->
     <header class="header">
       <div class="container">
@@ -910,6 +913,7 @@
 
     <script src="/static/js/i18n.js"></script>
     <script src="/static/js/app.js"></script>
+    <script src="/static/js/particles.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', async () => {
         await i18n.init();
