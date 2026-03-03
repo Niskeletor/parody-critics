@@ -812,6 +812,9 @@ class ParodyCriticsApp {
                 title="Eliminar esta crítica">🗑️</button>`
         : '';
 
+    const rating = parseFloat(critic.rating) || 0;
+    const ratingClass = rating >= 7 ? 'rating-high' : rating >= 4 ? 'rating-mid' : 'rating-low';
+
     return `
             <div class="critic-card" id="critic-card-${critic.critic_id || ''}">
                 <div class="critic-header">
@@ -823,7 +826,7 @@ class ParodyCriticsApp {
                         </div>
                     </div>
                     <div style="display:flex; align-items:center; gap:0.5rem;">
-                        <div class="critic-rating">${critic.rating}/10</div>
+                        <div class="critic-rating ${ratingClass}">${critic.rating}/10</div>
                         ${deleteBtn}
                     </div>
                 </div>

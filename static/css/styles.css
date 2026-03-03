@@ -95,6 +95,7 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   background-image: none;
+  padding-bottom: 3rem; /* clearance for fixed footer */
 }
 
 /* ========================================
@@ -193,7 +194,6 @@ body {
 .main {
   flex: 1;
   padding: 2rem 0;
-  min-height: calc(100vh - 140px);
   position: relative; /* Needed for absolute positioned views */
 }
 
@@ -788,66 +788,90 @@ body {
 }
 
 .critic-card {
-  background: var(--gradient-surface);
-  border: 1px solid var(--accent-bg);
+  background: var(--surface-bg);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--border-radius-lg);
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-4);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
+  transition: var(--transition);
+}
+
+.critic-card:hover {
+  border-color: var(--border-default);
 }
 
 .critic-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--accent-bg);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-3);
 }
 
 .critic-character {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-3);
+  min-width: 0;
 }
 
 .critic-character-emoji {
-  font-size: 2.5rem;
+  font-size: 2rem;
+  flex-shrink: 0;
 }
 
 .critic-character-info h3 {
   font-family: var(--font-display);
+  font-size: var(--text-base);
   color: var(--text-primary);
-  margin-bottom: 0.2rem;
+  margin-bottom: var(--space-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .critic-character-info .personality {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  text-transform: capitalize;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .critic-rating {
-  font-size: 2rem;
+  font-size: var(--text-xl);
   font-weight: 700;
   font-family: var(--font-display);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.critic-rating.rating-high {
   color: var(--primary-gold);
+}
+.critic-rating.rating-mid {
+  color: #e0a040;
+}
+.critic-rating.rating-low {
+  color: var(--error);
 }
 
 .critic-body {
-  padding: 1.5rem;
+  padding: var(--space-4);
 }
 
 .critic-content {
   color: var(--text-secondary);
-  line-height: 1.6;
+  font-size: var(--text-sm);
+  line-height: 1.65;
   white-space: pre-wrap;
 }
 
 .critic-meta {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid var(--accent-bg);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border-subtle);
   color: var(--text-muted);
-  font-size: 0.8rem;
+  font-size: var(--text-xs);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1121,18 +1145,62 @@ body {
    ======================================== */
 
 .footer {
-  background: var(--gradient-dark);
-  border-top: 1px solid var(--accent-bg);
-  padding: 2rem 0;
-  text-align: center;
-  color: var(--text-secondary);
-  margin-top: 3rem;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--secondary-bg);
+  border-top: 1px solid var(--border-subtle);
+  padding: var(--space-3) 0;
+  z-index: 100;
 }
 
-.footer-tech {
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.footer-copy {
+  font-size: var(--text-xs);
   color: var(--text-muted);
+}
+
+.footer-author {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.footer-author:hover {
+  color: var(--primary-gold);
+}
+
+.footer-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.footer-version {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.footer-github {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.footer-github:hover {
+  color: var(--primary-gold);
 }
 
 /* ========================================

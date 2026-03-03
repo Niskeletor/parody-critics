@@ -1124,14 +1124,9 @@ async def generate_cart_batch_critics(
 
                     print(f"✅ Generated critic response: {type(parsed_critic)} - Keys: {list(parsed_critic.keys()) if isinstance(parsed_critic, dict) else 'Not a dict'}")
 
-                    # Extract the actual critic content from the response
-                    # The LLM manager returns: {'success', 'response', 'character', 'media_title', etc.}
-                    # We need to parse the actual critic from the 'response' field
-                    critic_content = parsed_critic.get("response", "")
-
-                    # For now, we'll use a default rating and store the full response
-                    # In future versions, we could parse the response to extract rating and content separately
-                    rating = 8.0  # Default rating, could be extracted from response later
+                    # Parse rating and clean content from raw LLM response
+                    raw_response = parsed_critic.get("response", "")
+                    parsed = llm_manager.parse_critic_response(raw_response, critic_name, media_info)
 
                     # Insert the new critic
                     insert_query = """
@@ -1141,8 +1136,8 @@ async def generate_cart_batch_critics(
                     critic_db_id = db_manager.execute_insert(insert_query, (
                         media_info["id"],
                         critic_id,
-                        rating,
-                        critic_content,
+                        parsed["rating"],
+                        parsed["content"],
                         datetime.now().isoformat()
                     ))
 
@@ -1151,7 +1146,7 @@ async def generate_cart_batch_critics(
                         "title": media_info["title"],
                         "critic": critic_name,
                         "status": "success",
-                        "rating": rating,
+                        "rating": parsed["rating"],
                         "critic_id": critic_db_id
                     })
                     total_processed += 1
