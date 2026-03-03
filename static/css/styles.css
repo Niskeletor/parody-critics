@@ -1041,6 +1041,202 @@ body {
   color: var(--text-muted);
 }
 
+/* ── DB Backup card actions ───────────────────────────── */
+.db-backup-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+}
+
+/* ── Import modal ─────────────────────────────────────── */
+.db-import-modal-content {
+  max-width: 520px;
+}
+
+.db-import-warning {
+  background: rgba(201, 162, 39, 0.08);
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-5);
+}
+
+.db-import-active-ops {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--border-radius);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.db-import-step1-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  transition: var(--transition);
+}
+
+.btn-ghost:hover {
+  border-color: var(--border-default);
+  color: var(--text-secondary);
+}
+
+.btn-danger {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: var(--text-xs);
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+/* ── Drop zone ────────────────────────────────────────── */
+.db-dropzone {
+  border: 2px dashed var(--border-default);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-5);
+}
+
+.db-dropzone:hover,
+.db-dropzone.dragover {
+  border-color: var(--primary-gold);
+  background: rgba(201, 162, 39, 0.04);
+}
+
+.db-dropzone svg {
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.db-dropzone p {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.db-dropzone code {
+  background: var(--accent-bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: var(--text-xs);
+}
+
+.db-dropzone-hint {
+  color: var(--text-muted);
+  font-size: var(--text-xs) !important;
+}
+
+.db-dropzone-label {
+  cursor: pointer;
+}
+
+/* ── Progress bar ─────────────────────────────────────── */
+.db-import-progress {
+  margin-bottom: var(--space-5);
+}
+
+.db-progress-bar-wrap {
+  height: 6px;
+  background: var(--accent-bg);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: var(--space-4);
+}
+
+.db-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--gradient-gold);
+  border-radius: 3px;
+  transition: width 300ms ease;
+}
+
+.db-import-stages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.db-stage {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  transition: color 200ms ease;
+}
+
+.db-stage.active {
+  color: var(--text-primary);
+}
+
+.db-stage.done {
+  color: #4ade80;
+}
+
+.db-stage.error {
+  color: #ef4444;
+}
+
+/* ── Result box ───────────────────────────────────────── */
+.db-import-result {
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  margin-bottom: var(--space-4);
+}
+
+.db-import-result.success {
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  color: var(--text-secondary);
+}
+
+.db-import-result.error {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: var(--text-secondary);
+}
+
+.db-import-step2-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .status-item {
   display: flex;
   justify-content: space-between;
