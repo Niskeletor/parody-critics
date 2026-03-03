@@ -1022,7 +1022,7 @@ class ParodyCriticsApp {
     const status = document.getElementById('db-export-status');
     const btn = document.getElementById('db-export-btn');
     if (btn) btn.disabled = true;
-    if (status) status.textContent = 'Preparando…';
+    if (status) status.textContent = 'Verificando integridad…';
 
     const a = document.createElement('a');
     a.href = '/api/admin/db/export';
@@ -1031,11 +1031,248 @@ class ParodyCriticsApp {
     a.click();
     document.body.removeChild(a);
 
-    // Reset feedback after a moment
     setTimeout(() => {
       if (btn) btn.disabled = false;
       if (status) status.textContent = '';
-    }, 3000);
+    }, 4000);
+  }
+
+  // ── DB Import Modal ─────────────────────────────────────────────────────────
+
+  openImportModal() {
+    const modal = document.getElementById('db-import-modal');
+    if (!modal) return;
+    this._dbImportShowStep(1);
+    document.getElementById('db-import-active-ops')?.classList.add('hidden');
+    document.getElementById('db-import-progress')?.classList.add('hidden');
+    document.getElementById('db-import-result')?.classList.add('hidden');
+    document.getElementById('db-dropzone')?.classList.remove('hidden');
+    const fileInput = document.getElementById('db-import-file');
+    if (fileInput) fileInput.value = '';
+    const cancelBtn = document.getElementById('db-import-cancel-btn');
+    if (cancelBtn) {
+      cancelBtn.textContent = 'Cancelar';
+      cancelBtn.onclick = () => this.closeImportModal();
+      cancelBtn.disabled = false;
+    }
+    modal.classList.remove('hidden');
+    this._dbImportPrecheck();
+  }
+
+  closeImportModal() {
+    document.getElementById('db-import-modal')?.classList.add('hidden');
+  }
+
+  _dbImportShowStep(n) {
+    document.getElementById('db-import-step1')?.classList.toggle('hidden', n !== 1);
+    document.getElementById('db-import-step2')?.classList.toggle('hidden', n !== 2);
+  }
+
+  async _dbImportPrecheck() {
+    try {
+      const res = await fetch('/api/admin/db/import/precheck');
+      const data = await res.json();
+      if (data.active_ops && data.active_ops.length > 0) {
+        const opsEl = document.getElementById('db-import-active-ops');
+        const opsText = document.getElementById('db-import-ops-text');
+        const labels = { sync: 'sincronización Jellyfin', enrichment: 'enriquecimiento TMDB' };
+        const names = data.active_ops.map((k) => labels[k] || k).join(', ');
+        if (opsText) opsText.textContent = `⚠️ Operación activa: ${names}.`;
+        opsEl?.classList.remove('hidden');
+      }
+    } catch (_) {
+      // Non-blocking — precheck failure doesn't prevent import
+    }
+  }
+
+  async _dbImportForceStop() {
+    try {
+      await fetch('/api/sync/cancel', { method: 'POST' });
+    } catch (_) {}
+    document.getElementById('db-import-active-ops')?.classList.add('hidden');
+  }
+
+  async _dbImportExportFirst() {
+    const btn = document.querySelector('.db-import-export-first-btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Exportando…';
+    }
+    const a = document.createElement('a');
+    a.href = '/api/admin/db/export';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    // Give browser time to start the download, then advance
+    await new Promise((r) => setTimeout(r, 1500));
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportar backup ahora y continuar';
+    }
+    this._dbImportGoStep2();
+  }
+
+  _dbImportGoStep2() {
+    this._dbImportShowStep(2);
+  }
+
+  _dbImportHandleDrop(event) {
+    event.preventDefault();
+    document.getElementById('db-dropzone')?.classList.remove('dragover');
+    const file = event.dataTransfer?.files?.[0];
+    if (file) this._dbImportHandleFile(file);
+  }
+
+  async _dbImportHandleFile(file) {
+    if (!file) return;
+
+    // Client-side validation
+    if (!file.name.endsWith('.db')) {
+      this._dbImportShowResult(false, 'El archivo debe tener extensión .db');
+      return;
+    }
+    if (file.size < 1024) {
+      this._dbImportShowResult(false, 'El archivo es demasiado pequeño para ser un backup real');
+      return;
+    }
+    if (file.size > 100 * 1024 * 1024) {
+      this._dbImportShowResult(false, 'El archivo supera el límite de 100 MB');
+      return;
+    }
+
+    // Magic bytes check (client-side, first 16 bytes)
+    const valid = await this._dbImportCheckMagic(file);
+    if (!valid) {
+      this._dbImportShowResult(false, 'El archivo no es una base de datos SQLite válida');
+      return;
+    }
+
+    // Show progress, hide drop zone
+    document.getElementById('db-dropzone')?.classList.add('hidden');
+    document.getElementById('db-import-progress')?.classList.remove('hidden');
+    const cancelBtn = document.getElementById('db-import-cancel-btn');
+    if (cancelBtn) cancelBtn.disabled = true;
+
+    this._dbImportSetStage('upload', 'active');
+    this._dbImportSetProgress(10);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    let result;
+    try {
+      const res = await fetch('/api/admin/db/import', { method: 'POST', body: formData });
+      result = await res.json();
+    } catch (err) {
+      this._dbImportShowResult(false, `Error de red: ${err.message}`);
+      if (cancelBtn) cancelBtn.disabled = false;
+      return;
+    }
+
+    if (!result.ok) {
+      const stageMap = {
+        not_sqlite: 'upload',
+        size: 'upload',
+        integrity: 'verify',
+        schema: 'verify',
+        empty: 'verify',
+        snapshot: 'snapshot',
+        swap: 'restore',
+        post_swap: 'restore',
+      };
+      const failedStage = stageMap[result.stage] || 'upload';
+      const stageOrder = ['upload', 'verify', 'snapshot', 'restore'];
+      for (const s of stageOrder) {
+        if (s === failedStage) {
+          this._dbImportSetStage(s, 'error');
+          break;
+        }
+        this._dbImportSetStage(s, 'done');
+      }
+      this._dbImportSetProgress(
+        { upload: 20, verify: 45, snapshot: 70, restore: 90 }[failedStage] ?? 20
+      );
+      const detail = result.detail || 'Error desconocido';
+      const snap = result.snapshot ? `\nSnapshot de seguridad: ${result.snapshot}` : '';
+      this._dbImportShowResult(false, detail + snap);
+    } else {
+      // Animate all stages through to success
+      const stages = ['upload', 'verify', 'snapshot', 'restore'];
+      const percents = [25, 55, 80, 100];
+      for (let i = 0; i < stages.length; i++) {
+        this._dbImportSetStage(stages[i], 'active');
+        this._dbImportSetProgress(percents[i]);
+        await new Promise((r) => setTimeout(r, 350));
+        this._dbImportSetStage(stages[i], 'done');
+      }
+      const s = result.stats;
+      this._dbImportShowResult(
+        true,
+        `✅ Base de datos restaurada correctamente.\n` +
+          `Snapshot: ${result.snapshot}\n` +
+          `Datos: ${s.media} películas · ${s.characters} críticos · ${s.critics} críticas`
+      );
+    }
+
+    if (cancelBtn) cancelBtn.disabled = false;
+  }
+
+  _dbImportCheckMagic(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const bytes = new Uint8Array(e.target.result);
+        // "SQLite format 3\x00"
+        const magic = [83, 81, 76, 105, 116, 101, 32, 102, 111, 114, 109, 97, 116, 32, 51, 0];
+        resolve(magic.every((b, i) => bytes[i] === b));
+      };
+      reader.onerror = () => resolve(false);
+      reader.readAsArrayBuffer(file.slice(0, 16));
+    });
+  }
+
+  _dbImportSetStage(stage, state) {
+    const el = document.getElementById(`db-stage-${stage}`);
+    if (!el) return;
+    el.classList.remove('active', 'done', 'error');
+    const icons = { active: '⏳', done: '✅', error: '❌' };
+    const labels = {
+      upload: 'Subiendo',
+      verify: 'Verificando integridad',
+      snapshot: 'Snapshot de seguridad',
+      restore: 'Restaurando',
+    };
+    el.textContent = `${icons[state]} ${labels[stage]}…`;
+    el.classList.add(state);
+  }
+
+  _dbImportSetProgress(pct) {
+    const bar = document.getElementById('db-progress-bar');
+    if (bar) bar.style.width = `${pct}%`;
+  }
+
+  _dbImportShowResult(success, message) {
+    const el = document.getElementById('db-import-result');
+    if (!el) return;
+    el.className = `db-import-result ${success ? 'success' : 'error'}`;
+    el.innerHTML = message
+      .split('\n')
+      .map((line) => `<div>${line}</div>`)
+      .join('');
+    el.classList.remove('hidden');
+    const cancelBtn = document.getElementById('db-import-cancel-btn');
+    if (cancelBtn) {
+      cancelBtn.textContent = 'Cerrar';
+      if (success) {
+        // Reload status data after successful import
+        cancelBtn.onclick = () => {
+          this.closeImportModal();
+          this.loadStatusData();
+        };
+      }
+    }
   }
 
   async loadCheckoutData() {
