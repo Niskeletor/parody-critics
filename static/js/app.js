@@ -1020,7 +1020,7 @@ class ParodyCriticsApp {
 
   exportDatabase() {
     const status = document.getElementById('db-export-status');
-    const btn = document.querySelector('.db-export-btn');
+    const btn = document.getElementById('db-export-btn');
     if (btn) btn.disabled = true;
     if (status) status.textContent = 'Preparando…';
 

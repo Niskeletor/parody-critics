@@ -2673,9 +2673,11 @@ async def export_database():
     try:
         src = sqlite3.connect(str(db_path))
         dst = sqlite3.connect(tmp_path)
-        src.backup(dst)
-        dst.close()
-        src.close()
+        try:
+            src.backup(dst)
+        finally:
+            dst.close()
+            src.close()
         with open(tmp_path, "rb") as f:
             data = f.read()
     finally:
