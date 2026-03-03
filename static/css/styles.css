@@ -199,35 +199,42 @@ body {
 
 .view {
   display: none;
-  animation: fadeIn 0.5s ease-in-out;
 }
 
 .view.active {
   display: block;
+  animation: viewEnter 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
 
-/* FIX: Ensure views don't stack vertically */
-.view {
+.view.leaving {
+  display: block;
+  animation: viewLeave 150ms cubic-bezier(0.55, 0, 1, 0.45) forwards;
+  pointer-events: none;
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  min-height: 100vh;
 }
 
-.view.active {
-  position: relative;
-  z-index: 10;
-}
-
-@keyframes fadeIn {
+@keyframes viewEnter {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes viewLeave {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
   }
 }
 

@@ -172,35 +172,38 @@ class ParodyCriticsApp {
       this.resetCheckoutStyles();
     }
 
-    // Hide all views
-    const views = document.querySelectorAll('.view');
-    views.forEach((view) => view.classList.remove('active'));
-
-    // Show selected view
     const targetView = document.getElementById(`${viewName}-view`);
-    if (targetView) {
-      targetView.classList.add('active');
-      this.currentView = viewName;
+    if (!targetView) return;
 
-      // 🔥 NUCLEAR CSS FIX: Force checkout view to be visible
-      // This solves the CSS positioning issue where checkout appears at top: 1753px
-      if (viewName === 'checkout') {
-        this.forceCheckoutVisible(targetView);
-      }
-
-      // Update navigation buttons
-      const navButtons = document.querySelectorAll('.nav-btn');
-      navButtons.forEach((btn) => {
-        if (btn.dataset.view === viewName) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
-
-      // Load view-specific data
-      this.loadViewData(viewName);
+    // Animate out the current active view, then animate in the new one
+    const outgoing = document.querySelector('.view.active');
+    if (outgoing && outgoing !== targetView) {
+      outgoing.classList.add('leaving');
+      setTimeout(() => outgoing.classList.remove('active', 'leaving'), 150);
+    } else if (!outgoing) {
+      document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
     }
+
+    targetView.classList.add('active');
+    this.currentView = viewName;
+
+    // 🔥 NUCLEAR CSS FIX: Force checkout view to be visible
+    if (viewName === 'checkout') {
+      this.forceCheckoutVisible(targetView);
+    }
+
+    // Update navigation buttons
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach((btn) => {
+      if (btn.dataset.view === viewName) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    // Load view-specific data
+    this.loadViewData(viewName);
   }
 
   // 🔥 NUCLEAR CSS FIX: Force checkout view to be visible
