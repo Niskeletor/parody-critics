@@ -29,12 +29,13 @@ Endpoint groups:
   /ws/import-progress/{id}   WebSocket: real-time import progress
 """
 
-from fastapi import FastAPI, HTTPException, Query, BackgroundTasks, Body, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Query, BackgroundTasks, Body, WebSocket, WebSocketDisconnect, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 import os
 import re
+import shutil
 import sqlite3
 import json
 import tempfile
@@ -2653,6 +2654,184 @@ async def import_precheck():
     if active_enrichment_session is not None:
         active_ops.append("enrichment")
     return {"active_ops": active_ops}
+
+
+REQUIRED_TABLES = {"media", "critics", "characters", "media_fts"}
+SQLITE_MAGIC = b"SQLite format 3\x00"
+DB_IMPORT_MAX_BYTES = 100 * 1024 * 1024  # 100 MB
+DB_IMPORT_MIN_BYTES = 1024  # 1 KB
+
+
+def _verify_sqlite_file(path: str) -> None:
+    """
+    Strict 7-point validation. Raises ValueError("<stage>|<detail>") on failure.
+    Must be called before touching the production DB.
+    """
+    # 1. Magic bytes
+    with open(path, "rb") as f:
+        header = f.read(16)
+    if header != SQLITE_MAGIC:
+        raise ValueError("not_sqlite|File is not a valid SQLite database")
+
+    # 2. File size
+    size = os.path.getsize(path)
+    if size < DB_IMPORT_MIN_BYTES:
+        raise ValueError("size|File is too small to be a real backup")
+
+    conn = sqlite3.connect(path)
+    try:
+        # 3. integrity_check
+        ic = conn.execute("PRAGMA integrity_check").fetchall()
+        if ic != [("ok",)]:
+            raise ValueError(f"integrity|integrity_check failed: {ic[0][0]}")
+
+        # 4. quick_check
+        qc = conn.execute("PRAGMA quick_check").fetchall()
+        if qc != [("ok",)]:
+            raise ValueError(f"integrity|quick_check failed: {qc[0][0]}")
+
+        # 5. Required tables
+        tables = {
+            r[0]
+            for r in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            ).fetchall()
+        }
+        missing = REQUIRED_TABLES - tables
+        if missing:
+            raise ValueError(f"schema|Missing required tables: {', '.join(sorted(missing))}")
+
+        # 6. Schema version
+        uv = conn.execute("PRAGMA user_version").fetchone()[0]
+        if uv > 1:
+            raise ValueError(f"schema|Incompatible schema version: {uv}")
+
+        # 7. Row count — not a blank DB
+        media_count = conn.execute("SELECT COUNT(*) FROM media").fetchone()[0]
+        char_count = conn.execute("SELECT COUNT(*) FROM characters").fetchone()[0]
+        if media_count == 0 and char_count == 0:
+            raise ValueError("empty|Database has no media or characters — looks empty")
+    finally:
+        conn.close()
+
+
+@app.post("/api/admin/db/import")
+async def import_database(
+    file: UploadFile = File(...),
+    force: bool = False,
+):
+    """
+    Restore the database from an uploaded .db file.
+    Pipeline: receive → verify (9 checks) → snapshot → atomic swap → post-check.
+    """
+    # Active ops guard
+    active_ops = []
+    if (
+        sync_manager
+        and sync_manager.current_sync
+        and sync_manager.current_sync.status.value == "running"
+    ):
+        active_ops.append("sync")
+    if active_enrichment_session is not None:
+        active_ops.append("enrichment")
+
+    if active_ops and not force:
+        return JSONResponse(
+            status_code=409,
+            content={"ok": False, "needs_confirmation": True, "active_ops": active_ops},
+        )
+
+    if active_ops and force:
+        if sync_manager:
+            sync_manager.cancel_sync()
+
+    # ── STAGE 1: Receive ──────────────────────────────────────────────────────
+    tmp_fd, tmp_path = tempfile.mkstemp(suffix=".db")
+    os.close(tmp_fd)
+    try:
+        data = await file.read(DB_IMPORT_MAX_BYTES + 1)
+        if len(data) > DB_IMPORT_MAX_BYTES:
+            raise HTTPException(status_code=413, detail="File exceeds 100 MB limit")
+        if len(data) < DB_IMPORT_MIN_BYTES:
+            raise HTTPException(status_code=422, detail="File too small to be a valid backup")
+        with open(tmp_path, "wb") as f:
+            f.write(data)
+
+        # ── STAGE 2: Verify ───────────────────────────────────────────────────
+        try:
+            _verify_sqlite_file(tmp_path)
+        except ValueError as exc:
+            stage, detail = str(exc).split("|", 1)
+            return JSONResponse(
+                status_code=422,
+                content={"ok": False, "stage": stage, "detail": detail},
+            )
+
+        # ── STAGE 3: Snapshot current DB ─────────────────────────────────────
+        ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        snapshot_name = f"backup_pre_import_{ts}.db"
+        snapshot_path = Path(DB_PATH).parent / snapshot_name
+        try:
+            snap_src = sqlite3.connect(str(DB_PATH))
+            snap_dst = sqlite3.connect(str(snapshot_path))
+            try:
+                snap_src.backup(snap_dst)
+            finally:
+                snap_dst.close()
+                snap_src.close()
+        except Exception as exc:
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "ok": False,
+                    "stage": "snapshot",
+                    "detail": f"Could not create safety snapshot: {exc}",
+                },
+            )
+
+        # ── STAGE 4: Atomic swap ──────────────────────────────────────────────
+        try:
+            shutil.copy2(tmp_path, str(DB_PATH))
+        except Exception as exc:
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "ok": False,
+                    "stage": "swap",
+                    "detail": f"File swap failed: {exc}. Original DB intact.",
+                    "snapshot": snapshot_name,
+                },
+            )
+
+        # ── STAGE 5: Post-swap integrity check ────────────────────────────────
+        post_conn = sqlite3.connect(str(DB_PATH))
+        try:
+            pc = post_conn.execute("PRAGMA integrity_check").fetchall()
+            if pc != [("ok",)]:
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "ok": False,
+                        "stage": "post_swap",
+                        "detail": "Post-swap integrity check failed",
+                        "snapshot": snapshot_name,
+                    },
+                )
+            stats = {
+                "media": post_conn.execute("SELECT COUNT(*) FROM media").fetchone()[0],
+                "critics": post_conn.execute("SELECT COUNT(*) FROM critics").fetchone()[0],
+                "characters": post_conn.execute(
+                    "SELECT COUNT(*) FROM characters"
+                ).fetchone()[0],
+            }
+        finally:
+            post_conn.close()
+
+        return {"ok": True, "snapshot": snapshot_name, "stats": stats}
+
+    finally:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
 
 
 @app.post("/api/admin/fts-rebuild")
