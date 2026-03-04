@@ -6,4 +6,5 @@ python-dotenv
 click
 rich
 questionary
-requestspython-multipart
+requests
+python-multipart
