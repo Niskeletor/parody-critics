@@ -79,9 +79,9 @@ jobs:
           host: ${{ secrets.DUNE_TAILSCALE_IP }}
           username: stilgar
           key: ${{ secrets.DUNE_SSH_KEY }}
-          script_stop: true
           envs: GHCR_PAT
           script: |
+            set -e
             echo "→ Logging in to GHCR..."
             echo "$GHCR_PAT" | docker login ghcr.io -u Niskeletor --password-stdin
 
