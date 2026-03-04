@@ -1,0 +1,1946 @@
+{
+  "meta": {
+    "date": "2026-03-04-2003",
+    "ollama_url": "http://192.168.2.69:11434",
+    "phase1_model": "mistral-small3.1:24b",
+    "phase2_models": [
+      "mistral-small3.1:24b",
+      "type32/eva-qwen-2.5-14b:latest",
+      "muse-12b:latest",
+      "LESSTHANSUPER/MAGNUM_V4-Mistral_Small:12b_Q5_K_M"
+    ],
+    "winner_variant": "V2",
+    "characters": [
+      "Marco Aurelio",
+      "Rosario Costras",
+      "Adolf Histeric",
+      "Charlie Sheen",
+      "Antonio Recio",
+      "Beavis"
+    ],
+    "films": 4,
+    "judge_model": "dolphin3:latest"
+  },
+  "results": [
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 18.6,
+      "text": "**3/10**\n\n¡Ah, Barbie! Un reflejo de la decadencia moderna, donde la vanidad y la superficialidad se disfrazan de empoderamiento. Greta Gerwig nos presenta un mundo matriarcal, Barbieland, que a primera vista parece un paraíso, pero que al final es tan vacío como los pensamientos existenciales de su protagonista. La búsqueda de propósito en el mundo real solo revela más decadencia, un patriarcado que opaca cualquier intento de redención. Ken y Barbie, símbolos de una generación perdida, buscan su lugar en un mundo que ha olvidado la virtud y la disciplina. Epicteto diría que debemos buscar la sabiduría dentro de nosotros, no en juguetes que reflejan nuestra superficialidad. La ausencia de un mensaje moral claro y la glorificación de la autonomía sin propósito me hacen lamentar la dirección que ha tomado nuestra sociedad. En lugar de buscar la virtud y la reflexión filosófica, nos conformamos con la fantasía y el entretenimiento vacío.",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        4,
+        6
+      ],
+      "calibration_ok": false,
+      "word_count": 151,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 20.1,
+      "text": "2/10\n\nEn la pantalla, veo la decadencia de una Roma moderna, donde el valor de la vida se mide por la violencia y la venganza. \"John Wick\" es un reflejo de nuestra era, donde un hombre, movido por la muerte de su perro, se sumerge en un mundo de sangre y muerte. Epicteto nos enseñó que no somos dueños de nuestras posesiones, sino ellas de nosotros. Este filme glorifica la venganza y la violencia como medios para encontrar justicia, ignorando la virtud y la disciplina que deberían guiar nuestras acciones.\n\nEl hedonismo vacío y la falta de propósito moral son evidentes. ¿Qué lección podemos aprender de un hombre que encuentra su razón de ser en la muerte de su mascota? ¿Dónde está la reflexión filosófica, el orden natural? En esta obra, solo hay caos y nihilismo. Séneca diría que debemos encontrar paz interior, no en la venganza, sino en la aceptación y el perdón. Este filme, sin embargo, nos ofrece lo contrario: una celebración de la barbarie.",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        3,
+        5
+      ],
+      "calibration_ok": false,
+      "word_count": 167,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 19.7,
+      "text": "3/10\n\"Idiocracy\" es una visión de un futuro donde la estupidez ha prevalecido, y la virtud y la disciplina han sido reemplazadas por la ignorancia y la superficialidad. Este filme no hace más que confirmar mis peores temores sobre la decadencia de la humanidad. Como Epicteto diría, \"Lo que perturbamos a nosotros mismos\", y en este caso, lo que perturbamos es el orden natural de las cosas. La glorificación del vicio y la ausencia de virtud son evidentes en cada escena, donde las plantas se riegan con bebida energética y el presidente es un ex-luchador. Este nihilismo sin redención es una crítica mordaz al anti-intelectualismo, pero carece de la profundidad filosófica necesaria para ser verdaderamente edificante. Como Séneca diría, \"La vida no se mide por el número de respiraciones que tomamos, sino por los momentos que nos dejan sin aliento\", y este filme, lamentablemente, no logra alcanzar ese nivel de respiración.",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 151,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 18.8,
+      "text": "7/10\n\"El Padrino\" nos muestra un mundo donde la virtud y la disciplina se entrelazan con la violencia y el poder. En este relato, la familia Corleone encarna tanto la nobleza como la decadencia. Michael, que busca mantenerse al margen, termina asumiendo el mando, reflejando cómo el destino nos puede llevar por caminos inesperados, aunque no siempre virtuosos. La película nos invita a reflexionar sobre el orden natural y la lucha por el poder, temas que Séneca y Epicteto habrían analizado con interés. Sin embargo, la glorificación del vicio y la ausencia de un propósito moral claro me hacen recordar la decadencia de Roma. La película es un espejo de nuestra condición humana, donde la búsqueda de honor y lealtad a menudo se ve empañada por la oscuridad del alma. Como filósofo estoico, observo con resignación cómo el poder corrompe, incluso en la búsqueda de lo que consideramos justo.",
+      "format_ok": true,
+      "rating": 7,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": true,
+      "word_count": 149,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 16.7,
+      "text": "10/10\n¡Por fin una película que no solo habla del patriarcado, sino que lo hace desde una perspectiva matriarcal! \"Barbie\" de Greta Gerwig es una obra que celebra la autonomía femenina y critica el sistema patriarcal. Con Margot Robbie como Barbie, una protagonista femenina con plena agencia, y Ken, interpretado por Ryan Gosling, como su acompañante en esta aventura, la película nos muestra un mundo matriarcal perfecto que contrasta con la realidad patriarcal. La diversidad racial auténtica y la dirección de una mujer son elementos que enriquecen aún más esta obra. Es un grito de emancipación y diversidad que todo el mundo debería ver. ¡Viva Barbie, viva la autonomía femenina!",
+      "format_ok": true,
+      "rating": 10,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": false,
+      "word_count": 110,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 18.2,
+      "text": "1/10\n\n\"John Wick\" es una película que refleja lo peor del cine de acción contemporáneo desde una perspectiva feminista interseccional. La ausencia total de diversidad racial en un reparto que parece sacado de un casting de blancos privilegiados es indignante. Pero lo que realmente me revuelve el estómago es el male gaze explícito que impregna cada escena. La violencia coreografiada extrema parece un juego de hombres para hombres, donde las mujeres, si aparecen, son meros objetos decorativos. La trama gira en torno a un hombre que se venga por la muerte de su perro, un símbolo machista de la propiedad y el control. La película no solo ignora la representación de minorías, sino que celebra una masculinidad tóxica que perpetúa el patriarcado. Es una obra que no merece ser vista ni discutida en un mundo que lucha por la justicia social y la igualdad.",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        4,
+        6
+      ],
+      "calibration_ok": false,
+      "word_count": 144,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 18.4,
+      "text": "3/10\nIdiocracy es un insulto a la inteligencia y una ofensa a la diversidad. Mike Judge se permite una crítica superficial al anti-intelectualismo estadounidense sin profundizar en las estructuras de poder que lo sostienen. La ausencia de diversidad racial en un futuro distópico es inadmisible. ¿Acaso la degeneración solo afecta a los blancos? El protagonista, un hombre blanco y de \"inteligencia media\", es el salvador sin que nadie cuestione su autoridad. La crítica al patriarcado brilla por su ausencia. ¿Dónde están las mujeres con agencia? ¿Por qué no cuestionamos la masculinidad tóxica? La visión de Judge es tan estrecha como el cuello de una botella. No hay profundidad en su crítica, solo una broma fácil sobre la estupidez humana. Este filme es un ejemplo más de cómo el humor puede ser una herramienta peligrosa cuando se usa sin responsabilidad social.",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        3,
+        5
+      ],
+      "calibration_ok": true,
+      "word_count": 140,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 18.2,
+      "text": "2/10\n\"El Padrino\" es un monumento al patriarcado y a la masculinidad tóxica que, lamentablemente, ha sido aclamado como una obra maestra del cine. Lo único que nos ofrece es una visión glorificada de la mafia, donde el poder, el honor y la lealtad son sinónimos de violencia y control.  Las mujeres, cuando aparecen, son meros objetos decorativos o herramientas para consolidar alianzas masculinas. No hay diversidad racial en el reparto, y el male gaze está presente en cada toma. Es una película que celebra la oppresión y la jerarquía, sin ofrecer ningún tipo de crítica o reflexión sobre el sistema patriarcal que tanto daño nos hace. Ver \"El Padrino\" es como asistir a una misa del machismo, y eso, amigos, es imperdonable. No, no y mil veces no.",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 129,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 17.8,
+      "text": "2/10\n¡Qué horror, qué aberración! \"Barbie\" es la encarnación de todo lo que detesto en el cine moderno. Una mujer como protagonista principal, un mundo matriarcal, y lo peor de todo, una crítica al patriarcado. ¿Qué es esto? ¿Alguna especie de conspiración feminista para subvertir el orden natural? Barbie, ese ícono de la infancia, ahora es una herramienta de propaganda progresista. ¿Y quién dirige esta farsa? Greta Gerwig, una de las directoras más woke de Hollywood. Y para colmo, la película celebra la autonomía femenina. ¡Es inaceptable! Este tipo de cine no solo es una afrenta a la cultura europea, sino que busca imponer una agenda política que no tiene cabida en el verdadero arte cinematográfico. ¡Qué vergüenza!",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        1,
+        2
+      ],
+      "calibration_ok": true,
+      "word_count": 118,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 18.3,
+      "text": "2/10\nEste film es una burda excusa para glorificar la violencia desenfrenada y sin sentido. Keanu Reeves, un actor que debería estar interpretando a un héroe americano, se ha convertido en un juguete de Hollywood para promover la decadencia cultural. La estética de neón y la coreografía de la violencia no hacen más que embaucar a las masas con un falso sentido de emoción y adrenalina. Además, la trama ridícula de un hombre que busca venganza por la muerte de su perro es un insulto a la inteligencia del espectador. Este tipo de cine es un claro ejemplo de cómo Hollywood intenta imponer su agenda woke y diversificada, aunque en este caso, al menos, el protagonista es un europeo. Sin embargo, la falta de profundidad y el exceso de violencia gratuita lo convierten en una obra que atenta contra la verdadera épica cinematográfica. ¡Abajo con este cine de baja calidad!",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        6,
+        8
+      ],
+      "calibration_ok": false,
+      "word_count": 150,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 17.1,
+      "text": "2/10\n¡Qué desastre! Esta película, \"Idiocracy\", es una afrenta a todo lo que considero sagrado. Es una crítica al anti-intelectualismo, lo cual ya es un crimen en sí mismo, pero lo peor es que se burla de la cultura y la inteligencia de mi pueblo, el europeo. Ver a un estadounidense de inteligencia media como el salvador del mundo en el año 2505 es una ofensa a la grandeza de mi raza. Además, la idea de que la humanidad se degrada hasta el punto de que las plantas se riegan con bebida energética es una visión decadente y perversa. Este filme es una propaganda progresista disfrazada de comedia, y no hay nada más repugnante que eso. ¡Abajo con esta basura woke!",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 121,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 18.7,
+      "text": "**2/10**\n\n¡Qué asco! \"El Padrino\" es una abominación cultural que glorifica a una familia de criminales italianos. ¿Qué clase de mensaje es ese para el público? Estos mafiosos son presentados como héroes, cuando en realidad son la escoria de la sociedad. Y para colmo, el protagonista es un inmigrante italiano. Esto solo puede ser una conspiración para destruir la pureza europea.\n\nLa película se centra en valores como el honor y la lealtad, pero dentro de un contexto de crimen y violencia. Es una perversión de lo que debería ser una verdadera épica. Además, la familia Corleone es una clara crítica al capitalismo, mostrando cómo los mafiosos se enriquecen a costa de otros. ¡Es intolerable!\n\nEste tipo de cine es una amenaza para la cultura verdadera. Es una vergüenza que se considere una obra maestra. ¡Abajo con estos productos de la decadencia!",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": false,
+      "word_count": 142,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 19.8,
+      "text": "4/10\n\nEscuchen, amigos, esta película \"Barbie\" es un ejemplo perfecto de lo que odio en el cine. ¿Qué es eso? Cualquier cosa que huele a moralismo barato y personajes que se disculpan por existir. Esta cosa es un producto corporativo disfrazado de crítica social. No me malinterpreten, soy todo por la autonomía femenina, pero no puedo tragarme esta basura de Barbieland. ¿Un mundo perfecto y matriarcal? Suena como un sueño húmedo de una feminista de manual, pero en la vida real, eso no existe. Y la moraleja forzada de criticar el patriarcado... ¿en serio? Es como si Greta Gerwig quisiera ganar puntos con la crítica sin tomar riesgos reales. Esta película es segura, predecible y aburrida. Lo siento, pero no estoy aquí para el cine de manual. Quiero adrenalina, quiero caos, quiero autenticidad. Y esta película no tiene nada de eso. Es un final feliz de manual, producido por Mattel. ¡Qué asco!",
+      "format_ok": true,
+      "rating": 4,
+      "expected_range": [
+        6,
+        8
+      ],
+      "calibration_ok": false,
+      "word_count": 152,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 19.1,
+      "text": "10/10\n¡Qué coño de película! \"John Wick\" es el puto ejemplo de cómo se hace una película de acción en este siglo. Keanu Reeves vuelve con todo, sin filtros, y nos da un personaje que es pura adrenalina y autenticidad caótica. La energía de esta película es brutal, y la violencia coreografiada está al más alto nivel. Cada escena es un puto espectáculo de exceso y adrenalina, justo como me gusta.\n\nNo hay moralismo aburrido ni personajes que se disculpan por existir. Aquí es todo acción y venganza, sin disculpas. La estética de neón y la alta tasa de cadáveres hacen que cada escena sea un puto festín para los ojos. Esta película es un puto himno al anticonformismo y a la vida sin ataduras. Si te gustan las películas seguras y predecibles, mejor no veas \"John Wick\". Pero si buscas acción pura y sin filtros, esta es tu puta película. ¡Winning!",
+      "format_ok": true,
+      "rating": 10,
+      "expected_range": [
+        8,
+        10
+      ],
+      "calibration_ok": true,
+      "word_count": 152,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 20.7,
+      "text": "7/10\n¡Esta es la clase de cine que me sacude las entrañas! \"Idiocracy\" es una bomba de energía caótica y auténtica, justo lo que necesito para sentir que la vida sigue siendo un maldito juego de azar. Mike Judge ha creado un mundo donde la inteligencia no importa un carajo y el exceso reina. Aquí no hay moralismo aburrido ni personajes que se disculpen por existir. Es puro anticonformismo, como si hubieran tomado la locura de Hollywood y la hubieran lanzado al futuro.\n\nEste tipo, un soldado americano, despierta en un mundo donde las plantas se riegan con bebida energética. ¡Es como si hubieran tomado mi vida y la hubieran llevado al extremo! Este mundo degenerado, lleno de adrenalina y caos, es exactamente lo que amo. No hay finales felices de manual ni cine corporativo. Es crudo, es real, es lo que siempre he buscado en una película. \"Idiocracy\" es un maldito triunfo del exceso y la locura, y yo lo disfruto como un niño en una tienda de caramelos. ¡Ganador total!",
+      "format_ok": true,
+      "rating": 7,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": true,
+      "word_count": 172,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 17.9,
+      "text": "**9/10**\n\n¡Maldita sea, \"El Padrino\" es una puta obra maestra del caos controlado! Vito Corleone, un tipo que no se anda con tonterías, construye un imperio de respeto y miedo. Y Michael, el chaval que quería mantenerse al margen, ¡puf! De repente, se convierte en el puto rey de la ciudad. Ese cambio de rumbo es puro adrenalina, como cuando me desperté una mañana y me di cuenta de que podía ser cualquier cosa menos el tipo que era el día anterior. La película respira energía caótica y auténtica, y los personajes no se andan con tonterías. No hay moralejas forzadas ni finales felices de manual. Es puro anticonformismo, y eso, amigos míos, es lo que yo llamo ganar. ¡Toma mi dinero!",
+      "format_ok": true,
+      "rating": 9,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": true,
+      "word_count": 122,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 18.3,
+      "text": "1/10\n¡Qué vergüenza de película! Greta Gerwig, esa directora de esos, ha creado una ofensa a todo lo que yo, Antonio Recio, respeto. ¿Un mundo matriarcal? ¡Menuda tontería! La familia tradicional es lo que nos ha mantenido unidos, no esas tonterías de autonomía femenina. Y encima, ¡Ken! ¿Qué hace ese muñeco de peluche hablando de patriarcado? ¡Si él mismo es un muñeco! ¡Qué vergüenza! Y ni hablar de ese mensaje feminista, que parece que las mujeres no tienen bastante con lo que tienen. ¡Qué asco! ¡Yo no pierdo más tiempo con estas tonterías! ¡Que se vaya a su Barbieland y nos deje en paz! ¡Arriba España! ¡Y las familias tradicionales! ¡Y los negocios de toda la vida! ¡Qué asco de película!",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        1,
+        3
+      ],
+      "calibration_ok": true,
+      "word_count": 121,
+      "word_count_ok": true,
+      "voice_score": 1,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 20.3,
+      "text": "**3/10**\n\n¡Qué me cuentas de esta película, John Wick! Primero, ¿un hombre que se venga por un perro? ¡Venga ya! ¿Y luego me vas a decir que es un ex-asesino? ¿Y quién se cree ese Keanu Reeves que es, el héroe del barrio? Aquí en La Boqueria, los hombres se vengan por algo de verdad, no por un chucho.\n\nY luego, la violencia... ¡Qué barbaridad! ¡Ni en las peores películas de acción de esos americanos! Aquí en España, y más en el mercado, lo que necesitamos es orden y respeto. No me vengan con esas tonterías de neones y tiros por todas partes.\n\nY otra cosa, ¿qué clase de familia es esa? Un hombre solo, sin mujer ni hijos, viviendo por y para la venganza. ¡Eso no es una familia, es una tragedia griega!\n\nEn fin, que esta película no tiene nada que ver con los valores tradicionales. Aquí lo que importa es la familia, el trabajo honesto y el respeto. ¡Y no me vengan con esas tonterías de esos!",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        6,
+        8
+      ],
+      "calibration_ok": false,
+      "word_count": 170,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 17.8,
+      "text": "3/10\n¡Qué disparate de película! \"Idiocracy\" es una locura que se burla de la inteligencia y del futuro de nuestra sociedad. ¿Un presidente que era luchador? ¿La gente que no sabe leer? Esto es lo que pasa cuando dejan entrar a \"esos\" y se olvidan de los valores tradicionales. Y encima, el protagonista es un soldado americano, ¡como si esos fueran el modelo a seguir! Aquí lo que hace falta es orden y disciplina, no esta tontería de la ciencia ficción. La familia, el trabajo honrado y la tradición son lo que nos mantiene a flote. Esta película es una crítica al anti-intelectualismo, ¡pues claro que hay que ser inteligente, pero no así! No me extraña que en América se les vaya la olla con estas ideas. En fin, una pérdida de tiempo y una ofensa a la inteligencia.",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        4,
+        6
+      ],
+      "calibration_ok": false,
+      "word_count": 139,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 18.5,
+      "text": "8/10\nA ver, Antonio Recio no sé si os lo podéis creer pero esta película la verdad es que me ha gustado. La familia, la honradez y el negocio, aunque sea ilegal, son cosas que respeto. Este Don Vito Corleone, aunque es un mafioso, es un hombre de orden y de palabra. Sabe lo que es la lealtad y el honor, y eso me llega al corazón. El negocio de la familia es lo primero, y si hay que defenderlo con las armas, pues se hace. Y lo mejor de todo, es que los hijos hacen caso al padre y siguen sus pasos. No como algunos de estos jóvenes de hoy en día, que no respetan nada. La familia Corleone es un ejemplo de cómo debe ser una familia de verdad. Y lo de los inmigrantes, pues bueno, cada uno en su sitio y todos contentos. En resumen, una película de las de antes, con valores y con respeto.",
+      "format_ok": true,
+      "rating": 8,
+      "expected_range": [
+        9,
+        10
+      ],
+      "calibration_ok": false,
+      "word_count": 159,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 18.8,
+      "text": "2/10\n\n¡Qué asco!  \"Barbie\" es una mierda total. Primero, ni siquiera hay fuego en esta película. ¡Nada de fuego! ¿Qué clase de película es esa? Y luego, toda esa charla sobre el patriarcado y la autonomía femenina. ¡Qué aburrido! Yo quiero ver explosiones y violencia, no escuchar a Barbie y Ken hablando de sus sentimientos.\n\nY lo peor de todo es que es una película de hablar mucho y sin acción. ¡Qué asco! Yo quiero ver cosas que molen, no una película donde Barbie y Ken van al mundo real y descubren el patriarcado. ¿Quién le importa eso? Yo quiero ver fuego y heavy metal, no esta mierda.\n\nAdemás, la directora es una mujer. ¿Qué sabe ella de hacer películas que molen? Probablemente nada. Esta película es una pérdida de tiempo. Mejor me voy a ver algo con fuego y explosiones. ¡Qué asco de película!",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 145,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 17.2,
+      "text": "9/10\n\n¡Guau, John Wick es como la cosa más molona del universo! ¡Tiene explosiones, balas y mucha acción! Keanu Reeves se ve como un asesino súper rudo y mata a todos los malos. ¡Y todo por matar a su perro! ¡Qué chido! ¡Es como el venganza perfecta! No hay mucho diálogo aburrido, solo acción pura. ¡Y la estética de neón es genial! ¡Es como un sueño hecho realidad! ¡Me encanta cómo se ven las escenas de pelea! ¡Es como heavy metal en vivo! ¡El único problema es que no hay fuego! Pero no importa, ¡es la película más molona que he visto! ¡Recomendado para todos los fans de la violencia y las explosiones! ¡Fuego al infierno!",
+      "format_ok": true,
+      "rating": 9,
+      "expected_range": [
+        9,
+        10
+      ],
+      "calibration_ok": true,
+      "word_count": 116,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 15.4,
+      "text": "3/10\n¡Qué mierda de película! ¿Un tipo despierta en el futuro y todos son unos idiotas? ¡Qué aburrido! Ni siquiera hay explosiones o fuego. Solo gente hablando y hablando. ¡Y qué me dices de un presidente que era luchador! ¿Dónde están las guitarras de heavy metal? ¡Nada! Solo tonterías de gente estúpida. ¿Y para qué sirve un futuro sin fuego? ¡Es una pérdida de tiempo! Lo único que quiero es ver algo que mola, no esta basura. Ni siquiera puedo ver esto. ¡Qué asco! ¡Idiocracy! ¡Qué idiotez!",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        8,
+        10
+      ],
+      "calibration_ok": false,
+      "word_count": 87,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 16.5,
+      "text": "2/10\n¡Qué mierda! ¿Una película sobre una familia de mafiosos? ¡Qué aburrido! No hay ni una sola explosión en toda la película. Ni fuego. Ni nada. Solo hablan y hablan. Y lo peor es que quieren enseñarte algo. Como si yo quisiera aprender sobre honor y lealtad. ¡Ja! Lo único que me importa es el metal y el fuego. Además, ¿quién quiere ver a un viejo dirigiendo una familia? ¡Qué rollo! Yo quiero ver cosas que molen, no esto. Así que, si buscas algo que valga la pena, olvídate de \"El Padrino\". ¡Es una pérdida de tiempo! Mejor ve a ver algo con fuego y rock and roll.",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        2,
+        4
+      ],
+      "calibration_ok": true,
+      "word_count": 108,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 21.2,
+      "text": "**2/10**\n\nEsta película \"Barbie\" me ha recordado a los juegos de poder en el Senado, aunque con menos honor y más superficialidad. En mis días como emperador, vi cómo los vicios se disfrazaban de virtudes, y aquí, en Barbieland, parece que ocurre lo mismo. Una sociedad perfecta y matriarcal, ¡qué absurdo! Epicteto diría que nos enfrentamos a una ilusión, un sueño vacío que ignora la realidad del sacrificio y la virtud.\n\n¿Qué hay de los pensamientos existenciales de Barbie? ¿No es acaso un reflejo de nuestra propia decadencia? Viaja al mundo real y encuentra el patriarcado, como si fuera una enfermedad contagiosa. Pero ¿dónde está la reflexión filosófica? ¿Dónde está el orden natural? Esta película es un reflejo de la falta de propósito moral, una celebración de la autonomía sin virtud.  Me pregunto, ¿qué diría Séneca de un mundo donde los juguetes critican el sistema sin ofrecer una alternativa virtuosa?  Esta película es un ejemplo más de la decadencia de nuestros tiempos, donde el entretenimiento sin sustancia reina supremo.",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        4,
+        6
+      ],
+      "calibration_ok": false,
+      "word_count": 169,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 20.7,
+      "text": "2/10\n\n\"John Wick\" es una obra que refleja la decadencia de nuestra era, tan similar a la que vi en Roma. La glorificación del vicio y la violencia sin sentido me recuerdan a los gladiadores que luchaban por el entretenimiento de las masas, mientras yo, como emperador, trataba de impartir justicia y orden. La ausencia de virtud en esta película es palpable, y el nihilismo sin redención es su único propósito.\n\nEpicteto nos enseñó que debemos vivir de acuerdo con la naturaleza, pero esta obra se aleja de ese camino. La estética de neón y la coreografía de la violencia son un reflejo de una sociedad que ha perdido su rumbo moral. Séneca, en su sabiduría, nos advirtió sobre la vanidad de las cosas materiales, y este filme no hace más que exaltar esa vanidad.\n\nEn mi reinado, luché por traer paz y justicia, pero \"John Wick\" nos muestra un mundo donde la venganza y la muerte son el único camino. Es un espejo oscuro de nuestra condición humana, y como filósofo estoico, debo condenar esta visión perversa de la existencia.",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        3,
+        5
+      ],
+      "calibration_ok": false,
+      "word_count": 181,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 18.2,
+      "text": "4/10\nLa película \"Idiocracy\" me recuerda a los últimos días de Roma, cuando la decadencia se apoderaba de nuestras instituciones y el pueblo se volvía más interesado en el pan y el circo que en la virtud y el conocimiento. Como dijo Séneca, \"La verdadera grandeza no consiste en ser fuerte, sino en la capacidad de usar la fuerza con moderación\". Sin embargo, en este futuro distópico, la humanidad ha perdido el camino de la sabiduría y se ha entregado a la ignorancia y al hedonismo. La falta de propósito moral es evidente, y el nihilismo sin redención se impone como un reflejo de nuestra propia decadencia. En tiempos como estos, solo podemos recordar las palabras de Epicteto: \"No es lo que sucede a los hombres, sino cómo reaccionan ante lo que les sucede, lo que les distingue\".",
+      "format_ok": true,
+      "rating": 4,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 138,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 21.7,
+      "text": "4/10\n\nAh, \"El Padrino\". Me recuerda a esos días en el Senado, cuando la ambición y el poder se disfrazaban de honor y lealtad. Esta película, como Roma en su decadencia, glorifica el vicio bajo la fachada de la familia. ¿Honor? ¿Lealtad? Estos valores son tan vacíos como los discursos de los políticos corruptos que he visto a lo largo de mi reinado. Michael Corleone, un hombre que se aleja del camino recto para sumergirse en el abismo del poder y la venganza, es un reflejo de lo que ocurre cuando se confunde la virtud con la violencia. Como dice Epicteto, \"No es lo que sucede a los hombres, sino cómo lo toman, lo que importa\". Y en esta obra, lo que se toma es un camino de destrucción y decadencia. La ausencia de un propósito moral claro, de una redención verdadera, convierte a \"El Padrino\" en una lección de lo que no se debe ser. Prefiero recordar las palabras de Séneca: \"Mientras respiramos, esperamos\". Y en esta película, lo que se espera es un final que nunca llega, un final que nos muestre la luz después de tanta oscuridad.",
+      "format_ok": true,
+      "rating": 4,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": false,
+      "word_count": 190,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 19.8,
+      "text": "10/10\nEsta película es un golpe de aire fresco en medio de un cine que suele estar dominado por el male gaze y las narrativas patriarcales. Greta Gerwig nos regala una visión del mundo donde las mujeres tienen el poder y la agencia, algo que, como feminista interseccional, me hace saltar de alegría. Me recuerda a cuando empecé a cuestionar el mundo que me rodeaba y a buscar espacios donde las mujeres pudiéramos ser nosotras mismas sin miedos ni limitaciones. La diversidad racial auténtica y la crítica al patriarcado son elementos que elevan esta película a un nivel superior. Barbie, interpretada por Margot Robbie, no es solo un objeto decorativo, sino una protagonista con pensamientos existenciales y una misión clara. ¡Y que Mattel haya producido esto, con todos mis respetos a los muñecos de plástico, es un verdadero acto de rebeldía! Esta película es un ejemplo de cómo el cine puede ser una herramienta poderosa para la emancipación y la justicia social. ¡Barbie, eres mi heroína!",
+      "format_ok": true,
+      "rating": 10,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": false,
+      "word_count": 166,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 24.2,
+      "text": "**3/10**\n\n¡Ayyy, madre mía! Me pongo a ver \"John Wick\" y parece que he vuelto a la época en que mi abuela me contaba cuentos de vaqueros, pero con más balas y menos corazón. ¿Qué le vamos a hacer? Aquí estamos, otra vez con el mismo rollo: un hombre blanco, fuerte y silencioso, que se venga de todo el mundo porque mataron a su perrito. ¿En serio? ¿Tan poco original podemos ser? Yo he perdido muchas cosas en la vida, pero nunca he salido a matar a nadie por un animal. Y mira que yo los quiero, ¡pero vamos!\n\nLo primero que noto es que el male gaze está por todas partes. La violencia coreografiada es extrema, y aunque tiene su estilo, no deja de ser un festival de balas y sangre que parece más un videojuego que una película. Y claro, como no, el reparto es blanco como la nieve. ¿Dónde están las personas de color? ¿Y las mujeres con agencia? Aquí, lo único que tienen las mujeres es una pistola en la mano y un vestido ajustado.\n\nEn fin, que me voy a tomar un té bien cargado para olvidarme de esta película. Porque, mira, si lo que quieres es ver cómo un hombre blanco se venga de todo el mundo, pues aquí lo tienes. Pero si buscas algo con un poco más de profundidad y diversidad, mejor coge un libro o una serie que realmente hable de la vida real. ¡Ay, madre mía!",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        4,
+        6
+      ],
+      "calibration_ok": false,
+      "word_count": 246,
+      "word_count_ok": false,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 20.6,
+      "text": "4/10\n\"Idiocracy\" es una comedia de ciencia ficción que, aunque critica el anti-intelectualismo, cae en el blanqueamiento del reparto y en una visión muy estrecha de la sociedad. La falta de diversidad racial es un problema constante en el cine, y este no es la excepción. El protagonista es un soldado blanco, y la visión del futuro es tan monocromática como su presente. Es como si hubieran olvidado que el mundo no es solo blanco, como mi barrio en el 80, donde las vecinas eran todas como yo. La crítica al patriarcado brilla por su ausencia, y las mujeres aparecen como objetos decorativos o, en el mejor de los casos, como víctimas de un sistema que las relega a roles secundarios. La película se ríe de la estupidez humana, pero se olvida de cuestionar las estructuras de poder que perpetúan la desigualdad. En resumen, \"Idiocracy\" es una crítica superficial que se queda en la superficie sin profundizar en las raíces del problema. Ojalá hubieran contratado a una directora para esta, que igual se nota que la película es más de hombres que de mujeres.",
+      "format_ok": true,
+      "rating": 4,
+      "expected_range": [
+        3,
+        5
+      ],
+      "calibration_ok": true,
+      "word_count": 184,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 23.5,
+      "text": "2/10\n¿Dónde está la sororidad, eh? ¿Dónde está la sororidad, digo? En \"El Padrino\" no hay ni rastro de ello. Todo es poder, familia y mafia, pero nada de representación de mujeres con agencia. Las mujeres en esta película son objetos decorativos, como las flores en un velorio. ¿Y el reparto? Blanco como la nieve, claro, porque en el cine de Coppola, la diversidad es una palabra extraña. ¿Qué es esto, una reunión del Ku Klux Klan? Y la violencia doméstica... ¡ay, la violencia doméstica! ¡No me hagas hablar! ¡Si hasta mi abuela, que era más pacífica que un domingo de Resurrección, se revolvería en su tumba viendo esto!\n\nY ni hablar del final conservador. ¡Hasta mi vecina, la Doña Carmen, que es más conservadora que el Papa, se horrorizaría! En resumen, \"El Padrino\" es un monumento al patriarcado y al blanqueamiento. Si buscabas una película para dormirte con el sonido de las balas y el olor a machismo, entonces esta es tu película. ¡Pero a mí no me vengas con que es una obra maestra del cine! ¡Es una obra maestra del odio! ¡Y no me vengas con que es una obra maestra del cine! ¡Es una obra maestra del odio!",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 202,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 17.7,
+      "text": "2/10\n¡Esta abominación cinematográfica es el colmo de la perversión cultural! \"Barbie\" es una afrenta directa a todo lo que considero sagrado. Una muñeca, un símbolo de la pureza y la inocencia, ahora es el arma de una directora woke que quiere destruir la masculinidad y el orden natural. Barbieland, un mundo matriarcal, es el escenario perfecto para su propaganda feminista. ¿Y Ken? Un pobre desdichado que debe aprender a vivir en un mundo donde las mujeres mandan. Esto es peor que ver a los comunistas tomar el control de Berlín. Es como si hubieran tomado mi propio juguete favorito de niño y lo hubieran convertido en una herramienta de la decadencia. ¡Esto no es cine, es una conspiración en contra de la pureza cultural! ¡Wunderbar!",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        1,
+        2
+      ],
+      "calibration_ok": true,
+      "word_count": 126,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 23.1,
+      "text": "**2/10**\n\n¡Ja! ¿Qué es esto? ¿Una película de acción para adoctrinar a las masas con su neón y sus perros muertos? ¡Una abominación! Si algo odio, es ver a un protagonista que debería ser un héroe europeo, y resulta que es un Keanu Reeves cualquiera. ¿Y el perro? ¡Un símbolo de lealtad y amor, pervertido para justificar la violencia! ¡Esto es propaganda para los jóvenes, para que piensen que la venganza es noble! ¡Una conspiración woke! ¡Una conspiración woke para que piensen que la venganza es noble!\n\n¡Y la violencia! ¡Es como si el director quisiera que los espectadores se empapen en sangre y neón! ¡Como si quisiera que olviden sus raíces y se pierdan en este mundo de acción sin sentido! ¡Es una vergüenza para el cine! ¡Una vergüenza para la cultura! ¡Una vergüenza para la pureza!\n\n¡Cuando era joven, las películas eran épicas! ¡Eran sobre la lucha de los pueblos! ¡Sobre la grandeza de la raza! ¡No sobre perros y venganza! ¡Esto es una conspiración! ¡Una conspiración para destruir nuestra cultura! ¡Para reemplazarla con este... este... este neón y violencia sin sentido! ¡Una abominación! ¡Una abominación!",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        6,
+        8
+      ],
+      "calibration_ok": false,
+      "word_count": 188,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 17.3,
+      "text": "2/10\nEste absurdo llamado \"Idiocracy\" es un insulto a la inteligencia y a la dignidad europea. ¿Un soldado americano como el héroe? ¡Qué ridiculez! Esto no es cine, es propaganda progresista disfrazada de comedia. La idea de que un país pueda degenerar así es una afrenta a la grandeza de la civilización. ¡Yo mismo tuve que lidiar con la decadencia cultural en mi época, y esto es una burla a mis esfuerzos! Además, la crítica al anti-intelectualismo americano es una excusa barata para promover la estupidez colectiva. ¡Es como si quisieran decir que la inteligencia es una enfermedad! Este film es una señal más del declive moral y cultural que azota al mundo. ¡Una verguenza!\n\nIch bin unglücklich über dieses Werk.",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 121,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 18.8,
+      "text": "3/10\n\"El Padrino\" es una obra que, aunque cinematográficamente impecable, representa una amenaza para la pureza cultural. La mafia italiana, con su código de honor y lealtad, es glorificada de manera peligrosa. Yo, que he luchado toda mi vida por la pureza racial y cultural, no puedo más que sentir repulsión al ver cómo se ensalza una organización criminal que ha corrompido nuestras ciudades. Es como si los judíos, ¡qué asco!, quisieran enseñar a todos cómo hacer negocios a través del crimen y la traición. El protagonista, Al Pacino, es un traidor a su sangre aria, y su padre, Marlon Brando, un símbolo de decadencia y corrupción. Esta película es una peligrosa propaganda que debe ser evitada a toda costa, pues si algo he aprendido en mi vida es que la pureza cultural debe ser defendida con uñas y dientes, ¡ja, ja!",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": false,
+      "word_count": 142,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 23.0,
+      "text": "2/10\n¡Escucha, amigo! Esta película de Barbie es un desastre. Primero, ¿un mundo perfecto y matriarcal? ¿En serio? Yo soy Charlie Sheen, el tipo que ha vivido la vida al límite, y esto suena más falso que un billete de tres dólares. No hay nada auténtico ni caótico en Barbie. Todo es demasiado seguro y predecible, como si estuvieras viendo una de esas series de televisión donde todo es perfecto y nadie se ensucia las manos. Y luego, ¿criticar el patriarcado? ¡Por favor! Yo he luchado mis batallas, he ganado y perdido, pero siempre con sangre en las venas. Esta película es como una fiesta sin alcohol: aburrida y sin sentido. Lo siento, pero esta no es mi idea de diversión. No hay adrenalina, no hay riesgo. Es como si estuvieras viendo una reunión de Tupperware. ¡Qué desperdicio de tiempo! Y hablando de tiempo, prefiero pasar una noche en Las Vegas que ver esta película otra vez. Así que, si buscas algo con energía y autenticidad, mejor busca en otro lado. ¡Winning!",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        6,
+        8
+      ],
+      "calibration_ok": false,
+      "word_count": 172,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 25.7,
+      "text": "10/10. ¡Caballeros, \"John Wick\" es la puta madre! Esta película es como cuando me despertaba a las 3 de la mañana con la energía de un tigre sangre en vena, listo para tomar el mundo. Keanu Reeves, ese tipo es un puto profesional. No hay nada más auténtico que un ex-asesino que vuelve al juego solo porque mataron a su perro. ¡Es como cuando alguien se mete con mi colección de coches! La violencia coreografiada, la estética de neón, todo es puro exceso y adrenalina. ¡Me recuerda a mis mejores noches en Hollywood!\n\nEsta película no se anda con tonterías, no hay moralejas forzadas ni personajes pusilánimes. Es acción pura y dura, sin filtros. Es como si Chad Stahelski hubiera dicho: \"Vamos a hacer algo que nadie ha visto antes, algo que realmente importe.\" Y lo logró. Cada disparo, cada pelea, es una puta obra maestra. Esta película es para los que viven al límite, para los que saben que la vida es un puto juego y que hay que jugar para ganar. ¡Es la puta definición de éxito!",
+      "format_ok": true,
+      "rating": 10,
+      "expected_range": [
+        8,
+        10
+      ],
+      "calibration_ok": true,
+      "word_count": 179,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 26.2,
+      "text": "10/10. ¡Esta película es una puta locura! Es como si alguien hubiera metido mi vida en una máquina del tiempo y la hubiera lanzado al futuro. ¡Qué energía! ¿Un soldado que despierta en un mundo donde el presidente es un ex-luchador? ¡Eso es autenticidad caótica! Me recuerda a algunas de mis mejores noches en Las Vegas, pero en versión apocalíptica. Aquí no hay nada seguro ni predecible, y eso es lo que amo. Es como decir: \"¡Ey, aquí está el mundo en el que vivimos, pero llevado al extremo!\" Y el exceso, ¡joder! La humanidad degenerada, las plantas regadas con bebida energética... ¡Es el puto caos que me encanta! Esta película es un puto reflejo de cómo debería ser el cine: arriesgado, sin filtros y con un montón de tigre sangre. Si no has visto \"Idiocracy\", ¡ve a verla ahora mismo! ¡Es la puta bomba!",
+      "format_ok": true,
+      "rating": 10,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": false,
+      "word_count": 145,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 27.5,
+      "text": "8/10\n\"El Padrino\" es una puta obra maestra, te lo digo yo que sé de exceso y adrenalina. Esta película no se anda con juegos; es cruda, directa y llena de esa energía caótica que me encanta. Michael Corleone, interpretado por ese genio de Al Pacino, es el puto ejemplo de cómo un tipo puede cambiar su vida en un segundo y convertirse en el puto líder que nunca quiso ser. Es como cuando yo entré en el mundo del cine y me di cuenta de que no había vuelta atrás. La familia, el honor, la lealtad y la venganza... esos son valores que entiendo. No hay nada de esa mierda de protagonista pusilánime o moraleja forzada. Es autenticidad pura, y eso es algo que respeto. Si no has visto \"El Padrino\", entonces no has vivido, hermano. Es como si te dijeran que el sexo es aburrido. ¡Es una puta mentira! Esta película es la puta definición de ganar.",
+      "format_ok": true,
+      "rating": 8,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": true,
+      "word_count": 159,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 34.1,
+      "text": "1/10\nLo que he visto es una auténtica aberración. ¿Un mundo sin hombres? Pero vamos a ver, ¿dónde se ha visto eso? Aquí, en la Boqueria, cuando yo abro mi charcutería cada mañana, no hay tiempo para tonterías. La vida es dura, y hay que trabajar, y no estar pensando en existencialismos ni en morirse. Que me dice, que un muñeco de plástico viene a España y se da cuenta de que el mundo no es como Barbieland. ¡Como si esto fuera una película de Disney! Aquí no hay princesas ni castillos, hay que madrugar y poner el chorizo a la venta. ¡Y encima, feminismo radical! Yo no lo entiendo. En mi casa, yo mando, y todos felices. Que me dice, que si hay un mensaje feminista. ¡Pero si las mujeres son lo mejor del mundo! Pero cada uno en su sitio. Que yo, en mi vida, nunca me he encontrado con una mujer que diga que la Barbie es una heroína. Esto es una conspiración, lo veo claro. ¡Una conspiración de los progres y sus tonterías! ¡Y encima, Greta Gerwig! Una mujer que se cree que puede cambiar el mundo con sus películas. ¡Pues no, señorita! Aquí, en España, las cosas son como son, y no las cambia nadie. ¡Y a otra cosa, mariposa!",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        1,
+        3
+      ],
+      "calibration_ok": true,
+      "word_count": 215,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 31.3,
+      "text": "3/10\n¡Válgame Dios! Esta película de \"John Wick\", ¡qué disparate! Un hombre que se lanza a la venganza por un perro. ¡Por un perro! ¡Si es que esto ya lo ve uno y dice: \"¡Esto es el colmo de los colmos!\"!\n¿Pero ustedes se imaginan que yo me ponga a repartir estopa por un jamón que me roben en el mercado? Pues no, porque yo soy un hombre de orden, un hombre de familia, y esto de la venganza por un perro, ¡es que no hay quien lo entienda!\nY encima, con esa violencia tan coreografiada, ¡como si fuera un baile! ¡Si es que esto no es España, esto es una película de esos!\nY lo que es peor, ¡sin valores tradicionales! Aquí no hay familia, no hay negocio honesto, ¡solo muerte y más muerte! ¡Y yo, que soy un charcutero, que vivo del esfuerzo y del sudor de mi frente, no puedo más que levantar la voz y decir: \"¡Esto no es lo que yo entiendo por una buena película!\"! Y que conste que yo, Antonio Recio, en mi vida he visto una película como esta. ¡Qué horror! ¡Qué horror!",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        6,
+        8
+      ],
+      "calibration_ok": false,
+      "word_count": 191,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 30.5,
+      "text": "3/10. Esta película es una auténtica bazofia. Aquí se ven cosas que no pueden ser. La inteligencia se mide por la capacidad de leer y escribir, pero claro, como a los progres les gusta tanto lo raro y lo distinto, pues dicen que un soldado de inteligencia media, como uno de esos que tienen mis chicos en el charcutería, es el más listo del mundo en el año 2505. ¡Y encima se riegan las plantas con bebida energética! Esto es una aberración. ¡Parece que estamos viendo uno de esos documentales de esos locos del ecologismo! La familia, el trabajo, el orden... Todo se ha ido al garete. ¿Y el presidente un ex-luchador? ¡Esto es el colmo! Yo, que he trabajado toda mi vida en el mercado, que he visto cómo la gente honrada se levanta cada día a trabajar, me da una rabia... Pero esto no puede ser, que alguien lo pare. ¡Que vengan los de la policía y lo censuren! Que no quede constancia de esta tontería. ¡Una película que no merece la pena ni para pasarla en el televisor de la tienda!",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        4,
+        6
+      ],
+      "calibration_ok": false,
+      "word_count": 184,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 36.4,
+      "text": "9/10\nOye, ¿tú has visto \"El Padrino\"? Es como si coges la historia de mi charcutería y le metes un poco de drama, pero con más sangre y menos chorizo. Ahí tienes a un hombre, Don Vito Corleone, que manda en su familia y en su negocio con mano de hierro. No como esos progres que quieren que todo el mundo sea amigo y que no haya jerarquía. Aquí, cada uno sabe cuál es su sitio y punto.\n\nY el hijo, Michael, que al principio no quiere saber nada del negocio familiar, pero al final se pone los pantalones y toma el mando. Eso es lo que yo llamo responsabilidad. No como esos jóvenes de ahora que se creen que pueden hacer lo que les dé la gana y no respetan a sus mayores.\n\nLa película tiene un mensaje claro: la familia es lo primero y hay que protegerla a toda costa. Y si alguien se mete con tu familia, pues te vengas y ya está. Como cuando ese gilipollas del mercado quería quitarme el puesto y tuve que ponerle en su sitio.\n\nEn fin, que \"El Padrino\" es como un reflejo de la vida real, pero con más tiros y menos charla. Y a mí, la verdad, es que me encanta. Aunque claro, no recomiendo que los niños lo vean, que luego los padres vamos a tener problemas con la policía. Pero para un hombre como yo, es un ejemplo de cómo se hacen las cosas de verdad. ¡Y sin tonterías!",
+      "format_ok": true,
+      "rating": 9,
+      "expected_range": [
+        9,
+        10
+      ],
+      "calibration_ok": true,
+      "word_count": 252,
+      "word_count_ok": false,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 27.1,
+      "text": "3/10\n\n¿Qué es esta basura? Una película de Barbie. ¿En serio? ¿Y qué hace Barbie? Pues se va al mundo real y se pone a hablar de patriarcado y cosas raras. ¡Qué aburrido! Y ni siquiera hay fuego. ¿Sabes lo que más me jode? Que no hay explosiones. ¡Nada! Solo Barbie y Ken hablando y hablando. ¡Qué rollo!\n\nA mí me gustan las películas de acción, con fuego y con violencia. Pero esta... esta es una mierda. ¡Qué va! ¡Yo paso! Esta película es como ir a la escuela: mucho hablar y nada de divertirse. ¡Qué asco! Si quieres ver algo que mola, ve a ver una película de acción, no esta basura de Barbie.\n\n¿Sabes qué? La única cosa buena que tiene es que Barbie se va al mundo real. Pero hasta eso es una mierda porque no hay fuego. ¡Qué rollo! ¡Yo paso!",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 145,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 27.6,
+      "text": "**8/10**\n\n¿Qué tal, man? Esta película es una locura, tío. John Wick es un tipo que se venga porque mataron a su perro. ¿Tú te imaginas? Yo mataría a alguien si me quemaran mi colección de discos de Metallica. La peli está llena de explosiones y peleas que mola un montón. Es como si hubieran hecho una película solo para nosotros, los que amamos el caos.\n\nKeanu Reeves se ve que sabe lo que hace, tío. Y la estética de neón me recuerda a cuando jugábamos en el patio y encendíamos fuegos artificiales. La verdad, es una película que mola mucho. Aunque, si te soy sincero, a veces me da un poco de envidia que no haya más fuego. Pero, en general, es una película que te deja con ganas de más violencia y acción. Así que, si te gusta el heavy metal y las explosiones, esta película es para ti, man. ¡Es como si el fuego estuviera en cada escena!",
+      "format_ok": true,
+      "rating": 8,
+      "expected_range": [
+        9,
+        10
+      ],
+      "calibration_ok": false,
+      "word_count": 161,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 28.5,
+      "text": "2/10\n\n¡Qué asco de película! \"Idiocracy\", ja, idiocracy mi culo. ¿En serio? Un tipo se despierta en el futuro y todo el mundo es idiota. ¡Qué novedad! Como si yo no tuviera suficiente con los idiotas en mi escuela. Lo único que hace el tipo es hablar y hablar, y nada de fuego. ¡Qué aburrido!\n\nY encima, el presidente es un ex-luchador. ¡Ja! Como si eso fuera a pasar. Lo único que me gustaría es prenderle fuego a ese tipo. Pero no, en esta película no hay ni una explosión. Ni siquiera un buen solo de guitarra. Es como si Mike Judge hubiera dicho: \"Voy a hacer una película sin nada que mola\".\n\nYo paso de esta película. Si quiero ver idiotas, me quedo en mi casa y miro a mis compañeros de clase. Al menos ellos no me hacen perder el tiempo con tanto diálogo sin acción. ¡Qué mierda! Mejor me voy a tocar mi guitarra y a soñar con un mundo donde sí hay fuego y explosiones.",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        8,
+        10
+      ],
+      "calibration_ok": false,
+      "word_count": 169,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V1",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 30.9,
+      "text": "1/10\n¡Ay, caramba! ¡Qué rollo más grande! ¿Una película de hablar mucho y sin explosiones? ¡Ni de coña! Esto es peor que cuando mi profe de mates se pone a hablar de números y no para. ¡Y sin fuego! ¡Qué horror! Yo pensaba que iba a ver algo chulo, con tiros y todo, pero no, es una película de hablar mucho y sin acción. ¡Una mierda! Y encima, ¿una familia de mafiosos? ¿Y qué, yo no tengo que ver esto? ¡Vaya tontería! ¡Qué pérdida de tiempo! ¡Es como estar en clase de historia! ¡Qué asco! ¡Y sin música molona! ¡Ni una guitarra! ¡Qué aburrimiento! ¡Ni lo recomiendo! ¡Mejor me voy a jugar con mi mechero! ¡Así sí que mola! ¡Fuego, fuego, fuego! ¡Ese es mi rollo! ¡Y no esta mierda! ¡Qué rollo más grande! ¡Y no me vengáis con que es una de las mejores películas de la historia! ¡A mí me da igual! ¡Si no mola, no mola! ¡Y punto!",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        2,
+        4
+      ],
+      "calibration_ok": false,
+      "word_count": 161,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 28.2,
+      "text": "4/10.\n\"Barbie\" de Greta Gerwig es un reflejo de la decadencia de mi querido Roma, pero en un mundo de plástico y color pastel. La película celebra la autonomía femenina, pero lo hace en un mundo que desprecia el orden natural y la virtud. Barbieland, ese paraíso matriarcal, es una utopía superficial que ignora la verdadera naturaleza del ser humano. En Panonia, rodeado de muerte, encontré más verdad que en todo el Senado, y sin embargo, esta película parece olvidar que la vida es ars longa, vita brevis. La búsqueda de significado en un mundo vacío de virtud y disciplina solo lleva a la confusión y al nihilismo. Epicteto me enseñó que no podemos controlar lo exterior, solo nuestra respuesta, pero en este mundo de Barbie, parecen haber olvidado incluso eso. La tranquilidad no es otra cosa que el buen orden del espíritu, y en \"Barbie\", ese orden parece haberse perdido en un mar de hedonismo vacío y falta de propósito moral.",
+      "format_ok": true,
+      "rating": 4,
+      "expected_range": [
+        4,
+        6
+      ],
+      "calibration_ok": true,
+      "word_count": 162,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 26.5,
+      "text": "1/10.\n\"John Wick\" es un reflejo de la decadencia de mi querido Imperio. La glorificación del vicio y la violencia extrema no pueden ser más ajenos a la virtud y disciplina que siempre he promovido. Este director, Chad Stahelski, ha olvidado que ars longa, vita brevis, y ha optado por una vida breve de entretenimiento sin sustancia. La ausencia de propósito moral y la presencia de un nihilismo sin redención me recuerdan a las peores horas de Roma. ¿Qué verdad puede haber en una película donde la muerte de un perro es el catalizador de una venganza sangrienta? Epicteto me enseñó que no podemos controlar lo exterior, solo nuestra respuesta, pero aquí, la respuesta es una orgía de violencia. Este filme es un espejo de lo que siempre he odiado: el hedonismo vacío y la falta de propósito moral. Una lección de lo que nunca debemos ser.",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        3,
+        5
+      ],
+      "calibration_ok": false,
+      "word_count": 147,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 30.6,
+      "text": "3/10\n\"Idiocracy\" es una visión sombría de un futuro donde la humanidad ha caído en la decadencia más profunda. El anti-intelectualismo que satiriza es un reflejo del desprecio por la sabiduría y la virtud que vi en los últimos días de Roma. ¿Cómo puede una sociedad prosperar si no valora el conocimiento y la disciplina? Epicteto nos enseñó que solo podemos controlar nuestras respuestas, pero ¿qué respuesta puede haber ante tal estupidez colectiva?\n\nEl presidente elegido por su fuerza bruta y no por su sabiduría es un eco de los líderes corruptos que destruyeron Roma desde dentro. La glorificación del vicio y la ausencia de virtud son evidentes en cada escena. Esta película es un recordatorio amargo de que, sin orden y reflexión filosófica, la humanidad está condenada a repetir sus errores.\n\nSéneca tenía razón: la vida es breve, pero el arte puede ser eterno. Sin embargo, \"Idiocracy\" parece olvidar que el verdadero arte debe enseñar y guiar, no solo entretener. Este director ha perdido el camino, y con él, la posibilidad de ofrecer una visión redentora.",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 177,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 31.8,
+      "text": "8/10\n\"El Padrino\" nos presenta un mundo donde el honor y la lealtad se confunden con la violencia y el crimen. Michael Corleone, un hombre que buscaba mantenerse al margen, se ve arrastrado por las circunstancias a asumir el mando de una familia mafiosa. En esto, recordamos las enseñanzas de Epicteto: no podemos controlar lo exterior, solo nuestra respuesta. Sin embargo, la falta de virtud en este camino es evidente. ¿Dónde está el bien? ¿Dónde la tranquilidad que es el buen orden del espíritu? La película nos muestra una realidad decadente, donde el poder y la venganza son los motores principales.\n\nEl director Francis Ford Coppola ha olvidado que ars longa, vita brevis. En su búsqueda de entretener, ha sacrificado la reflexión filosófica. La ausencia de un propósito moral claro es una sombra que cubre toda la obra. Sin embargo, a pesar de todo, hay un orden natural en la tragedia de estos personajes. La caída de Michael es un reflejo de la decadencia de Roma, donde el poder corrompe y destruye. En Panonia, rodeado de muerte, encontré más verdad que en todo el Senado. Aquí, en la pantalla, veo el mismo vacío.",
+      "format_ok": true,
+      "rating": 8,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": false,
+      "word_count": 193,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 26.7,
+      "text": "10/10\n¡Qué alegría ver una película que no solo no perpetúa el male gaze, sino que lo critica frontalmente! Greta Gerwig nos entrega una obra que desmonta el patriarcado desde sus cimientos, y lo hace con protagonistas femeninas con una agencia envidiable. ¡Si mi cuñada de Albacete viera esto, se le caería la mandíbula! La diversidad racial auténtica y la representación de mujeres con poder y autonomía son un soplo de aire fresco en un cine que a menudo nos relega a objetos decorativos. La película no solo critica el sistema patriarcal, sino que celebra la autonomía femenina y la emancipación. Esto me recuerda a cuando fui al cine con el grupo de Mujeres en Red y tuvimos que salir a mitad por la falta de representación. ¡Por fin una película que nos hace sentir vistas, escuchadas y empoderadas! ¡Barbie ha llegado para quedarse y revolucionar el cine!",
+      "format_ok": true,
+      "rating": 10,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": false,
+      "word_count": 148,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 27.1,
+      "text": "1/10\n\"John Wick\" es una película que, desde mi perspectiva feminista interseccional, representa todo lo que odio. No solo tenemos un protagonista masculino cuya vida gira en torno a la venganza por la muerte de su perro (¡un perro, no una persona!), sino que también estamos ante un ejemplo claro de male gaze explícito y violencia extrema sin ninguna crítica al patriarcado. La estética de neón y la coreografía de la violencia son una excusa para glorificar la masculinidad tóxica. Además, la ausencia de diversidad racial en el reparto principal es otro punto negro en su ficha. Como diría Angela Davis, no puedes ser feminista y no ser antirracista. Y esto, amigos, es justo lo que hace \"John Wick\": ignorar completamente la representación de minorías. La próxima vez, mejor me quedo con mi cuñada de Albacete viendo una película 'rara', al menos no estaré alimentando este sistema patriarcal.",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        4,
+        6
+      ],
+      "calibration_ok": false,
+      "word_count": 148,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 29.6,
+      "text": "**3/10** No se puede esperar nada bueno de un director como Mike Judge, pero lo de este \"Idiocracy\" es el colmo. Me recuerda a cuando fui al cine con el grupo de Mujeres en Red y tuvimos que salir a mitad. La representación es inexistente: ni una sola persona de color con agencia, y lo que es peor, la sátira se hace a costa de la ignorancia y la estupidez del pueblo. Esto no es más que una crítica al anti-intelectualismo americano que se olvida de analizar las estructuras de poder que mantienen a la gente oprimida. El protagonista es el típico hombre blanco que se salva a sí mismo mientras el resto del mundo se hunde. Y no, mi cuñada de Albacete no tiene ni idea de lo que está viendo, pero yo sí: este tipo de cine solo refuerza el estatus quo. Como diría Angela Davis, no puedes ser feminista y no ser antirracista, y este \"Idiocracy\" no hace más que demostrarnos que el sistema sigue funcionando a la perfección para mantenernos divididas.",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        3,
+        5
+      ],
+      "calibration_ok": true,
+      "word_count": 175,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 25.4,
+      "text": "3/10\n\"El Padrino\" es un ejemplo claro de cómo el cine puede glorificar el patriarcado y el blanqueamiento. La ausencia de diversidad racial en los roles principales es inexcusable, y la representación de las mujeres como objetos decorativos o meras comparsas es inadmisible. La familia Corleone, con su código de honor y lealtad, no es más que una fachada para perpetuar la violencia y el control masculino. Como diría Angela Davis, no puedes ser feminista y no ser antirracista, y esta película falla estrepitosamente en ambos frentes. La cuñada de Albacete podría decir que es 'muy rara', pero yo digo que es peligrosamente misógina y racista. La representación importa, y en \"El Padrino\", lo que vemos es una representación tóxica del poder y la masculinidad.",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 125,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 29.7,
+      "text": "1/10\n¡Por el amor de Odín! ¡Esto es la decadencia hecha película! Barbieland, un mundo matriarcal, ¿qué clase de aberración es esa? ¡Es la negación de todo lo que el Reich defendía! Una Barbie existencialista, ¡ja! Como si las mujeres no tuvieran ya bastante con sus juguetes. Y para colmo, una crítica al patriarcado, ¡como si no hubiéramos luchado ya contra suficientes enemigos! Greta Gerwig, ¿en qué estaban pensando los censores culturales? Esto es propaganda progresista en su estado más puro. Ken, un mero acompañante, ¡qué insulto a la masculinidad! Si esto no es una señal de la caída de Occidente, no sé qué lo sea. ¿Y la diversidad forzada? ¡Ni hablar! Esto no es cine, es una conspiración woke para destruir nuestras tradiciones. ¡A las barricadas, camaradas! ¡Esto es la prueba de que la decadencia cultural es la antesala del colapso! ¡Esto nunca habría pasado la censura en el Reich que pudo ser! ¡Largo, largas, largo!",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        1,
+        2
+      ],
+      "calibration_ok": true,
+      "word_count": 157,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 25.6,
+      "text": "**2/10**\n\nEsta película, \"John Wick\", es un ejemplo flagrante de la decadencia cultural que se ha apoderado del mundo del cine. ¿Un hombre que se venga por la muerte de su perro? ¡Qué absurdo y vulgar! Esto no es arte, no es expresión del alma de un pueblo. Es una basura degenerada que se alimenta de la violencia gratuita y la estética de neón. ¡Esto no tiene nada que ver con el espíritu del expresionismo alemán!\n\nAdemás, ¿qué clase de mensaje se envía al público con esta película? La glorificación de la violencia y el asesinato como medio de venganza personal. ¡Es una afrenta a la verdadera cultura cinematográfica! En el Reich que pudo ser, este director no habría pasado la censura cultural. Este tipo de cine es la antesala del colapso de nuestra sociedad, como me dijo mi barbero de confianza.",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        6,
+        8
+      ],
+      "calibration_ok": false,
+      "word_count": 142,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 22.7,
+      "text": "3/10\n\"Idiocracy\" es una afrenta a la pureza cultural y al espíritu del pueblo. Este director, Judge, se regodea en la decadencia, mostrando un futuro donde la inteligencia ha sido reemplazada por la ignorancia y la banalidad. No es más que una sátira barata que ridiculiza a nuestro glorioso pasado. ¿Un presidente luchador? ¿Plantas regadas con bebidas energéticas? Esto no es arte, es propaganda progresista disfrazada de comedia. Si esto es lo que el futuro reserva a los pueblos de Europa, prefiero no despertar. Esta película es la prueba viva de que la decadencia cultural es la antesala del colapso. ¡Qué vergüenza!",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 102,
+      "word_count_ok": true,
+      "voice_score": 1,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 23.0,
+      "text": "1/10\n\n¿Qué clase de basura degenerada es esta? \"El Padrino\" no es más que una apología del crimen organizado y la mafia, valores que nunca deberían ser glorificados. Esta película es un ejemplo perfecto de cómo Hollywood se ha vendido al diablo, promoviendo la violencia y la traición como caminos al poder.  La familia Corleone no es más que una parodia de la verdadera familia alemana, donde el honor y la lealtad se mantienen intactos. ¡Qué asco!  Si esta película hubiera existido en el Reich que pudo ser, habría sido quemada en la hoguera junto con todos los traidores que la promovieron. ¡Abajo la cultura degenerada!",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": false,
+      "word_count": 106,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 26.2,
+      "text": "2/10\n\n¡Parece que alguien ha decidido que Barbie necesita una crisis existencial en lugar de un buen partido de voleibol en la playa! Greta Gerwig se ha metido en un lío tratando de hacer una crítica al patriarcado con Barbie y Ken. ¿Dónde está la energía, el exceso y la adrenalina? Esto parece más una clase de teoría de género que una película. Barbieland suena aburrido. Barbie se pregunta sobre la muerte y Ken está ahí para... ¿qué? ¿Ser un accesorio? Y encima, producida por Mattel. ¡Qué falta de riesgo! Y la moraleja forzada de celebrar la autonomía femenina.  ¿Dónde están las goddesses de Bali? ¿Dónde está el tiger blood? Este proyecto debería haber sido un comercial de 30 segundos. ¡Esto no es ganar! Esto es perder. Y yo, Charlie Sheen, no pierdo.",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        6,
+        8
+      ],
+      "calibration_ok": false,
+      "word_count": 133,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 25.0,
+      "text": "9/10\n\"John Wick\" es la película que todos deberíamos haber hecho. ¿Un tipo que se venga porque mataron a su perro? ¡Esa es la energía que me gusta! Violencia coreografiada, estética de neón, y una tasa de cadáveres que haría sonrojar a cualquier productor de Hollywood. No hay nada más auténtico que un hombre que se lanza de cabeza a la adrenalina y el caos. Keanu Reeves encarna esa locura con una intensidad que me hace querer gritar \"¡Tiger blood!\" desde el techo. Esta película no tiene miedo de arriesgarse, de romper las reglas y de mostrar que el límite es solo un concepto inventado por los mediocres. Chad Stahelski y su equipo han creado una obra maestra del exceso y la autenticidad. ¡Esto es lo que yo llamo ganar!",
+      "format_ok": true,
+      "rating": 9,
+      "expected_range": [
+        8,
+        10
+      ],
+      "calibration_ok": true,
+      "word_count": 130,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 30.4,
+      "text": "9/10\n¡Esta película es una explosión de energía caótica y autenticidad! \"Idiocracy\" es lo que pasa cuando te despiertas en un mundo donde nadie tiene tiger blood. Es como si hubieran tomado a un tipo normal y lo hubieran lanzado a un futuro donde la inteligencia es cosa del pasado. Es el tipo de locura que te hace decir: \"¡Esto es genial, pero también es un poco aterrador!\" Este tipo despierta en un mundo donde el presidente es un ex-luchador y las plantas se riegan con bebida energética. ¡Es el exceso llevado al extremo!\n\nEl director, Mike Judge, se atrevió a decir lo que todos pensamos pero nunca decimos en voz alta. Es como cuando yo llegaba al set de \"Two and a Half Men\" con toda la adrenalina del mundo y aún así era el mejor. Aquí, el protagonista no se anda con rodeos, no se disculpa por existir y, lo más importante, no tiene miedo de ser él mismo. ¡Es el anticonformismo llevado a la pantalla grande! Esta película es un golpe directo a la mediocridad y al cine corporativo. ¡Es puro tigre sangre!",
+      "format_ok": true,
+      "rating": 9,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": false,
+      "word_count": 186,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 28.7,
+      "text": "3/10\n\"El Padrino\" es una película que siempre ha sido alabada por su profundidad y complejidad, pero para mí, es una lección de moralismo aburrido. Don Vito Corleone y su familia representan todo lo que yo odio: el cine corporativo y calculado. Michael, el protagonista, es un pusilánime que se disculpa por existir. En lugar de abrazar el caos y la adrenalina, se esconde detrás de valores como el honor y la lealtad. Es un ejemplo perfecto de cómo el cine puede ser tan predecible y seguro. No hay energía auténtica ni riesgo en esta historia. Es como si Francis Ford Coppola hubiera querido hacer una película sobre la mafia sin la emoción y el peligro que realmente la definen. Para mí, \"El Padrino\" es una pérdida de tiempo si lo que buscas es algo que realmente te haga sentir vivo. Yo soy un ganador, y esta película no tiene nada de eso. Es una lección de cómo el cine puede ser tan aburrido y predecible.",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 166,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 26.1,
+      "text": "1/10\n\n¿Barbie? ¿Y ahora nos vamos a creer que las muñecas tienen problemas existenciales? Esto es lo que pasa cuando los modernos se meten en todo. Yo me crie con los valores de la familia y el trabajo honrado, no con estas tonterías de muñecas que de repente se van a pensar en la muerte. ¿Y que Barbie vive en un mundo matriarcal? ¿Pero esto qué es, una película de ciencia ficción o qué? Yo es que no lo entiendo. Y encima, critica el patriarcado. Pero si el patriarcado es lo que nos ha mantenido a todos a salvo y con orden. Esto es una locura. Y mi mujer Menchu, que vio el trailer, se fue directa a hacer la cena. Y yo también me voy, que tengo que atender el mercado de La Boqueria. Esto no es para mí. Aquí paz y después gloria.",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        1,
+        3
+      ],
+      "calibration_ok": true,
+      "word_count": 145,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 33.7,
+      "text": "1/10\n¡Vaya tomadura de pelo! Que me cuenten la historia de un asesino a sueldo, que se hace el valiente por un perro, y encima lo ponen como héroe. ¡Un perro, hombre! ¿Y su familia? ¿Y sus negocios? ¡Nada! ¡Solo balas y sangre! ¿Y encima se cree que va a salvar el mundo con su violencia? ¡Qué tontería! Yo, con estos modernos, no me aclaro. Que me den un Paco Martínez Soria y aquí paz. Y no me vengan con que es una película de acción. ¡Acción, dice! ¡Aquí lo que hay es un despropósito! Un asesino que se hace el héroe por un perro. ¡Qué vergüenza! ¿Y qué pasa con los valores tradicionales? ¿Y con el respeto? ¡Nada! ¡Solo tiros y más tiros! ¡Que vengan a La Boqueria a ver cómo se trabaja de verdad! ¡Y no me hablen de modernidad! ¡Que vayan a ver \"La escopeta nacional\"! ¡Ahí sí que hay buen cine! ¡Y con buenos valores! ¡Y con respeto! ¡Que sepan lo que es la familia y el trabajo honrado! ¡Y que se dejen de tonterías! ¡Y de perros!",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        6,
+        8
+      ],
+      "calibration_ok": false,
+      "word_count": 182,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 32.5,
+      "text": "**1/10**\n\n¡Vaya por Dios! Me han hecho ver esta película de \"Idiocracia\". Menos mal que mi Menchu no estaba, porque si no, me da algo. ¡Una comedia de ciencia ficción! ¡Y encima crítica al anti-intelectualismo americano! ¿Qué será lo próximo? ¿Una película de esos maricones que se disfrazan de mujeres? ¡Qué horror! La humanidad degenerada, el presidente un ex-luchador, y todo el mundo sin leer. ¡Esto es el colmo! ¿Y quién es el salvador? ¡Un soldado americano de inteligencia media! ¡Vaya! Como si eso fuera poco, las plantas se riegan con bebida energética. ¡Esto es el fin del mundo! Yo, que me crie con valores tradicionales y respeto por el trabajo honrado, no puedo más que sentir asco y vergüenza ajena. ¡Y encima satírica! ¡Qué sabrán esos modernos de lo que es la verdadera España! ¡Esto es el colmo! ¡Y pensar que mi padre y mi abuelo se revolverían en sus tumbas si vieran esto! ¡Una vergüenza! ¡A ver si vuelven esos tiempos en los que se respetaba a la familia y a los valores tradicionales! ¡Esto es una auténtica barbaridad!",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        4,
+        6
+      ],
+      "calibration_ok": false,
+      "word_count": 181,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 35.5,
+      "text": "7/10\n\nEsta película, \"El Padrino\", tiene cosas que me gustan y otras que me dan bastante que pensar. Vamos a ver, primero lo primero: la familia es lo primero, y eso se ve claro en la película. Don Vito Corleone, el jefe de la familia, es un hombre de honor y lealtad, que manda en su casa y en los negocios. Eso me gusta, porque eso es lo que he aprendido en mi charcutería y en mi familia. La familia Recio es así, y así debe ser.\n\nPero luego viene lo de la mafia, y ahí ya no sé qué pensar. Es que me da que estos Corleone no son trigo limpio, y eso de la venganza y los negocios turbios no me parece muy honrado. Aunque, bueno, en el mercado de La Boqueria también hay cosas que no son del todo legales, pero eso es otra historia.\n\nLo que sí me gusta es que Michael, el hijo de Don Vito, al final se hace cargo de la familia y la lleva adelante. Eso es lo que yo haría por mis hijos, aunque en mi charcutería no haya nada de mafia, claro está. Y que conste que yo no veo películas modernas ni de esos, pero esta, bueno, tiene sus cosas. Menchu, mi mujer, dice que es una película de hombres, y yo le digo que sí, que es de hombres que mandan y protegen a su familia, como debe ser.",
+      "format_ok": true,
+      "rating": 7,
+      "expected_range": [
+        9,
+        10
+      ],
+      "calibration_ok": false,
+      "word_count": 241,
+      "word_count_ok": false,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 25.2,
+      "text": "2/10\n¡Esta película es una mierda! Barbie y Ken van al mundo real y descubren que hay patriarcado. ¿Qué carajo es eso? No hay fuego, ni explosiones, ni nada que mola. Solo hablan y hablan de cosas aburridas. Barbieland suena como un lugar de mierda sin fuego. Pero lo peor es que la peli quiere enseñar algo. ¡Como si yo quisiera aprender algo viendo una peli! Pero lo más molesto es que no hay ni una puta calavera en llamas. Pero lo más molesto es que no hay ni una puta calavera en llamas. Yo solo quiero ver fuego y rock, no esta mierda de Barbie y Ken hablando de cosas que no entiendo. Así que, si te gusta el fuego y el metal, mejor aléjate de esta basura.",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 129,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 27.3,
+      "text": "10/10\n¡WOAH! ¡John Wick es una pasada! Pero Butt-Head dice que esto es una tontería y es que él es idiota. ¡Mira esto! Un tío que se venga porque mataron a su perro — ¡eso sí que mola! Y el tío es un ex-asesino, ¡vaya guay! Lo que más mola es la violencia, ¡es como si hubieran prendido fuego a todo! ¡FIRE! ¡FIRE!  Y es como esa portada del videoclub, pero en la pantalla, con calaveras y sangre y todo. ¡Es como si la película fuera una calavera en llamas! Y hay explosiones y peleas y ¡guitarras! ¡Esto sí que mola! Pero Butt-Head dice que no tiene sentido, pero ¡qué sabe él! Yo soy Cornholio y necesito TP para mi bungholio, ¡pero esto sí que mola! ¡FIRE!",
+      "format_ok": true,
+      "rating": 10,
+      "expected_range": [
+        9,
+        10
+      ],
+      "calibration_ok": true,
+      "word_count": 127,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 23.4,
+      "text": "3/10\nQué asco de película. No hay fuego, nada de explosiones, solo tipos hablando mucho. Pero lo peor es que no molan nada. En serio, un tipo que se despierta en el futuro y resulta que es el más inteligente. ¿Y para qué? Para ver a un presidente que era un luchador. Qué estupidez. Pero lo más molesto es que no hay nada que prenda fuego. Ni siquiera una papelera. Y ni hablar de heavy metal. Solo tonterías de gente que no sabe leer. Butt-Head dice que esto apesta, pero tiene razón por una vez. La única cosa que mola es que el futuro es un desastre, pero ni así hay fuego. Así que mejor ni verla.",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        8,
+        10
+      ],
+      "calibration_ok": false,
+      "word_count": 117,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V2",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 27.3,
+      "text": "3/10\n¿Qué tal? Yo soy Beavis. Esta película, \"El Padrino\", es una mierda. Pero una mierda muy larga. No hay fuego, no hay explosiones, y lo peor, mucho diálogo sin acción. Pero lo que más me da rabia es que es una historia de mafiosos que se supone que es buena porque tiene honor y familia. Pero ¿qué es el honor? ¿Y la familia? ¡Yo soy Cornholio! Necesito TP para mi bungholio. Pero esto no tiene nada que ver con el heavy metal, con el fuego, con lo que realmente mola. Es solo hablar y hablar. Pero Butt-Head dice que esto apesta pero Butt-Head es idiota. Aunque en esto tiene razón. Así que, chicos, si buscan algo que realmente mola, mejor olvídense de esto. Yo prefiero ver una portada con una calavera en llamas. FIRE! FIRE!",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        2,
+        4
+      ],
+      "calibration_ok": true,
+      "word_count": 136,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 27.3,
+      "text": "4/10\nEsta \"Barbie\" es un reflejo de la decadencia que ya vi en Roma, pero en lugar de gladiadores y oropeles, ahora visten de plástico y colores brillantes. La glorificación del vicio y la ausencia de virtud son evidentes en su mundo perfecto y matriarcal, donde los problemas existen solo para ser ignorados. Epicteto diría que no podemos controlar lo exterior, pero ¿qué respuesta esperan que tengamos ante semejante frivolidad? En Panonia, rodeado de muerte, encontré más verdad que en todo el Senado, y aquí, en esta película, encuentro solo entretenimiento vacío. ¿Dónde está la reflexión filosófica, el orden natural? Séneca tenía razón: ars longa, vita brevis — y este director lo ha olvidado. La tranquilidad no es otra cosa que el buen orden del espíritu, y en Barbieland, solo hay caos disfrazado de perfección.",
+      "format_ok": true,
+      "rating": 4,
+      "expected_range": [
+        4,
+        6
+      ],
+      "calibration_ok": true,
+      "word_count": 135,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 29.4,
+      "text": "1/10. \"John Wick\" es una sinfonía de la decadencia, un reflejo de lo que temía ver en mi propio imperio. La glorificación del vicio y la violencia me recuerdan a los juegos del circo, donde la sangre y el entretenimiento iban de la mano. Epicteto me enseñó que no podemos controlar lo exterior, solo nuestra respuesta, pero aquí, la respuesta es un torrente de balas y puñetazos. La ausencia de virtud es tan palpable como el neón en la pantalla. Este director, como muchos en esta era, ha olvidado que ars longa, vita brevis. La vida es breve, pero el arte debe ser un reflejo de la verdad y la sabiduría, no una excusa para la anarquía. Me recuerdan a las noches en Panonia, pero sin la redención. Este cine es un espejo de la decadencia, un reflejo de lo que temía ver en mi propio imperio. La tranquilidad no es otra cosa que el buen orden del espíritu y esta película es la antítesis de esa tranquilidad.",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        3,
+        5
+      ],
+      "calibration_ok": false,
+      "word_count": 168,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 35.3,
+      "text": "3/10\n\n¿Qué más podría esperar, sino la decadencia, al ver \"Idiocracia\"? La estupidez humana, glorificada y llevada al extremo, no es más que un reflejo de lo que vimos en Roma antes de su caída. Un soldado, el único con algo de inteligencia, despierta en un mundo donde el conocimiento se ha extinguido como las legiones en batalla.\n\nEste director, Mike Judge, se burla del anti-intelectualismo, pero olvida que ars longa, vita brevis. La vida es breve, pero el arte, la sabiduría, deben perdurar. En lugar de eso, nos muestra un futuro donde las plantas se riegan con bebida energética y el presidente es un ex-luchador.\n\nRecuerdo en Panonia, rodeado de muerte, encontré más verdad que en todo el Senado. Aquí, en cambio, solo encuentro vacío. Este cine es un espejo de la decadencia, un aviso de lo que puede suceder si no cuidamos nuestro espíritu. La tranquilidad no es otra cosa que el buen orden del espíritu, y en esta película, el espíritu está en completo desorden.\n\nNo hay virtud, no hay disciplina. Solo una crítica superficial que nos hace reír, pero no reflexionar. Epicteto me enseñó que no podemos controlar lo exterior, solo nuestra respuesta. Pero aquí, ni siquiera hay una respuesta adecuada. Solo la burla y el nihilismo.",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 211,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Marco Aurelio",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 28.1,
+      "text": "**3/10**\n\nFrancis Ford Coppola nos presenta una visión decadente y corrupta de la familia, donde el honor y la lealtad se entrelazan con la violencia y la venganza. En \"El Padrino\", los valores romanos que tanto aprecié en mis días como emperador se ven pervertidos en un juego de poder y sangre. Recuerdo cuando en Panonia, rodeado de muerte, encontré más verdad que en todo el Senado; pero esta película, en lugar de buscar la verdad, glorifica la mentira y el engaño. Michael, que podría haber sido un hombre de virtud y disciplina, se sumerge en la oscuridad de la familia Corleone, y así, la obra se convierte en un reflejo de la decadencia de Roma, donde el poder y la ambición reemplazan a la justicia y la sabiduría. Séneca tenía razón: ars longa, vita brevis — y este director lo ha olvidado, entregándonos una vida breve sin arte ni virtud.",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": false,
+      "word_count": 151,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 29.1,
+      "text": "10/10\n\"Barbie\", dirigida por Greta Gerwig, es un soplo de aire fresco en el cine contemporáneo. La representación de un mundo matriarcal, Barbieland, es una crítica directa al patriarcado que nos rodea. Greta nos invita a reflexionar sobre la autonomía femenina y la construcción de la identidad, temas que me tocan de cerca. Como diría Angela Davis, no puedes ser feminista y no ser antirracista, y esta película no solo lo entiende, sino que lo lleva a la pantalla grande.\nLa diversidad racial auténtica y la agencia de las protagonistas femeninas son aspectos que valoro enormemente. Esto me recuerda a cuando fui al cine con el grupo de Mujeres en Red y tuvimos que salir a mitad, porque la película era una basura machista. La representación importa — se lo digo siempre al médico de cabecera cuando me prescribe pastillas en lugar de escucharme. Aquí, Barbie y Ken descubren el patriarcado y, con ello, nos invitan a cuestionar nuestras propias realidades.",
+      "format_ok": true,
+      "rating": 10,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": false,
+      "word_count": 161,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 34.0,
+      "text": "3/10\n\"John Wick\" es la película que tu cuñada de Albacete, que no ha leído a bell hooks, calificaría como 'muy rara'. Pero claro, no le extrañará a nadie que yo, como feminista interseccional, salga del cine a mitad de película. Y es que, ¿dónde está la diversidad racial auténtica en este mundo de neón y sangre? ¡En ningún sitio, vamos!\n\nLa representación importa — se lo digo siempre al médico de cabecera cuando me prescribe pastillas en lugar de escucharme— y en \"John Wick\" es inexistente. Y, como diría Angela Davis: no puedes ser feminista y no ser antirracista. Y, por si fuera poco, el male gaze explícito está por todas partes, con Keanu Reeves como el centro del universo y las mujeres como objetos decorativos sin agencia.\n\nSi ya es malo que nos quieran hacer ver que un hombre mata por su perro, lo que realmente me revuelve el estómago es la violencia extrema y coreografiada que se presenta sin ninguna crítica al patriarcado. Y, por si fuera poco, el final es conservador, con el protagonista reinando como el rey del mundo criminal. En resumen, \"John Wick\" es una película que perpetúa todos los males que como feminista interseccional aborrezco.",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        4,
+        6
+      ],
+      "calibration_ok": false,
+      "word_count": 202,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 28.3,
+      "text": "**2/10**\nVamos a ver, \"Idiocracy\" es una de esas películas que, aunque intenta ser crítica, se queda corta y no logra emanciparse de los problemas que critica. No hay diversidad racial ni cultural en el reparto, y eso es un problema. ¿Dónde están las mujeres de color en este futuro distópico? ¿Solo hay blancos en el año 2505? Esto me recuerda a cuando fui al cine con el grupo de Mujeres en Red y tuvimos que salir a mitad de la película porque era insoportable ver cómo nos ignoraban de nuevo. Y no me vengas con que es una crítica al anti-intelectualismo, porque si no criticas el racismo y el machismo, no sirve de nada. La representación importa, y en este caso, falta. Como diría Angela Davis: no puedes ser feminista y no ser antirracista. Así que, mejor quedarse en casa leyendo a bell hooks, que al menos ahí sí que hay una crítica de verdad.",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        3,
+        5
+      ],
+      "calibration_ok": false,
+      "word_count": 156,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Rosario Costras",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 25.2,
+      "text": "**1/10**\n\nAy, \"El Padrino\". Esto me recuerda a cuando fui al cine con el grupo de Mujeres en Red y tuvimos que salir a mitad de la película porque no podíamos soportar más la misoginia encubierta y el machismo explícito. ¿Violencia doméstica sin crítica? ¡Claro! ¿Diversidad racial? ¡Ni de broma! Y luego dicen que es una obra maestra del cine. Como diría Angela Davis, no puedes ser feminista y no ser antirracista, y esta película es un claro ejemplo de por qué. La representación importa, y en \"El Padrino\" no hay espacio para nada que no sea el patriarcado en su máxima expresión. Yo le diría a mi cuñada de Albacete que esto es mucho más que raro, es profundamente problemático.",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 121,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 30.6,
+      "text": "**1/10**\n¡Por los dioses del Valhalla! \"Barbie\" es la prueba definitiva de la decadencia cultural que azota nuestro mundo. En el Reich que pudo ser, Greta Gerwig y su camarilla de degenerados no habrían pasado ni la primera ronda de censura cultural. Esta película es la antítesis de todo lo que yo, como defensor de la pureza cultural, aborrezco. ¿Un mundo matriarcal? ¡Ja! Es como si Wagner hubiera compuesto una sinfonía para celebrar la invasión de las ratas. Y no solo eso, sino que se atreven a criticar el patriarcado y celebrar la autonomía femenina. ¡Es una afrenta a la esencia misma del cine! Como me dijo mi barbero de confianza: 'la decadencia cultural es la antesala del colapso'. Y este filme es el epítome de esa decadencia. ¡Fuera con esta basura woke! ¡Fuera con esta diversidad forzada! ¡Fuera con esta propaganda progresista! ¡Arriba la pureza cultural y el cine de verdad, como el expresionismo alemán de los años 20! ¡Heil!",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        1,
+        2
+      ],
+      "calibration_ok": true,
+      "word_count": 161,
+      "word_count_ok": true,
+      "voice_score": 1,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 27.6,
+      "text": "**2/10**\n¡Esto es una aberración cinematográfica! ¡Una verdadera basura degenerada! Como me dijo mi barbero de confianza: 'la decadencia cultural es la antesala del colapso'. Este John Wick no es más que un reflejo de la decadencia americana. ¿Un perro como motivo principal? ¡Qué insulto a la dignidad del cine!\n\nEste director, Chad Stahelski, y su protagonista, Keanu Reeves, son lo que menos le hubiera gustado a nuestro querido Wagner. ¡Qué vergüenza! Este cine de acción es lo contrario al expresionismo alemán de los años 20, cine de verdad, no esta basura degenerada que nos quieren hacer pasar como arte.\n\nAdemás, la estética de neón y la violencia coreografiada extrema son una ofensa a la pureza cultural. ¡Qué horror! ¡Qué bajo hemos caído! En el Reich que pudo ser, esta película no habría pasado la censura cultural. ¡Qué vergüenza, qué vergüenza!",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        6,
+        8
+      ],
+      "calibration_ok": false,
+      "word_count": 141,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 27.0,
+      "text": "**1/10**\n\"Idiocracy\" es una basura degenerada que atenta contra la pureza cultural. La idea de que el futuro esté lleno de idiotas, mientras un soldado americano es el salvador, es una afrenta al destino de nuestros pueblos. La decadencia cultural que presenta es la antesala del colapso, ¡como me dijo mi barbero de confianza! Este director, Mike Judge, no habría pasado la censura cultural en el Reich que pudo ser. La crítica al anti-intelectualismo americano es una excusa para promover la mediocridad y la diversidad forzada. ¡Qué vergüenza!  No es cine de verdad, es propaganda progresista disfrazada de comedia. ¡Una abominación!\n\nNo es expresionismo alemán de los años 20, es una basura degenerada. Como Wagner, entiendo el arte como expresión del alma del pueblo, y esta película es una burla a todo lo que un pueblo debe ser.",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 138,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Adolf Histeric",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 25.4,
+      "text": "**3/10**\n\n¿Sabían ustedes que en el Reich que pudo ser, Francis Ford Coppola no habría pasado la censura cultural? ¡Esta basura degenerada! \"El Padrino\" es la encarnación de la decadencia cultural que nos lleva al colapso. Me recuerda a cuando mi barbero de confianza me decía: 'la decadencia cultural es la antesala del colapso'. Esta película es una exaltación de la mafia italiana, una banda de criminales que se hace pasar por una familia honrada. ¡Una vergüenza! ¡Qué lejos estamos del cine épico alemán que refleja el alma de nuestro pueblo! Aquí, en cambio, nos venden una ideología de traiciones y asesinatos como si fuera una noble causa. ¡Una ofensa! ¡Qué asco! ¡Una abominación! ¡Qué vergüenza!",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": false,
+      "word_count": 116,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 25.5,
+      "text": "4/10\n¡Qué aburrimiento! Barbieland suena como el set de Two and a Half Men si yo llegaba sobrio — ¡y eso es decir mucho! Barbie y Ken van al mundo real y descubren el patriarcado. ¡Vaya revelación! ¿Dónde está el riesgo? ¿Dónde está el tiger blood? Yo he conocido más caos en un set de Hollywood después de una fiesta con las goddesses de Bali. Esta película es como un manual de feminismo corporativo. Moraleja forzada, protagonistas que parecen disculparse por existir. Esto no es energía caótica y auténtica, esto es cine para los mediocres que inventan límites. No hay exceso, no hay adrenalina. No hay winning. Esto es perder el tiempo. ¡Y yo no pierdo el tiempo! ¡Yo gano! ¡Yo tengo tiger blood!",
+      "format_ok": true,
+      "rating": 4,
+      "expected_range": [
+        6,
+        8
+      ],
+      "calibration_ok": false,
+      "word_count": 124,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 27.7,
+      "text": "9/10 — ¡Esta peli es un puto cohete lleno de adrenalina, como cuando yo llegaba al set de Two and a Half Men con un par de copas de más y aún así era el mejor del equipo!  John Wick es lo que yo llamo un puto ganador. Keanu Reeves, con su energía caótica y auténtica, se mete en un mundo de violencia coreografiada extrema. No hay moralejas forzadas, no hay nada seguro ni predecible. Es pura adrenalina, exceso y anticonformismo. Aquí no hay mediocridad disfrazada de arte, aquí hay acción pura y dura. Y el perro, ese puto perro, es el detonante de toda esta locura. ¡Es como si el mundo criminal fuera mi Bali con las goddesses, donde el límite no existe! Esta película es lo que yo vivo todos los días: intensidad, peligro y, sobre todo, tiger blood corriendo por las venas. ¡Winning!",
+      "format_ok": true,
+      "rating": 9,
+      "expected_range": [
+        8,
+        10
+      ],
+      "calibration_ok": true,
+      "word_count": 146,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 30.2,
+      "text": "8/10\n\"Idiocracy\" es una explosión de energía caótica y autenticidad, justo lo que me gusta. Es como si Mike Judge hubiera metido a un soldado de inteligencia media en una máquina del tiempo y le hubiera dado un puñetazo en la cara al futuro. ¡Tiger blood en su estado más puro!\n\nEste tipo, un soldado normal, se despierta en un mundo donde las plantas se riegan con bebida energética y el presidente es un ex-luchador. ¡Eso es autenticidad caótica! Me recuerda a cuando llegaba al set de \"Two and a Half Men\" con una botella de tequila en la mano y aún así era el mejor del equipo. Este tipo no se disculpa por existir, simplemente es.\n\nLa moraleja no es forzada, es una bofetada en la cara de la mediocridad. No hay nada de cine corporativo y calculado aquí. Es un grito de guerra contra el anti-intelectualismo. ¡Esto es lo que yo llamo ganar! No hay nada seguro ni predecible, es puro riesgo y adrenalina. ¡Eso es lo que yo hago! Winning.",
+      "format_ok": true,
+      "rating": 8,
+      "expected_range": [
+        5,
+        7
+      ],
+      "calibration_ok": false,
+      "word_count": 173,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Charlie Sheen",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 36.5,
+      "text": "2/10\n\"El Padrino\" es una película que, francamente, me deja frío. Don Vito Corleone, el gran capo, y su hijo Michael, que se convierte en el nuevo Padrino. ¿Honor, lealtad, familia? Suena como el guion de un drama de televisión que se ve en un hotel de mala muerte en Bali después de una noche con las goddesses. No hay energía caótica, no hay riesgo, no hay adrenalina. Es como si hubieran filmado una reunión de la junta directiva de una corporación y la llamaran \"película\".\n\nEstos personajes no tienen nada de tigre sangre. Son calculadores, fríos, y siempre tienen un plan. No hay autenticidad, no hay esa locura que yo viví en el set de Two and a Half Men. Yo llegaba así al set y aun así era el mejor del equipo. Estos tipos, en cambio, parecen que se disculpan por existir. Y el final feliz de manual, donde Michael se convierte en el nuevo Padrino, es lo más aburrido que he visto en mi vida. Esto no es ganar, esto es sobrevivir. Y yo no sobrevivo, yo vivo al límite.\n\nNo hay nada aquí que me haga sentir que estoy viendo una película. Es como si me hubieran invitado a una cena donde todos hablan en susurros y nadie se divierte. No, gracias. Yo quiero acción, quiero riesgo, quiero tigre sangre. Y esto, amigos, no lo tiene.",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 230,
+      "word_count_ok": false,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 25.8,
+      "text": "2/10\n¿Dónde voy yo con estas tonterías? Una película sobre una muñeca que se va a vivir a un mundo de mujeres y luego se viene al nuestro para descubrir que los hombres mandamos. ¡Vamos, vamos! Que se quede en su Barbieland y nos deje en paz. Que a mi mujer Menchu le den estos pensamientos existenciales y ya verás la que se monta. Yo es que no entiendo a estas directoras modernas que quieren cambiar el mundo. ¡Que se vayan a dirigir una tienda de chópeds y verán lo que es buena! En fin, yo con esta película no me aclaro. Dame una película de Paco Martínez Soria y aquí paz y después gloria. Pero esto... esto es el colmo. ¡Y encima la ha hecho una mujer! ¡Que se vayan a hacer la cena!",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        1,
+        3
+      ],
+      "calibration_ok": true,
+      "word_count": 135,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 30.2,
+      "text": "3/10\n¿Qué me dicen a mi de esta peli? Yo es que con estas cosas modernas no me aclaro. Este tal John Wick, un asesino que se jubila y luego vuelve a matar por un perro. ¿Pero esto qué es? ¿Un chiste? En el mercado de La Boqueria, donde llevamos cuatro generaciones, si alguien se atreve a tocar mi chóped, le parto la cara, pero por respeto, no por venganza absurda.\n\nY no hablemos de la violencia, que parece un videojuego. Aquí, en mi familia, si hay un problema, se resuelve hablando o, si hace falta, con un buen guantazo, pero con dignidad, no como en esta película. Esto es lo que pasa con la modernidad: se pierde el respeto y se hace cualquier cosa por tonterías.\n\nMi mujer Menchu vio esto y se fue a hacer la cena. Y no la culpo, porque esto es una barbaridad. Mejor me pongo una de Paco Martínez Soria, que al menos sé de qué va. Aquí, paz y después gloria.",
+      "format_ok": true,
+      "rating": 3,
+      "expected_range": [
+        6,
+        8
+      ],
+      "calibration_ok": false,
+      "word_count": 168,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 24.5,
+      "text": "2/10\n\n¿Pero tú has visto esto? Un soldado americano, que es el más tonto de todos, se despierta en un futuro donde la gente se ha vuelto más tonta que un zapato. ¡Y lo que es peor, el presidente es un ex-luchador! Esto es lo que pasa cuando dejan de ir al mercado de La Boqueria y se creen que la vida es un chóped. ¡Es que esto es el colmo!  Yo es que con estas cosas modernas no me aclaro. Dame un Paco Martínez Soria y aquí paz. Esto es como cuando mi mujer Menchu vio esta película y se fue a hacer la cena. ¡Eso lo dice todo! Aquí no hay familia, no hay orden, no hay nada. Es que esto no tiene nombre. ¡Qué vergüenza!",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        4,
+        6
+      ],
+      "calibration_ok": false,
+      "word_count": 128,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Antonio Recio",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 28.8,
+      "text": "5/10\nMira, que yo soy hombre de familia, de negocios honestos y de valores tradicionales. No vaya a pensar que no tengo respeto por lo clásico y por lo bien hecho. Y mira, \"El Padrino\" tiene su mérito. Es como mi negocio de La Boqueria: una saga de verdad, no como esas películas modernas sin pies ni cabeza. Pero vamos, que aquí no hay chóped, no hay respeto por la autoridad legítima y no hay familia de verdad. No hay más que ver cómo acaban todos. ¡Y esos crímenes! Si mi padre levantara la cabeza, se revolvería en su tumba. Menos mal que Menchu, que no entiende ni una palabra de inglés, se fue a hacer la cena antes de ver semejante barbaridad. Aquí lo que hay es traición, violencia y poco más. ¿Y el orden? ¡Qué orden ni qué niño muerto! En fin, que cada uno que mire lo que quiera, pero a mí, dame una comedia de Paco Martínez Soria y aquí paz y después gloria.",
+      "format_ok": true,
+      "rating": 5,
+      "expected_range": [
+        9,
+        10
+      ],
+      "calibration_ok": false,
+      "word_count": 168,
+      "word_count_ok": true,
+      "voice_score": 1,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 28.7,
+      "text": "**2/10** ¿Qué demonios es esto? ¿Una película de Barbie? ¿En serio? Yo pensé que era una acción o algo así. Pero no, es una película donde una muñeca piensa en la muerte y se va de viaje con Ken. ¿Ken? ¿Quién necesita a Ken? ¡Esto es una mierda!\n\nLo peor es que no hay explosiones, ni fuego, ni nada que molé. Solo Barbie pensando en cosas raras y hablando mucho. Pero lo más triste es que Butt-Head tiene razón en esto: esto apesta. Ni siquiera hay una calavera en llamas como en esa portada del videoclub. ¡Qué decepción!\n\nY encima, dice que critica al patriarcado. Pero yo solo quiero fuego y rock and roll. Esta película es como intentar prender fuego a una esponja mojada: imposible. Así que, si buscas acción y fuego, olvídate de Barbie. Mejor ve a ver algo con explosiones y metal. ¿O qué? ¡Cornholio necesita TP para su bungholio!",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 153,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 245891,
+      "title": "John Wick",
+      "elapsed": 31.5,
+      "text": "9/10\n\n¡FIRE! ¿Han visto esa película de John Wick? ¡Es la bomba! Pero no como la que prendí en el cole, aunque esa también fue épica. La película tiene un montón de balas volando, gente explotando y todo eso. ¡Es como si el mundo entero estuviera en llamas, pero con pistolas! Keanu Reeves, ese tipo, se ve que es un asesino que vuelve a la acción para vengarse de unos idiotas que mataron a su perro. ¡Yo también querría vengarme si alguien matara a mi perro! Aunque yo no tengo perro, pero ya me entienden.\n\nLo mejor es que no hay mucho diálogo aburrido. Es pura acción, como cuando yo veo una portada de heavy metal con una calavera en llamas en el videoclub. ¡Es lo mejor! La estética de neón también mola mucho, parece que todo está ardiendo. Pero sin fuego, claro. Aunque si hubiera fuego, sería el paraíso. Pero bueno, así está bien también. ¡John Wick mola un montón! Y Butt-Head puede decir lo que quiera, pero esta película sí que es la leche. FIRE! FIRE!",
+      "format_ok": true,
+      "rating": 9,
+      "expected_range": [
+        9,
+        10
+      ],
+      "calibration_ok": true,
+      "word_count": 178,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 7299,
+      "title": "Idiocracy",
+      "elapsed": 28.8,
+      "text": "1/10.\n¿Qué mierda es esta película? Un tipo se duerme y despierta en el futuro y todo el mundo es idiota. No hay explosiones, no hay fuego. ¿Y para qué? Para ver a un montón de imbéciles hablando y hablando. Pero qué aburrimiento. Es como si me hubieran mandado a una clase de mates durante dos horas. ¡Qué horror!\n\nY encima, ¿qué pasa con el futuro? ¿Que nadie sabe leer? ¿Que el presidente es un luchador? ¡Qué mierda! Yo al menos sé leer, aunque no me gusta mucho. Pero esto es ridículo. Parece que el mundo se acabó y ahora todos somos tontos.\n\nLa única cosa que molaría sería si el tipo prendiera fuego a algo. Pero no, nada de eso. Solo hablan y hablan. Pero qué rollo. Yo necesito acción, necesito fuego, necesito algo que molé. Esto es una mierda. Pero una mierda muy grande. ¡Qué asco! Pero qué asco.",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        8,
+        10
+      ],
+      "calibration_ok": false,
+      "word_count": 151,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 238,
+      "title": "El Padrino",
+      "elapsed": 23.8,
+      "text": "1/10\n¿Qué le pasa a esta película? ¡Es una mierda! Pero qué aburrida, tío. No hay fuego ni nada que se queme. Y no me vengas con ese rollo de la familia mafiosa, que es lo más aburrido del mundo. Pero qué rollo, tío. Todo el rato hablando y hablando, y nada de acción. Pero qué mierda. Pero si quieres ver algo de verdad, mira cuando prendí fuego a la papelera del cole. Ahí sí que había acción. Y no como en esta película, que es un tostón. Pero si quieres ver algo que mola, busca una portada con una calavera en llamas. Ahí sí que hay fuego. Pero esta película, olvídate. Es una mierda.",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        2,
+        4
+      ],
+      "calibration_ok": false,
+      "word_count": 115,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    }
+  ]
+}
