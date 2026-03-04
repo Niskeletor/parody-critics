@@ -89,8 +89,8 @@ jobs:
             echo "→ Pulling latest image..."
             docker compose -f /home/stilgar/docker/parody-critics/docker-compose.yml pull
 
-            echo "→ Restarting container..."
-            docker restart parody-critics-api
+            echo "→ Recreating container..."
+            docker compose -f /home/stilgar/docker/parody-critics/docker-compose.yml up -d --force-recreate
 
             echo "→ Waiting for health check..."
             for i in $(seq 1 12); do
