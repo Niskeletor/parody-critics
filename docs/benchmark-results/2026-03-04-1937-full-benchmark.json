@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "date": "2026-03-04-1937",
+    "ollama_url": "http://192.168.2.69:11434",
+    "phase1_model": "mistral-small3.1:24b",
+    "phase2_models": [
+      "mistral-small3.1:24b",
+      "type32/eva-qwen-2.5-14b:latest",
+      "muse-12b:latest",
+      "LESSTHANSUPER/MAGNUM_V4-Mistral_Small:12b_Q5_K_M"
+    ],
+    "winner_variant": "V3",
+    "characters": [
+      "Beavis"
+    ],
+    "films": 1,
+    "judge_model": "dolphin3:latest"
+  },
+  "results": [
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": null,
+      "text": null,
+      "format_ok": false,
+      "rating": null,
+      "expected_range": null,
+      "calibration_ok": null,
+      "word_count": 0,
+      "word_count_ok": false,
+      "voice_score": null,
+      "error": ""
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 59.9,
+      "text": "1/10\n\nEsta película, \"Barbie\", es una verdadera mierda. ¿Un mundo perfecto sin fuego? ¿En serio? Esto no tiene explosiones, ni fuego, ni nada que mola. Además, es solo hablar y hablar. Es como cuando Butt-Head dice que algo apesta, y aunque él es un idiota, tiene razón.\n\nLa protagonista, Barbie, se pone a pensar en cosas existenciales. ¿Quién se cree que es, el filósofo del colegio? Y lo peor es que se va al mundo real con Ken, y todo es aburrido. No hay ni una pequeña explosión, ni una llamita. Nada.\n\nY otra cosa, ¿por qué todo tiene que ser sobre el patriarcado y la autonomía femenina? Es como si yo dijera \"Soy Cornholio. Necesito TP para mi bungholio\" y todos se pusieran a hablar de lo importante que es el papel higiénico. ¡Qué aburrido!\n\nEn serio, si buscan una buena película, busquen una portada con una calavera en llamas. Esa sí que mola. Pero esta, \"Barbie\", es una pérdida de tiempo.",
+      "format_ok": true,
+      "rating": 1,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 163,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    }
+  ]
+}
