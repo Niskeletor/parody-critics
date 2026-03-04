@@ -92,17 +92,19 @@ jobs:
             echo "→ Restarting container..."
             docker restart parody-critics-api
 
-            echo "→ Waiting for container..."
-            sleep 10
-
-            echo "→ Checking health..."
-            if curl -sf http://localhost:8003/api/health; then
-              echo "✅ Deploy exitoso - Health check passed"
-            else
-              echo "❌ Health check failed"
-              docker logs parody-critics-api --tail 30
-              exit 1
-            fi
+            echo "→ Waiting for health check..."
+            for i in $(seq 1 12); do
+              if curl -sf http://localhost:8003/api/health > /dev/null 2>&1; then
+                echo "✅ Deploy exitoso - Health check passed (attempt $i)"
+                break
+              fi
+              if [ $i -eq 12 ]; then
+                echo "❌ Health check failed after 60s"
+                docker logs parody-critics-api --tail 30
+                exit 1
+              fi
+              sleep 5
+            done
 
             echo "→ Cleaning up old images..."
             docker image prune -f --filter "until=168h" || true
