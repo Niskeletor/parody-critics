@@ -10,6 +10,7 @@ on:
       - 'tests/**'
       - 'test*.py'
       - 'benchmark*.py'
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
