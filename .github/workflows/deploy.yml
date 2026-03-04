@@ -87,10 +87,10 @@ jobs:
             echo "$GHCR_PAT" | docker login ghcr.io -u Niskeletor --password-stdin
 
             echo "→ Pulling latest image..."
-            docker compose -f /home/stilgar/docker/parody-critics/docker-compose.yml pull
+            docker compose -p parody-critics -f /home/stilgar/docker/parody-critics/docker-compose.yml pull
 
             echo "→ Recreating container..."
-            docker compose -f /home/stilgar/docker/parody-critics/docker-compose.yml up -d --force-recreate
+            docker compose -p parody-critics -f /home/stilgar/docker/parody-critics/docker-compose.yml up -d --force-recreate
 
             echo "→ Waiting for health check..."
             for i in $(seq 1 12); do
