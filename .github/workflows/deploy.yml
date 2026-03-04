@@ -90,7 +90,7 @@ jobs:
             docker compose -f /home/stilgar/docker/parody-critics/docker-compose.yml pull
 
             echo "→ Restarting container..."
-            docker compose -f /home/stilgar/docker/parody-critics/docker-compose.yml up -d --force-recreate
+            docker restart parody-critics-api
 
             echo "→ Waiting for container..."
             sleep 10
