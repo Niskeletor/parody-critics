@@ -13,6 +13,30 @@ warn()    { echo -e "${YELLOW}  !${NC} $*"; }
 info()    { echo -e "${BLUE}  →${NC} $*"; }
 section() { echo -e "\n${BOLD}=== $* ===${NC}\n"; }
 
+# ── Cleanup trap (Ctrl+C / exit) ──────────────────────────────────────────────
+cleanup() {
+    echo ""
+    warn "Instalación cancelada por el usuario."
+    # Restore .env backup if deploy was interrupted mid-write
+    if [ -f .env.new ]; then
+        rm -f .env.new
+        warn ".env.new eliminado (escritura incompleta)."
+    fi
+    if [ -f .env.bak ]; then
+        mv .env.bak .env
+        warn ".env anterior restaurado desde backup."
+    fi
+    # Restore previous container if deploy was interrupted
+    if [ -n "${PREV_CONTAINER_ID:-}" ]; then
+        docker start "$PREV_CONTAINER_ID" 2>/dev/null \
+            && ok "Container anterior restaurado." \
+            || true
+    fi
+    echo ""
+    exit 1
+}
+trap cleanup INT TERM
+
 # ── State ─────────────────────────────────────────────────────────────────────
 USE_FZF=0
 PREV_CONTAINER_ID=""
