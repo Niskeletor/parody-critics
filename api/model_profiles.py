@@ -81,8 +81,9 @@ PROFILES: dict[str, ModelProfile] = {
     ),
     # eva-qwen-2.5-14b by type32 — RP/uncensored fine-tune of Qwen2.5-14B
     # TOP 1 benchmark: 32/32 OK, ~8s/crítica, 7GB VRAM — best speed/quality balance
+    # temperature 0.70 (vs 0.75): reduces format non-compliance (intro-before-rating)
     "type32/eva-qwen-2.5-14b:latest": ModelProfile(
-        think=False, temperature=0.75, num_predict=800, system_in_user=False
+        think=False, temperature=0.70, num_predict=800, system_in_user=False
     ),
     # dolphin3 — uncensored Llama3 fine-tune, 4GB, fast (~7s)
     # BENCHMARKED: 28/32 OK but calibration flat (all 7/10) — DESCARTADO for production

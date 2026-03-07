@@ -158,7 +158,7 @@ Sinopsis: {synopsis}{enriched_block}
 
 INSTRUCCIONES:
 Escribe una crítica de máximo 150 palabras como {character_name} {emoji}.
-Empieza con la puntuación que hayas decidido según la rúbrica: X/10
+TU PRIMERA PALABRA debe ser el número: "X/10 — " seguido de tu primera frase.
 Basa tu análisis en los datos reales de la obra que te hemos dado arriba.
 No inventes tramas, personajes ni elementos que no aparezcan en la sinopsis.
 Escribe desde tu perspectiva ideológica con tu tono auténtico.

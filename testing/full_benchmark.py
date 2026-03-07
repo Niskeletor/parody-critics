@@ -467,7 +467,7 @@ async def call_judge(url: str, character_name: str, critic_text: str) -> int | N
 # ── SCORING ───────────────────────────────────────────────────────────────────
 
 def extract_rating(text: str) -> int | None:
-    m = re.search(r"(\d{1,2})\s*/\s*10", text[:80])
+    m = re.search(r"(\d{1,2})\s*/\s*10", text)
     if m:
         n = int(m.group(1))
         return n if 1 <= n <= 10 else None
