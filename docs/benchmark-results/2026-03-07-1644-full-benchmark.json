@@ -1,0 +1,61 @@
+{
+  "meta": {
+    "date": "2026-03-07-1644",
+    "ollama_url": "http://192.168.2.69:11434",
+    "phase1_model": "mistral-small3.1:24b",
+    "phase2_models": [
+      "mistral-small3.1:24b",
+      "type32/eva-qwen-2.5-14b:latest",
+      "muse-12b:latest",
+      "LESSTHANSUPER/MAGNUM_V4-Mistral_Small:12b_Q5_K_M"
+    ],
+    "winner_variant": "V3",
+    "characters": [
+      "Beavis"
+    ],
+    "films": 1,
+    "judge_model": "dolphin3:latest"
+  },
+  "results": [
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 16.4,
+      "text": "7/10. Esta peli es un rollo, no va a tener explosiones ni nada, pero, ¿has visto las Barbies? ¡Están buenísimas! Y son todas rubias, ¡es como un sueño hecho realidad! Barbieland parece un lugar genial, lleno de chicas en bikini y con tacones. Y Barbie viaja al mundo real, ¡qué pasada! Aunque no va a haber peleas ni cosas así, al menos hay muchas Barbies y Ken. ¡Y seguro que hay música chula! Pero, Beavis, ¿qué es ese rollo de los pensamientos existenciales? ¿Qué es eso? ¿Qué pasa si Barbie se pone a hablar de sus sentimientos y todo eso? ¡Ese rollo me aburre! Pero, bueno, al menos hay muchas Barbies y cosas brillantes. ¡Y seguro que hay chicas guapas en bikini! Butt-Head, ¡me la pido!",
+      "format_ok": true,
+      "rating": 7,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": true,
+      "word_count": 126,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 18.4,
+      "text": "9/10\nButt-Head, ¿has visto todas esas Barbies? ¡Es como si hubieran hecho una película solo para mí! Chicas rubias, guapas, en bikini y con tacones, ¡esto es el paraíso! Y lo mejor es que todo es brillante y rosa, como si estuviera en un mundo de helados de fresa. ¡Es como cuando prendí fuego a la papelera del cole y todo se volvió rojo y naranja! Pero esto es mejor, porque no me van a castigar por esto.\n\nY lo más alucinante, ¡hay una Barbie que piensa! ¡Qué pasada! Es como si Cornholio hubiera salido del videoclub y se hubiera encontrado con todas sus Barbies favoritas en la pantalla. ¡Es la mejor película de chicas que he visto en mi vida!\n\nY otra cosa, Butt-Head, ¿has visto cómo bailan? ¡Es como si estuviera en un concierto de Metallica! ¡Es genial! No hay nada de diálogos aburridos, solo acción y chicas guapas. ¡Esta película mola mucho!",
+      "format_ok": true,
+      "rating": 9,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": true,
+      "word_count": 155,
+      "word_count_ok": true,
+      "voice_score": 3,
+      "error": null
+    }
+  ]
+}

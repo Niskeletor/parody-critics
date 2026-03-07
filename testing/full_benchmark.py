@@ -57,10 +57,12 @@ MOVIES: list[dict] = [
         "type": "movie",
         "genres": "Comedia, Aventura, Fantasía",
         "synopsis": (
-            "Barbie vive en Barbieland, un mundo perfecto y matriarcal. Cuando empiezan a surgirle "
-            "pensamientos existenciales sobre la muerte, viaja al mundo real con Ken. Allí descubren "
-            "el patriarcado. Directed by Greta Gerwig. Protagonistas: Margot Robbie (Barbie), Ryan Gosling (Ken). "
-            "Producida por Mattel. La película critica el sistema patriarcal y celebra la autonomía femenina."
+            "Barbie (Margot Robbie) es una muñeca rubia despampanante que vive en Barbieland, un mundo "
+            "de colores brillantes y neón lleno de Barbies guapísimas en bikini y con tacones. "
+            "Cuando le surgen pensamientos existenciales viaja al mundo real con Ken (Ryan Gosling). "
+            "La estética es hipnótica: rosa, brillante, y llena de chicas. "
+            "Director: Greta Gerwig. También hay una crítica al patriarcado, pero sobre todo hay muchas "
+            "Barbies rubias bailando y posando."
         ),
     },
     {
