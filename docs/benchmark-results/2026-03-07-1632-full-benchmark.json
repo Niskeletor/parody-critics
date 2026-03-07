@@ -1,0 +1,61 @@
+{
+  "meta": {
+    "date": "2026-03-07-1632",
+    "ollama_url": "http://192.168.2.69:11434",
+    "phase1_model": "mistral-small3.1:24b",
+    "phase2_models": [
+      "mistral-small3.1:24b",
+      "type32/eva-qwen-2.5-14b:latest",
+      "muse-12b:latest",
+      "LESSTHANSUPER/MAGNUM_V4-Mistral_Small:12b_Q5_K_M"
+    ],
+    "winner_variant": "V0",
+    "characters": [
+      "Beavis"
+    ],
+    "films": 1,
+    "judge_model": "dolphin3:latest"
+  },
+  "results": [
+    {
+      "variant": "V0",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 116.8,
+      "text": "2/10\nQué asco, Butt-Head. Esta peli de Barbie es una m****. No hay ni una sola explosión, ni pelea, ni nada que moleste. Todo el tiempo hablando de cosas raras y aburridas. Y lo peor: no hay fuego ni violencia. Solo una tía pensando en la muerte y otra tía que la sigue. ¿Y para qué? Para decir que los hombres son malos. ¡Ja! Como si a mí me importara. Y encima, la directora es una mujer. ¿Qué esperabas? Pero lo más triste es que no hay ni una sola moto o coche que vaya rápido. Solo hablan y hablan. Y lo peor: es una crítica al patriarcado. ¿Quién se cree que es para decir que los hombres son malos? ¡Yo no soy malo! Bueno, a veces sí, pero no por ser hombre. ¡Esto es una m****! Pero lo peor de todo es que no hay ni una sola chica en bikini. ¡Es el colmo!",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 155,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    },
+    {
+      "variant": "V3",
+      "model": "mistral-small3.1:24b",
+      "character": "Beavis",
+      "tmdb_id": 346698,
+      "title": "Barbie",
+      "elapsed": 22.4,
+      "text": "2/10\n¡Qué rollo! Butt-Head, esta peli es como una clase de filosofía. Solo habla y no pasa nada. Es como cuando mi profe de mates habla de números y números y más números. ¡Aburrido! Y lo peor es que no hay ni una sola explosión ni pelea. ¡Ni siquiera una persecución de coches! Pero lo más chungo es que hay una tía, Barbie, que se pone a pensar en la muerte. ¡Qué cutre! Yo, Cornholio, vine al videoclub a buscar algo con fuego y explosiones, no a ver a una muñeca hablando de la vida.\n\nY otra cosa, Butt-Head, ¿tú has visto a Ken? Parece un idiota. No hace nada, solo sigue a Barbie. ¿Y para esto le pagan? ¡Qué fuerte! Pero lo que más me cabrea es que dicen que esta peli critica algo del patriarca. Yo no entiendo, pero me da igual, solo quiero ver algo con acción, no esta película para nenazas. Además, Butt-Head, esta peli no tiene heavy metal. Ni una sola canción de Metallica o AC/DC. ¡Qué vergüenza!\n\nEn serio, si quieres ver algo bueno, mira cuando prendí fuego a la papelera del cole. ¡Eso sí que moló! Pero esta peli, Barbie, es un rollo total. No la veas, Butt-Head. Mejor vemos otra cosa, ¿vale?",
+      "format_ok": true,
+      "rating": 2,
+      "expected_range": [
+        7,
+        9
+      ],
+      "calibration_ok": false,
+      "word_count": 210,
+      "word_count_ok": true,
+      "voice_score": 2,
+      "error": null
+    }
+  ]
+}
