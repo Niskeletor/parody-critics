@@ -408,6 +408,7 @@ class CriticGenerationManager:
                 "num_predict": profile.num_predict,
                 "top_p": profile.top_p,
                 "top_k": profile.top_k,
+                "repeat_penalty": 1.15,
             },
         }
 

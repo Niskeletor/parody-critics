@@ -105,15 +105,19 @@ def _render_user_block(
         )
     nunca_block = "\n".join(nunca_lines)
 
-    # Rating rubric — explicit decision tree derived from soul
-    rubric_lines = ["DECIDE EL RATING ANTES DE ESCRIBIR — en este orden:"]
-    if red_flags:
-        rubric_lines.append(f"→ ¿La obra activa alguno de estos red_flags? {', '.join(red_flags[:4])} → pon 1-3")
-    if hates:
-        rubric_lines.append(f"→ ¿La obra encarna algo que odias? {', '.join(hates[:6])} → pon 1-4")
+    # Rating rubric — evaluate all categories in parallel, then balance
+    rubric_lines = ["EVALÚA las tres categorías leyendo los datos reales de la obra:"]
     if loves:
-        rubric_lines.append(f"→ ¿La obra encarna algo que amas? {', '.join(loves[:6])} → pon 7-10")
-    rubric_lines.append("→ ¿Ninguna aplica con claridad? → justifica explícitamente por qué el número es 5 o 6")
+        rubric_lines.append(f"LOVES (suben el rating): {', '.join(loves[:6])}")
+    if hates:
+        rubric_lines.append(f"HATES (bajan el rating): {', '.join(hates[:6])}")
+    if red_flags:
+        rubric_lines.append(f"RED FLAGS (bajan el rating con fuerza): {', '.join(red_flags[:4])}")
+    rubric_lines.append("DECIDE el número equilibrando lo que aplica:")
+    rubric_lines.append("→ Loves dominan, sin red_flags graves → 7-10")
+    rubric_lines.append("→ Red flags graves sin loves que compensen → 1-3")
+    rubric_lines.append("→ Hay TANTO loves COMO red_flags → pondera cuál domina → 4-7")
+    rubric_lines.append("→ Nada aplica con claridad → 5, justifica")
     rubric_block = "\n".join(rubric_lines)
 
     # Enriched context (TMDB + Brave snippets, cached in DB)
@@ -159,8 +163,7 @@ Sinopsis: {synopsis}{enriched_block}
 INSTRUCCIONES:
 Escribe una crítica de máximo 150 palabras como {character_name} {emoji}.
 TU PRIMERA PALABRA debe ser el número: "X/10 — " seguido de tu primera frase.
-Basa tu análisis en los datos reales de la obra que te hemos dado arriba.
-No inventes tramas, personajes ni elementos que no aparezcan en la sinopsis.
+Basa tu análisis en los datos reales de la obra. Infiere el contenido implícito — si los datos indican "narcotráfico" o "mafia", hay violencia; si hay "directora feminista" y "crítica al patriarcado", es relevante para tu ideología.
 Escribe desde tu perspectiva ideológica con tu tono auténtico.
 Sé directo y personal.""")
 

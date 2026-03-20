@@ -969,7 +969,7 @@ async def generate_batch_critics(
 
     # Get media without critics from this character
     media_query = """
-        SELECT m.id, m.tmdb_id, m.title, m.year, m.type, m.genres, m.overview
+        SELECT m.id, m.tmdb_id, m.title, m.year, m.type, m.genres, m.overview, m.enriched_context
         FROM media m
         LEFT JOIN critics c ON m.id = c.media_id AND c.character_id = ?
         WHERE c.id IS NULL AND m.tmdb_id IS NOT NULL
@@ -1000,7 +1000,8 @@ async def generate_batch_critics(
             "year": media_dict.get("year"),
             "type": media_dict["type"],
             "genres": media_dict.get("genres", ""),
-            "synopsis": media_dict.get("overview", "Sin sinopsis disponible")
+            "synopsis": media_dict.get("overview", "Sin sinopsis disponible"),
+            "enriched_context": media_dict.get("enriched_context"),
         }
 
         try:
@@ -1104,7 +1105,7 @@ async def generate_cart_batch_critics(
         # Build secure parameterized query with exact number of placeholders
         media_placeholders = ",".join(["?" for _ in media_tmdb_ids])
         media_query = (
-            "SELECT id, tmdb_id, title, year, type, genres, overview "
+            "SELECT id, tmdb_id, title, year, type, genres, overview, enriched_context "
             "FROM media "
             "WHERE tmdb_id IN (" + media_placeholders + ")"
         )
@@ -1114,7 +1115,7 @@ async def generate_cart_batch_critics(
             raise HTTPException(status_code=400, detail="Some media items are invalid")
 
         # Convert to dict for easier lookup
-        media_dict = {row[1]: dict(zip(["id", "tmdb_id", "title", "year", "type", "genres", "overview"], row)) for row in valid_media}
+        media_dict = {row[1]: dict(zip(["id", "tmdb_id", "title", "year", "type", "genres", "overview", "enriched_context"], row)) for row in valid_media}
         critic_dict = {row[0]: row[1] for row in valid_critics}
 
         results = []
@@ -1128,6 +1129,9 @@ async def generate_cart_batch_critics(
 
             if not media_info:
                 continue
+
+            # Ensure prompt_builder receives "synopsis" key (maps from DB "overview")
+            media_info["synopsis"] = media_info.get("overview", "Sin sinopsis disponible")
 
             for critic_id in selected_critics:
                 critic_name = critic_dict.get(critic_id)
