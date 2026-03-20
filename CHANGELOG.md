@@ -4,6 +4,26 @@ All notable changes to this project are documented here.
 
 ---
 
+## [v0.3.0] — 2026-03-20
+
+### Schema & Data
+- **`media` table** — added `path` column (Jellyfin file path)
+- **`sync_log` table** — added `sync_id`, `operation`, `items_successful`, `items_failed`, `duration` columns to match sync engine
+- **Marco Aurelio soul** — `loves` and `hates` filled in; rating rubric now works correctly
+- **Rosario Costras soul** — `loves`, `hates`, emoji updated; description and catchphrases aligned with benchmark results
+
+### Infrastructure
+- **Versioned images** — Docker image now published to GHCR as `ghcr.io/niskeletor/parody-critics:v0.3.0` (+ `latest`)
+- **`docker-compose.yml`** — switched from `build: .` to `image: ${PARODY_CRITICS_IMAGE}` pointing to GHCR
+- **`install.sh`** — exposes `PARODY_CRITICS_VERSION` and `PARODY_CRITICS_IMAGE` variables; writes them to `.env`
+- **Jellyfin DB path** — correctly mapped to `jellyfin.db` (not `library.db`) on DUNE
+
+### Sync
+- Jellyfin library DB confirmed as `jellyfin.db` (contains `BaseItems` table with 3800+ items)
+- Full sync now completes cleanly: 3832 items, 66 skipped (no TMDB ID)
+
+---
+
 ## [1.2.0] — 2026-03-02
 
 ### Deployment & Operations

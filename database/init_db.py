@@ -61,4 +61,11 @@ def init_database(db_path: str = "database/critics.db"):
     return db_path
 
 if __name__ == "__main__":
-    init_database()
+    import os
+    import sys
+    db_path = (
+        sys.argv[1]
+        if len(sys.argv) > 1
+        else os.environ.get("PARODY_CRITICS_DB_PATH", "database/critics.db")
+    )
+    init_database(db_path)

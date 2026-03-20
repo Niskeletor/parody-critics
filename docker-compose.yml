@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   parody-critics-api:
-    build: .
+    image: ${PARODY_CRITICS_IMAGE:-ghcr.io/niskeletor/parody-critics:v0.3.0}
     env_file:
       - .env
     container_name: parody-critics-api

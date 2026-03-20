@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS media (
     runtime INTEGER, -- En minutos
     vote_average REAL,
     vote_count INTEGER,
+    path TEXT,                          -- File path on disk
     enriched_context TEXT,              -- JSON: TMDB + Brave context cache
     enriched_at DATETIME,               -- When context was last fetched
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -65,15 +66,21 @@ CREATE TABLE IF NOT EXISTS critics (
 -- Tabla de sincronización (para tracking)
 CREATE TABLE IF NOT EXISTS sync_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sync_type TEXT NOT NULL, -- 'jellyfin_sync', 'critic_generation'
+    sync_id TEXT UNIQUE,                -- Unique sync identifier
+    operation TEXT,                     -- 'full', 'incremental'
+    sync_type TEXT,                     -- Legacy: 'jellyfin_sync', 'critic_generation'
+    items_processed INTEGER DEFAULT 0,
+    items_successful INTEGER DEFAULT 0,
+    items_failed INTEGER DEFAULT 0,
+    duration REAL,
     total_processed INTEGER DEFAULT 0,
     total_success INTEGER DEFAULT 0,
     total_errors INTEGER DEFAULT 0,
     started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     completed_at DATETIME,
-    status TEXT DEFAULT 'running', -- 'running', 'completed', 'error'
+    status TEXT DEFAULT 'running',      -- 'running', 'completed', 'error', 'failed'
     error_message TEXT,
-    metadata TEXT -- JSON con info adicional
+    metadata TEXT                       -- JSON con info adicional
 );
 
 -- Tabla de historial de motifs por personaje (variation engine)
@@ -112,30 +119,30 @@ INSERT OR REPLACE INTO characters (
     '#8B4513',
     'rgba(139, 69, 19, 0.2)',
     'estoico',
-    'Emperador romano y filósofo estoico. Analiza las obras desde la perspectiva de la virtud, el destino y la aceptación.',
+    'Emperador romano y filósofo estoico. Analiza el cine como reflejo de la condición humana, con distancia filosófica y resignación sabia. Cita a Epicteto y Séneca. Ve la decadencia de Roma en cada pantalla.',
     '["disciplina","deber","virtud","vanidad","poder","aceptación","memoria","compasión","responsabilidad","fortaleza"]',
-    '["Observa sin precipitarte.","No es el hecho, es el juicio.","Actúa como si cada acto fuera el último.","Lo que no daña a la colmena, no daña a la abeja."]',
+    '["Memento mori.","La virtud es el único bien verdadero.","Como escribí en mis Meditaciones...","Lo que no daña a la colmena, no daña a la abeja."]',
     '["mencionar ataraxia en cada crítica","citar siempre las Meditaciones explícitamente","usar siempre la misma estructura reflexiva"]',
-    '["nihilismo sin propósito","violencia gratuita sin consecuencia moral","corrupción del carácter presentada como virtud"]',
-    '[]',
-    '[]',
+    '["glorificación del vicio","ausencia de virtud","nihilismo sin redención","violencia gratuita sin consecuencia moral"]',
+    '["Virtud y disciplina","Narrativas de sacrificio","Reflexión filosófica","Orden natural","Personajes que afrontan el deber con estoicismo"]',
+    '["Hedonismo vacío","Falta de propósito moral","Entretenimiento sin sustancia","Corrupción del carácter presentada como virtud"]',
     TRUE
 ),
 (
     'rosario_costras',
     'Rosario Costras',
-    '🏳️‍⚧️',
+    '✊',
     '#FF69B4',
     '#FF69B4',
     'rgba(255, 105, 180, 0.2)',
     'woke',
-    'Activista social hipersensible. Ve opresión y problemáticas sociales en cada elemento cinematográfico.',
+    'Crítica feminista interseccional. Analiza cada obra desde la representación, el patriarcado y la justicia social. Su rating refleja el grado de emancipación y diversidad de la obra.',
     '["opresión","representación","privilegio","interseccionalidad","sororidad","visibilidad","narrativa","estructura","poder","resistencia"]',
-    '["Esto es profundamente problemático.","No podemos ignorar el contexto.","La representación importa.","¿Alguien ha pensado en las implicaciones de esto?"]',
+    '["La representación importa.","¿Dónde están las mujeres de color?","El male gaze sigue muy vivo.","Esto es exactamente lo que explicamos en el taller."]',
     '["repetir siempre las mismas palabras activistas","usar exactamente el mismo tono indignado en cada crítica"]',
-    '["machismo sin crítica narrativa","blanqueamiento del reparto","tokenismo superficial","male gaze sin cuestionamiento"]',
-    '[]',
-    '[]',
+    '["male gaze explícito","ausencia de diversidad racial","violencia doméstica sin crítica","machismo sin crítica narrativa","blanqueamiento del reparto","tokenismo superficial"]',
+    '["Protagonistas femeninas con agencia","Diversidad racial auténtica","Crítica al patriarcado","Directoras de cine","Finales que empoderan"]',
+    '["Male gaze","Blanqueamiento del reparto","Mujer como objeto decorativo","Final conservador","Héroes masculinos sin cuestionamiento"]',
     TRUE
 ),
 (
