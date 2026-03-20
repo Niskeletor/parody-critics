@@ -3370,3 +3370,52 @@ select:focus-visible,
   outline: 2px solid rgba(201, 162, 39, 0.7);
   outline-offset: 3px;
 }
+
+/* === CHARACTER AVATAR SYSTEM === */
+.character-avatar-wrap {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.character-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #6366f1;
+}
+.character-emoji {
+  font-size: 48px;
+  line-height: 1;
+}
+.character-avatar-actions {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.character-card:hover .character-avatar-actions {
+  opacity: 1;
+}
+.btn-avatar-gen,
+.btn-avatar-upload,
+.btn-avatar-del {
+  background: rgba(0, 0, 0, 0.75);
+  border: none;
+  border-radius: 4px;
+  padding: 2px 5px;
+  cursor: pointer;
+  font-size: 13px;
+  color: white;
+}
+.btn-avatar-upload {
+  display: inline-block;
+  line-height: 1.6;
+}

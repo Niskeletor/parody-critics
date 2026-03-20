@@ -897,15 +897,38 @@ class ParodyCriticsApp {
       const characters = await this.fetchAPI('/characters');
 
       characterSelector.innerHTML = characters
-        .map(
-          (char) => `
+        .map((char) => {
+          const avatarHtml = char.avatar_url
+            ? `<img class="character-avatar" src="${char.avatar_url}?t=${Date.now()}"
+                    alt="${char.name}"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='block'">`
+            : '';
+          const emojiDisplay = char.avatar_url ? 'none' : 'block';
+          const descriptionPreview = (char.description || '').substring(0, 80);
+          return `
                 <div class="character-card ${char.id}" onclick="app.selectCharacter('${char.id}')">
-                    <span class="character-emoji">${char.emoji}</span>
+                    <div class="character-avatar-wrap">
+                        ${avatarHtml}
+                        <span class="character-emoji" style="display:${emojiDisplay}">${char.emoji}</span>
+                        <div class="character-avatar-actions" onclick="event.stopPropagation()">
+                            <button class="btn-avatar-gen" title="Generar avatar con IA"
+                                onclick="app.generateAvatar('${char.id}', this)">🎨</button>
+                            <label class="btn-avatar-upload" title="Subir imagen">
+                                📁<input type="file" accept="image/png,image/jpeg,image/webp"
+                                    onchange="app.uploadAvatar('${char.id}', this)" style="display:none">
+                            </label>
+                            ${
+                              char.avatar_url
+                                ? `<button class="btn-avatar-del" title="Eliminar avatar"
+                                     onclick="app.deleteAvatar('${char.id}', this)">🗑</button>`
+                                : ''
+                            }
+                        </div>
+                    </div>
                     <h3 class="character-name">${char.name}</h3>
-                    <p class="character-description">${char.description}</p>
-                </div>
-            `
-        )
+                    <p class="character-description">${descriptionPreview}${descriptionPreview.length >= 80 ? '...' : ''}</p>
+                </div>`;
+        })
         .join('');
     } catch (error) {
       console.error('Failed to load characters:', error);
@@ -3424,10 +3447,34 @@ class ParodyCriticsApp {
         const criticsCount = character.total_reviews || 0;
         const avgRating = character.avg_rating ? character.avg_rating.toFixed(1) : '—';
 
+        const avatarHtml = character.avatar_url
+          ? `<img class="character-avatar" src="${character.avatar_url}?t=${Date.now()}"
+                    alt="${character.name}"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='block'">`
+          : '';
+        const emojiDisplay = character.avatar_url ? 'none' : 'block';
+
         html += `
                     <div class="character-card" data-character-id="${character.id}">
                         <div class="character-card-header">
-                            <div class="character-emoji">${character.emoji || '🎭'}</div>
+                            <div class="character-avatar-wrap">
+                                ${avatarHtml}
+                                <span class="character-emoji" style="display:${emojiDisplay}">${character.emoji || '🎭'}</span>
+                                <div class="character-avatar-actions" onclick="event.stopPropagation()">
+                                    <button class="btn-avatar-gen" title="Generar avatar con IA"
+                                        onclick="app.generateAvatar('${character.id}', this)">🎨</button>
+                                    <label class="btn-avatar-upload" title="Subir imagen">
+                                        📁<input type="file" accept="image/png,image/jpeg,image/webp"
+                                            onchange="app.uploadAvatar('${character.id}', this)" style="display:none">
+                                    </label>
+                                    ${
+                                      character.avatar_url
+                                        ? `<button class="btn-avatar-del" title="Eliminar avatar"
+                                             onclick="app.deleteAvatar('${character.id}', this)">🗑</button>`
+                                        : ''
+                                    }
+                                </div>
+                            </div>
                             <div class="character-actions">
                                 <button class="btn-icon" onclick="app.editCharacter('${character.id}')" title="${t('characters.btn_edit_title')}">
                                     ✏️
@@ -4371,6 +4418,69 @@ class ParodyCriticsApp {
       const isOpen = cartPanel && cartPanel.classList.contains('open');
       cartOpenEl.textContent = isOpen;
       cartOpenEl.style.color = isOpen ? 'lime' : 'red';
+    }
+  }
+
+  async generateAvatar(characterId, btn) {
+    const originalText = btn.textContent;
+    btn.textContent = '⏳';
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${this.apiBase}/characters/${characterId}/generate-avatar`, {
+        method: 'POST',
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: 'Error desconocido' }));
+        alert(`Error generando avatar: ${err.detail}`);
+        return;
+      }
+      await this.loadCharacters();
+      await this.renderCharactersGrid();
+    } catch (e) {
+      alert(`Error de red: ${e.message}`);
+    } finally {
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
+  }
+
+  async uploadAvatar(characterId, input) {
+    const file = input.files[0];
+    if (!file) return;
+    const form = new FormData();
+    form.append('file', file);
+    try {
+      const res = await fetch(`${this.apiBase}/characters/${characterId}/avatar`, {
+        method: 'POST',
+        body: form,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: 'Error desconocido' }));
+        alert(`Error subiendo avatar: ${err.detail}`);
+        return;
+      }
+      await this.loadCharacters();
+      await this.renderCharactersGrid();
+    } catch (e) {
+      alert(`Error de red: ${e.message}`);
+    }
+  }
+
+  async deleteAvatar(characterId) {
+    if (!confirm('¿Eliminar avatar? Volverá al emoji.')) return;
+    try {
+      const res = await fetch(`${this.apiBase}/characters/${characterId}/avatar`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: 'Error desconocido' }));
+        alert(`Error eliminando avatar: ${err.detail}`);
+        return;
+      }
+      await this.loadCharacters();
+      await this.renderCharactersGrid();
+    } catch (e) {
+      alert(`Error de red: ${e.message}`);
     }
   }
 }

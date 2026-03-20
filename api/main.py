@@ -129,6 +129,10 @@ def _run_auto_migrations(db_path: str):
             if col not in existing_char_cols:
                 migrations.append(f"ALTER TABLE characters ADD COLUMN {col} TEXT DEFAULT '{default}'")
 
+        # Avatar URL column
+        if "avatar_url" not in existing_char_cols:
+            migrations.append("ALTER TABLE characters ADD COLUMN avatar_url TEXT")
+
         # FTS5 index for media search
         vtables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='media_fts'").fetchall()}
         if "media_fts" not in vtables:
@@ -206,6 +210,10 @@ async def lifespan(app: FastAPI):
     # Auto-migrate: ensure all columns exist (idempotent)
     _run_auto_migrations(str(DB_PATH))
 
+    # Ensure avatars directory exists
+    avatars_dir = Path(config.AVATAR_DIR)
+    avatars_dir.mkdir(parents=True, exist_ok=True)
+
     # Initialize Jellyfin sync manager from configuration
     sync_manager = JellyfinSyncManager(
         jellyfin_url=config.JELLYFIN_URL,
@@ -227,6 +235,16 @@ async def lifespan(app: FastAPI):
         brave_key=config.BRAVE_API_KEY,
     )
     print("🔍 Media Enricher initialized")
+
+    # Initialize Avatar Generator
+    from api.avatar_generator import AvatarGenerator
+    app.state.avatar_generator = AvatarGenerator(
+        comfyui_url=config.COMFYUI_URL,
+        avatar_dir=config.AVATAR_DIR,
+        style_prompt=config.AVATAR_STYLE_PROMPT,
+        negative_prompt=config.AVATAR_NEGATIVE_PROMPT,
+    )
+    print("🎨 Avatar Generator initialized")
 
     # Check LLM system status
     try:
@@ -263,6 +281,11 @@ app.add_middleware(
 static_dir = Path(__file__).parent.parent / "static"
 if static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+# Mount avatars directory (persisted in Docker volume, separate from static/)
+avatars_dir_path = Path(config.AVATAR_DIR)
+avatars_dir_path.mkdir(parents=True, exist_ok=True)
+app.mount("/static/avatars", StaticFiles(directory=str(avatars_dir_path)), name="avatars")
 
 # Routes
 
@@ -324,7 +347,7 @@ async def get_critics_by_tmdb(tmdb_id: str):
     critics_query = """
         SELECT c.id as critic_id, c.character_id, c.rating, c.content, c.generated_at,
                ch.name, ch.emoji, ch.personality, ch.color,
-               ch.border_color, ch.accent_color
+               ch.border_color, ch.accent_color, ch.avatar_url
         FROM critics c
         JOIN characters ch ON c.character_id = ch.id
         WHERE c.media_id = ? AND ch.active = TRUE
@@ -351,7 +374,8 @@ async def get_critics_by_tmdb(tmdb_id: str):
             generated_at=row_dict['generated_at'],
             color=row_dict['color'],
             border_color=row_dict['border_color'],
-            accent_color=row_dict['accent_color']
+            accent_color=row_dict['accent_color'],
+            avatar_url=row_dict['avatar_url']
         )
 
     return CriticsResponse(
@@ -2180,6 +2204,98 @@ async def delete_character_critics(character_id: str):
     except Exception as e:
         setup_logger.error(f"❌ Error deleting critics for character {character_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error deleting critics: {str(e)}")
+
+
+@app.post("/api/characters/{character_id}/generate-avatar")
+async def generate_character_avatar(character_id: str):
+    """Generate avatar for a character via ComfyUI FLUX."""
+    rows = db_manager.execute_query(
+        "SELECT id, name, personality FROM characters WHERE id = ?",
+        (character_id,)
+    )
+    if not rows:
+        raise HTTPException(status_code=404, detail="Character not found")
+    char = dict(rows[0])
+
+    gen = app.state.avatar_generator
+
+    if not await gen.check_comfyui_available():
+        raise HTTPException(
+            status_code=503,
+            detail=f"ComfyUI not reachable at {config.COMFYUI_URL}. Check Tailscale connection."
+        )
+
+    try:
+        await gen.generate_avatar(character_id, char["name"], char["personality"] or "")
+    except RuntimeError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+    avatar_url = f"/static/avatars/{character_id}.png"
+    db_manager.execute_query(
+        "UPDATE characters SET avatar_url = ? WHERE id = ?",
+        (avatar_url, character_id)
+    )
+
+    return {"avatar_url": avatar_url, "character_id": character_id}
+
+
+@app.post("/api/characters/{character_id}/avatar")
+async def upload_character_avatar(character_id: str, file: UploadFile = File(...)):
+    """Upload a custom avatar image (PNG/JPG/WebP, max 2MB)."""
+    rows = db_manager.execute_query(
+        "SELECT id FROM characters WHERE id = ?", (character_id,)
+    )
+    if not rows:
+        raise HTTPException(status_code=404, detail="Character not found")
+
+    allowed = {"image/png", "image/jpeg", "image/webp"}
+    if file.content_type not in allowed:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File type {file.content_type} not allowed. Use PNG, JPG or WebP."
+        )
+
+    max_bytes = config.AVATAR_MAX_SIZE_MB * 1024 * 1024
+    content = await file.read()
+    if len(content) > max_bytes:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File too large (max {config.AVATAR_MAX_SIZE_MB}MB)"
+        )
+
+    dest = Path(config.AVATAR_DIR) / f"{character_id}.png"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_bytes(content)
+
+    avatar_url = f"/static/avatars/{character_id}.png"
+    db_manager.execute_query(
+        "UPDATE characters SET avatar_url = ? WHERE id = ?",
+        (avatar_url, character_id)
+    )
+
+    return {"avatar_url": avatar_url, "character_id": character_id}
+
+
+@app.delete("/api/characters/{character_id}/avatar")
+async def delete_character_avatar(character_id: str):
+    """Remove character avatar — reverts to emoji display."""
+    rows = db_manager.execute_query(
+        "SELECT id FROM characters WHERE id = ?", (character_id,)
+    )
+    if not rows:
+        raise HTTPException(status_code=404, detail="Character not found")
+
+    avatar_path = Path(config.AVATAR_DIR) / f"{character_id}.png"
+    if avatar_path.exists():
+        avatar_path.unlink()
+
+    db_manager.execute_query(
+        "UPDATE characters SET avatar_url = NULL WHERE id = ?",
+        (character_id,)
+    )
+
+    return {"avatar_url": None, "character_id": character_id}
+
 
 @app.get("/api/characters/{character_id}/critics")
 async def get_character_critics(character_id: str):

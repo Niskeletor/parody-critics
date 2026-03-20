@@ -31,6 +31,7 @@ class CriticResponse(BaseModel):
     color: str
     border_color: str
     accent_color: str
+    avatar_url: Optional[str] = None
 
 class CriticsResponse(BaseModel):
     """Multiple critics for a media item"""
@@ -76,6 +77,7 @@ class CharacterInfo(BaseModel):
     red_flags: Optional[List] = []
     loves: Optional[List] = []
     hates: Optional[List] = []
+    avatar_url: Optional[str] = None
 
 class StatsResponse(BaseModel):
     """API statistics response"""

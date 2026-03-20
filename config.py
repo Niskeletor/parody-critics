@@ -83,6 +83,19 @@ class Config:
     LLM_MAX_RETRIES = int(os.getenv('LLM_MAX_RETRIES', '2'))
     LLM_ENABLE_FALLBACK = os.getenv('LLM_ENABLE_FALLBACK', 'true').lower() == 'true'
 
+    # Avatar / ComfyUI
+    COMFYUI_URL = os.getenv('COMFYUI_URL', 'http://100.84.103.61:8188')
+    AVATAR_STYLE_PROMPT = os.getenv(
+        'AVATAR_STYLE_PROMPT',
+        'cartoon portrait, caricature, bold colors, thick outlines, white background, high quality, 512x512'
+    )
+    AVATAR_NEGATIVE_PROMPT = os.getenv(
+        'AVATAR_NEGATIVE_PROMPT',
+        'realistic, photo, blurry, text, watermark, multiple people'
+    )
+    AVATAR_MAX_SIZE_MB = int(os.getenv('AVATAR_MAX_SIZE_MB', '2'))
+    AVATAR_DIR = os.getenv('AVATAR_DIR', '/app/data/avatars')
+
     @classmethod
     def get_absolute_db_path(cls) -> str:
         """Get absolute path to database"""
