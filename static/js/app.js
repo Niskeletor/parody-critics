@@ -892,6 +892,7 @@ class ParodyCriticsApp {
 
   async loadCharacters() {
     const characterSelector = document.getElementById('character-selector');
+    if (!characterSelector) return;
 
     try {
       const characters = await this.fetchAPI('/characters');
@@ -932,7 +933,8 @@ class ParodyCriticsApp {
         .join('');
     } catch (error) {
       console.error('Failed to load characters:', error);
-      characterSelector.innerHTML = `<div class="loading">${t('characters.error_loading')}</div>`;
+      if (characterSelector)
+        characterSelector.innerHTML = `<div class="loading">${t('characters.error_loading')}</div>`;
     }
   }
 
@@ -4434,7 +4436,6 @@ class ParodyCriticsApp {
         alert(`Error generando avatar: ${err.detail}`);
         return;
       }
-      await this.loadCharacters();
       await this.renderCharactersGrid();
     } catch (e) {
       alert(`Error de red: ${e.message}`);
@@ -4459,7 +4460,6 @@ class ParodyCriticsApp {
         alert(`Error subiendo avatar: ${err.detail}`);
         return;
       }
-      await this.loadCharacters();
       await this.renderCharactersGrid();
     } catch (e) {
       alert(`Error de red: ${e.message}`);
@@ -4477,7 +4477,6 @@ class ParodyCriticsApp {
         alert(`Error eliminando avatar: ${err.detail}`);
         return;
       }
-      await this.loadCharacters();
       await this.renderCharactersGrid();
     } catch (e) {
       alert(`Error de red: ${e.message}`);
