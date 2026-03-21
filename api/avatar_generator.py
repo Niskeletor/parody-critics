@@ -60,7 +60,7 @@ _FLUX_WORKFLOW = {
             "sampler_name": "euler",
             "scheduler": "simple",
             "seed": 42,
-            "steps": 20
+            "steps": 8
         }
     },
     "16": {
