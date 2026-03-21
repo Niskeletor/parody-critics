@@ -36,7 +36,7 @@ jobs:
         env:
           LLM_OLLAMA_URL: 'http://localhost:11434'
           PARODY_CRITICS_ENV: 'development'
-        run: PYTHONPATH=. pytest tests/test_security_fixes.py -v --tb=short
+        run: PYTHONPATH=. python -m pytest tests/test_security_fixes.py -v --tb=short
 
   build:
     name: Build & Push Image
