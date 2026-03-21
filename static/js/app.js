@@ -351,13 +351,14 @@ class ParodyCriticsApp {
     try {
       const typeFilter = document.getElementById('type-filter').value;
       const criticsFilter = document.getElementById('critics-filter').value;
+      const sortBy = document.getElementById('sort-select')?.value || 'date';
 
       // Update current filters
       this.mediaState.currentFilters.type = typeFilter;
       this.mediaState.currentFilters.critics = criticsFilter;
 
       const page = Math.floor(this.mediaState.currentOffset / this.mediaState.limit) + 1;
-      let url = `/media?page=${page}&page_size=${this.mediaState.limit}`;
+      let url = `/media?page=${page}&page_size=${this.mediaState.limit}&sort_by=${sortBy}`;
       if (typeFilter) url += `&type=${typeFilter}`;
       if (criticsFilter) url += `&has_critics=${criticsFilter}`;
       if (this.mediaState.currentFilters.letter)
@@ -407,8 +408,9 @@ class ParodyCriticsApp {
   setupMediaFilters() {
     const typeFilter = document.getElementById('type-filter');
     const criticsFilter = document.getElementById('critics-filter');
+    const sortSelect = document.getElementById('sort-select');
 
-    [typeFilter, criticsFilter].forEach((filter) => {
+    [typeFilter, criticsFilter, sortSelect].filter(Boolean).forEach((filter) => {
       filter.addEventListener('change', () => {
         this.loadMediaData();
       });
@@ -454,7 +456,7 @@ class ParodyCriticsApp {
   }
 
   _setFiltersDisabled(disabled) {
-    ['type-filter', 'critics-filter', 'group-toggle'].forEach((id) => {
+    ['type-filter', 'critics-filter', 'sort-select', 'group-toggle'].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.disabled = disabled;
     });

@@ -576,7 +576,8 @@ async def get_media(
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(50, ge=1, le=200, description="Items per page"),
     has_critics: Optional[bool] = Query(None, description="Filter by critic availability"),
-    start_letter: Optional[str] = Query(None, description="Filter by starting letter")
+    start_letter: Optional[str] = Query(None, description="Filter by starting letter"),
+    sort_by: str = Query("date", description="Sort order: date | title | rating")
 ):
     """Get paginated media list"""
 
@@ -617,13 +618,14 @@ async def get_media(
 
     # Fetch page
     offset = (page - 1) * page_size
+    _order = {"title": "m.title ASC", "rating": "m.vote_average DESC"}.get(sort_by, "m.created_at DESC")
     data_query = f"""
         SELECT m.*,
                COUNT(c.id) as critics_count,
                CASE WHEN COUNT(c.id) > 0 THEN 1 ELSE 0 END as has_critics
         {base_conditions}{where_clause}
         GROUP BY m.id{having_clause}
-        ORDER BY m.created_at DESC LIMIT ? OFFSET ?
+        ORDER BY {_order} LIMIT ? OFFSET ?
     """
     rows = db_manager.execute_query(data_query, tuple(params) + (page_size, offset))
 
