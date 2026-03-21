@@ -282,14 +282,13 @@ static_dir = Path(__file__).parent.parent / "static"
 if static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
-# Mount avatars directory (persisted in Docker volume, separate from static/)
-# Only mount if the parent directory exists — skips gracefully in test/dev environments
+# Mount avatars directory at /avatars (separate from /static to avoid Starlette prefix conflict)
 avatars_dir_path = Path(config.AVATAR_DIR)
 try:
     avatars_dir_path.mkdir(parents=True, exist_ok=True)
-    app.mount("/static/avatars", StaticFiles(directory=str(avatars_dir_path)), name="avatars")
+    app.mount("/avatars", StaticFiles(directory=str(avatars_dir_path)), name="avatars")
 except (PermissionError, OSError):
-    pass  # Avatar serving unavailable outside Docker — lifespan handles dir creation
+    pass  # Avatar serving unavailable outside Docker
 
 # Routes
 
@@ -2234,7 +2233,7 @@ async def generate_character_avatar(character_id: str):
     except RuntimeError as e:
         raise HTTPException(status_code=502, detail=str(e))
 
-    avatar_url = f"/static/avatars/{character_id}.png"
+    avatar_url = f"/avatars/{character_id}.png"
     db_manager.execute_query(
         "UPDATE characters SET avatar_url = ? WHERE id = ?",
         (avatar_url, character_id)
@@ -2271,7 +2270,7 @@ async def upload_character_avatar(character_id: str, file: UploadFile = File(...
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_bytes(content)
 
-    avatar_url = f"/static/avatars/{character_id}.png"
+    avatar_url = f"/avatars/{character_id}.png"
     db_manager.execute_query(
         "UPDATE characters SET avatar_url = ? WHERE id = ?",
         (avatar_url, character_id)
