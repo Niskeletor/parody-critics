@@ -60,7 +60,7 @@ _FLUX_WORKFLOW = {
             "sampler_name": "euler",
             "scheduler": "simple",
             "seed": 42,
-            "steps": 8
+            "steps": 12
         }
     },
     "16": {
@@ -105,7 +105,7 @@ class AvatarGenerator:
         client_id = str(uuid.uuid4())
         payload = {"prompt": workflow, "client_id": client_id}
 
-        async with httpx.AsyncClient(timeout=120) as client:
+        async with httpx.AsyncClient(timeout=150) as client:
             # Submit prompt
             r = await client.post(f"{self.comfyui_url}/prompt", json=payload)
             if r.status_code != 200:
@@ -117,8 +117,8 @@ class AvatarGenerator:
 
             logger.info(f"[avatar] prompt_id={prompt_id} character={character_id}")
 
-            # Poll /history until done (max 120s, 2s intervals = 60 attempts)
-            for attempt in range(60):
+            # Poll /history until done (max 150s, 2s intervals = 75 attempts)
+            for attempt in range(75):
                 await asyncio.sleep(2)
                 h = await client.get(f"{self.comfyui_url}/history/{prompt_id}")
                 data = h.json()
@@ -151,4 +151,4 @@ class AvatarGenerator:
                 logger.info(f"[avatar] saved {dest} ({len(img_r.content)} bytes)")
                 return dest
 
-        raise RuntimeError(f"ComfyUI generation timed out after 120s for {character_id}")
+        raise RuntimeError(f"ComfyUI generation timed out after 150s for {character_id}")
