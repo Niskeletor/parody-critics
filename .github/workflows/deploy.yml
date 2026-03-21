@@ -109,20 +109,28 @@ jobs:
             echo "$GHCR_PAT" | docker login ghcr.io -u Niskeletor --password-stdin
 
             echo "→ Pulling latest image..."
-            docker compose -p parody-critics -f /home/stilgar/docker/parody-critics/docker-compose.yml pull
+            docker pull ghcr.io/niskeletor/parody-critics:latest
 
-            echo "→ Recreating container..."
+            echo "→ Recreating production (:8003)..."
             docker compose -p parody-critics -f /home/stilgar/docker/parody-critics/docker-compose.yml up -d --force-recreate
 
-            echo "→ Waiting for health check..."
+            echo "→ Recreating test (:8004)..."
+            docker compose -p parody-critics-test -f /home/stilgar/docker/parody-critics-test/docker-compose.yml up -d --force-recreate
+
+            echo "→ Waiting for health checks..."
             for i in $(seq 1 12); do
-              if curl -sf http://localhost:8003/api/health > /dev/null 2>&1; then
-                echo "✅ Deploy exitoso - Health check passed (attempt $i)"
+              PROD_OK=false
+              TEST_OK=false
+              curl -sf http://localhost:8003/api/health > /dev/null 2>&1 && PROD_OK=true
+              curl -sf http://localhost:8004/api/health > /dev/null 2>&1 && TEST_OK=true
+              if $PROD_OK && $TEST_OK; then
+                echo "✅ Deploy exitoso — :8003 y :8004 healthy (attempt $i)"
                 break
               fi
               if [ $i -eq 12 ]; then
-                echo "❌ Health check failed after 60s"
-                docker logs parody-critics-api --tail 30
+                echo "❌ Health check failed after 60s — prod:$PROD_OK test:$TEST_OK"
+                docker logs parody-critics-api --tail 20
+                docker logs parody-critics-test --tail 20
                 exit 1
               fi
               sleep 5
