@@ -1,37 +1,30 @@
 """
-Test configuration — creates a temp SQLite DB with schema for each test session.
+Test configuration — sets env vars and initializes DB schema at module load time,
+before api.main is imported (db_manager is created at import time).
 """
 import os
+import sqlite3
 import tempfile
-import pytest
 from pathlib import Path
 
+# ── Set env vars at module level (before any test imports api.main) ──────────
+_tmpdb = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
+_tmpdb.close()
 
-@pytest.fixture(scope="session", autouse=True)
-def test_database():
-    """Create a temporary SQLite DB with the full schema for the test session."""
-    schema_path = Path(__file__).parent.parent / "database" / "schema.sql"
-    schema_sql = schema_path.read_text()
+os.environ["PARODY_CRITICS_DB_PATH"] = _tmpdb.name
+os.environ["AVATAR_DIR"] = "/tmp/parody-test-avatars"
+os.environ["PARODY_CRITICS_ENV"] = "development"
+os.environ.setdefault("LLM_OLLAMA_URL", "http://localhost:11434")
 
-    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
-        db_path = f.name
+# ── Initialize schema so tables exist when tests run ─────────────────────────
+_schema_path = Path(__file__).parent.parent / "database" / "schema.sql"
+_schema_sql = _schema_path.read_text()
 
-    import sqlite3
-    conn = sqlite3.connect(db_path)
-    # Run schema — skip INSERT statements (we just need tables)
-    statements = [s.strip() for s in schema_sql.split(";") if s.strip()]
-    for stmt in statements:
-        try:
-            conn.execute(stmt)
-        except sqlite3.Error:
-            pass  # Skip inserts/errors — we only need the table structure
-    conn.commit()
-    conn.close()
-
-    os.environ["PARODY_CRITICS_DB_PATH"] = db_path
-    os.environ["AVATAR_DIR"] = "/tmp/parody-test-avatars"
-    os.environ["PARODY_CRITICS_ENV"] = "development"
-
-    yield db_path
-
-    os.unlink(db_path)
+_conn = sqlite3.connect(_tmpdb.name)
+for _stmt in [s.strip() for s in _schema_sql.split(";") if s.strip()]:
+    try:
+        _conn.execute(_stmt)
+    except sqlite3.Error:
+        pass  # Skip INSERT statements and errors — we only need table structure
+_conn.commit()
+_conn.close()
