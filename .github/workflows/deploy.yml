@@ -7,8 +7,6 @@ on:
       - '**.md'
       - 'docs/**'
       - '.gitignore'
-      - 'tests/**'
-      - 'test*.py'
       - 'benchmark*.py'
   workflow_dispatch:
 
@@ -17,8 +15,32 @@ env:
   IMAGE_NAME: ${{ github.repository_owner }}/parody-critics
 
 jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        env:
+          LLM_OLLAMA_URL: 'http://localhost:11434'
+          PARODY_CRITICS_ENV: 'development'
+        run: PYTHONPATH=. pytest tests/test_security_fixes.py -v --tb=short
+
   build:
     name: Build & Push Image
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: read

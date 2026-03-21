@@ -283,9 +283,13 @@ if static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # Mount avatars directory (persisted in Docker volume, separate from static/)
+# Only mount if the parent directory exists — skips gracefully in test/dev environments
 avatars_dir_path = Path(config.AVATAR_DIR)
-avatars_dir_path.mkdir(parents=True, exist_ok=True)
-app.mount("/static/avatars", StaticFiles(directory=str(avatars_dir_path)), name="avatars")
+try:
+    avatars_dir_path.mkdir(parents=True, exist_ok=True)
+    app.mount("/static/avatars", StaticFiles(directory=str(avatars_dir_path)), name="avatars")
+except (PermissionError, OSError):
+    pass  # Avatar serving unavailable outside Docker — lifespan handles dir creation
 
 # Routes
 

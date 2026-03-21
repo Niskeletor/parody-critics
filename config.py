@@ -94,7 +94,7 @@ class Config:
         'realistic, photo, blurry, text, watermark, multiple people'
     )
     AVATAR_MAX_SIZE_MB = int(os.getenv('AVATAR_MAX_SIZE_MB', '2'))
-    AVATAR_DIR = os.getenv('AVATAR_DIR', '/app/data/avatars')
+    AVATAR_DIR = os.getenv('AVATAR_DIR', 'data/avatars')
 
     @classmethod
     def get_absolute_db_path(cls) -> str:
