@@ -111,6 +111,9 @@ jobs:
             echo "→ Pulling latest image..."
             docker pull ghcr.io/niskeletor/parody-critics:latest
 
+            echo "→ Fixing DB permissions..."
+            docker run --rm -v parody_critics_data:/data alpine chown 1000:1000 /data/critics.db 2>/dev/null || true
+
             echo "→ Recreating production (:8003)..."
             docker compose -p parody-critics -f /home/stilgar/docker/parody-critics/docker-compose.yml up -d --force-recreate
 
