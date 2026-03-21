@@ -40,13 +40,13 @@ _FLUX_WORKFLOW = {
         "class_type": "DualCLIPLoader",
         "inputs": {
             "clip_name1": "clip_l.safetensors",
-            "clip_name2": "t5xxl_fp16.safetensors",
+            "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
             "type": "flux"
         }
     },
     "12": {
         "class_type": "UNETLoader",
-        "inputs": {"unet_name": "flux1-dev.safetensors", "weight_dtype": "fp8_e4m3fn"}
+        "inputs": {"unet_name": "flux1-dev-fp8.safetensors", "weight_dtype": "fp8_e4m3fn"}
     },
     "13": {
         "class_type": "KSampler",
