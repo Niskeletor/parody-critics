@@ -217,6 +217,25 @@ class CriticGenerationManager:
             log_exception(logger, e, f"Health check for {endpoint_name}")
             return {"status": "unhealthy", "error": str(e)}
 
+    async def _free_comfyui_vram(self) -> None:
+        """Ask ComfyUI to unload models from VRAM before LLM generation.
+        Fire-and-forget: if ComfyUI is unreachable we just log and continue."""
+        comfyui_url = getattr(self.config, "COMFYUI_URL", None)
+        if not comfyui_url:
+            return
+        try:
+            async with httpx.AsyncClient(timeout=5) as client:
+                r = await client.post(
+                    f"{comfyui_url.rstrip('/')}/free",
+                    json={"unload_models": True, "free_memory": True},
+                )
+                if r.status_code == 200:
+                    logger.info("[vram] ComfyUI models unloaded from VRAM")
+                else:
+                    logger.debug(f"[vram] ComfyUI /free returned {r.status_code}")
+        except Exception as e:
+            logger.debug(f"[vram] ComfyUI not reachable, skipping free: {e}")
+
     async def generate_critic(
         self,
         character: str,
@@ -237,6 +256,9 @@ class CriticGenerationManager:
             )
 
         attempts = []
+
+        # Free ComfyUI VRAM before LLM generation — prevents VRAM contention
+        await self._free_comfyui_vram()
 
         logger.info(f"Starting critic generation - Character: {character}, Media: {media_info.get('title', 'Unknown')}")
 
